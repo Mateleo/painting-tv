@@ -9,6 +9,9 @@ description = "Anki painting catalog extraction and offline image pack tools"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+images = ["Pillow>=11,<14"]
+
 [project.scripts]
 painting-catalog = "tools.painting_catalog:main"
 

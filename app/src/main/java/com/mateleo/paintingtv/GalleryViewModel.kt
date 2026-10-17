@@ -17,14 +17,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-data class GallerySettings(val seconds: Int = 10, val zoom: Boolean = true, val captions: Boolean = true, val crop: Boolean = true)
+data class GallerySettings(val seconds: Int = 10, val zoom: Boolean = true, val captions: Boolean = true,
+    val crop: Boolean = true, val minimumHeight: Int = 0)
 
 class GalleryViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences = application.getSharedPreferences("settings", 0)
     val store = CollectionStore(application)
     var settings by mutableStateOf(GallerySettings(
         preferences.getInt("seconds", 10), preferences.getBoolean("zoom", true),
-        preferences.getBoolean("captions", true), preferences.getBoolean("crop", true)))
+        preferences.getBoolean("captions", true), preferences.getBoolean("crop", true), preferences.getInt("minimumHeight", 0)))
         private set
     var collection by mutableStateOf<ArtCollection?>(null)
         private set
@@ -42,6 +43,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     var importMessage by mutableStateOf("")
         private set
     private var deck: ShuffleDeck? = null
+    private var playlist = emptyList<Painting>()
+    var availableCount by mutableStateOf(0)
+        private set
     private val workManager = WorkManager.getInstance(application)
 
     init {
@@ -74,13 +78,24 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
             val loaded = withContext(Dispatchers.IO) { store.load() }
             if (collection?.directory == loaded.directory && collection != null) return@launch
             collection = loaded
-            deck = ShuffleDeck(loaded.paintings.size)
-            next()
+            rebuildPlaylist()
         } catch (e: Exception) { message = e.message ?: "Could not open collection" }
     }
 
-    fun next() { deck?.let { painting = collection!!.paintings[it.next()]; revision++ } }
-    fun previous() { deck?.let { painting = collection!!.paintings[it.previous()]; revision++ } }
+    private fun rebuildPlaylist() {
+        playlist = collection?.paintings.orEmpty().filter { it.meetsDisplayQuality(settings.minimumHeight, settings.crop) }
+        availableCount = playlist.size
+        deck = if (playlist.isEmpty()) null else ShuffleDeck(playlist.size)
+        if (playlist.isEmpty()) {
+            painting = null
+            revision++
+            message = "No paintings meet this quality filter. Choose a lower threshold or whole-painting framing."
+            panel = true
+            interact()
+        } else next()
+    }
+    fun next() { deck?.let { painting = playlist[it.next()]; revision++ } }
+    fun previous() { deck?.let { painting = playlist[it.previous()]; revision++ } }
     fun interact() { controls = true; lastInteraction = android.os.SystemClock.elapsedRealtime() }
     fun remoteKey(code: Int): Boolean {
         when (code) {
@@ -105,9 +120,11 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         return false
     }
     fun update(value: GallerySettings) {
+        val refilter = settings.minimumHeight != value.minimumHeight || settings.crop != value.crop
         settings = value
         preferences.edit().putInt("seconds", value.seconds).putBoolean("zoom", value.zoom)
-            .putBoolean("captions", value.captions).putBoolean("crop", value.crop).apply()
+            .putBoolean("captions", value.captions).putBoolean("crop", value.crop).putInt("minimumHeight", value.minimumHeight).apply()
+        if (refilter && collection != null) rebuildPlaylist()
         interact()
     }
     fun startImport(source: String, mode: String) {

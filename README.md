@@ -57,6 +57,13 @@ artwork captions start enabled. Fill-screen cropping is the default; select
 keep the edges visible. Each shuffle cycle includes every painting, with no
 immediate repeat at the boundary. The app keeps the TV awake while open.
 
+Settings also offers **All / HD+ / 4K+** source-quality filters. The filter
+uses the actual source dimensions and selected framing: filling the screen
+requires enough pixels in both dimensions; showing a whole portrait with
+black margins can qualify by its height. The panel shows how many paintings
+qualify and the current image's source dimensions. A dimension check cannot
+prove that a scan contains genuine fine detail.
+
 The renderer requests a 4K display mode if the television exposes a matching
 refresh-rate mode. Actual UI/output resolution depends on the TV firmware;
 decoding a 4K image is not a guarantee that a particular TV renders apps at 4K.
@@ -95,6 +102,39 @@ remain with their respective sources. Keep source and license metadata when
 adding replacements. The two starter images are CC0 Met Open Access works;
 their source pages and credits are in `app/src/main/assets/catalog.json`.
 
+## Audit and improve every image
+
+Install the optional image tools in a virtual environment (Pillow is the only
+extra dependency). With `uv` installed:
+
+```sh
+uv venv
+uv pip install -e '.[images]'
+.venv/bin/python -m tools.image_quality --no-starters
+.venv/bin/python -m tools.source_upgrades
+.venv/bin/python -m tools.commons_upgrades
+.venv/bin/python -m tools.optimize_images --catalog data/upgrades/catalog.json
+```
+
+The technical audit fully decodes each available source and records missing
+files, dimensions, crop enlargement, hashes, and a clearly labeled edge-detail
+heuristic. The source passes save progress and compare downloaded reproductions
+against the deck image before accepting an upgrade. Automatic similarity checks
+can reject changed crops or colors and are not a substitute for a human review.
+Every source attempt is retained, including failures and unmatched paintings.
+
+Downloaded masters remain unchanged. TV exports use high-quality WebP only
+when it saves useful space and meets a conservative compression-error threshold;
+otherwise the original JPEG/PNG is retained. A required resize uses lossless
+WebP if the lossy version misses that threshold. Exports never enlarge an image.
+The default export limits are a 7,680-pixel edge and 16.6 megapixels; these bound
+file size and decoder workload while keeping masters available separately.
+
+WebP is supported throughout this app's Android version range. AVIF is not used
+as the default because Android's documented AVIF support starts at Android 12
+and this TV's version is not yet known. Compression changes storage, not source
+detail: the original deck thumbnails still need larger reproductions.
+
 Alternatively, host an app-compatible JSON catalog and its images over HTTPS
 and enter its URL under Settings. The app downloads the entire collection,
 checks every image, and then activates it. Interrupted downloads can be retried;
@@ -109,7 +149,7 @@ Android Studio, or set `ANDROID_HOME` to your SDK directory and run:
 
 ```sh
 ./gradlew assembleDebug testDebugUnitTest lintDebug --no-daemon
-python3 -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`. It is a debug-signed personal

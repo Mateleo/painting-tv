@@ -73,7 +73,8 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
     val progress = remember(revision) { Animatable(0f) }
 
     LaunchedEffect(collection, revision) {
-        if (collection == null || painting == null) return@LaunchedEffect
+        if (collection == null) return@LaunchedEffect
+        if (painting == null) { frame = null; loading = false; return@LaunchedEffect }
         loading = true
         try {
             val bitmap = withContext(Dispatchers.IO) {
@@ -132,6 +133,8 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
             }
             if (loading && frame == null) {
                 Text("Opening the gallery…", color = Ivory, modifier = Modifier.align(Alignment.Center))
+            } else if (frame == null) {
+                Text("No paintings match the selected quality filter.", color = Ivory, modifier = Modifier.align(Alignment.Center))
             }
             AnimatedVisibility(vm.controls && !vm.panel, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
                 Column(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.88f))))
@@ -142,7 +145,7 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
                         GalleryButton(if (vm.playing) "Pause" else "Play", Modifier.focusRequester(focus), onClick = { vm.playing = !vm.playing; vm.interact() })
                         GalleryButton("Next", onClick = { vm.next(); vm.interact() })
                         Spacer(Modifier.weight(1f))
-                        Text("${collection?.paintings?.size ?: 0} paintings  ·  ${settings.seconds}s", color = Muted, fontSize = 13.sp)
+                        Text("${vm.availableCount} paintings  ·  ${settings.seconds}s", color = Muted, fontSize = 13.sp)
                         GalleryButton("Settings", onClick = { vm.panel = true; vm.interact() })
                     }
                     Box(Modifier.fillMaxWidth().height(2.dp).background(Color.White.copy(alpha = 0.15f))) {
@@ -193,6 +196,15 @@ private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload
             GalleryButton("Artwork captions: ${if (settings.captions) "on" else "off"}", onClick = { vm.update(settings.copy(captions = !settings.captions)) })
             GalleryButton("Framing: ${if (settings.crop) "fill screen" else "whole painting"}", onClick = { vm.update(settings.copy(crop = !settings.crop)) })
             Text("Whole painting adds black margins and keeps the image still so its edges stay visible.", color = Muted, fontSize = 12.sp)
+            Text("Minimum source quality", color = Ivory, fontSize = 16.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                listOf(0 to "All", 1080 to "HD+", 2160 to "4K+").forEach { (height, label) ->
+                    GalleryButton((if (settings.minimumHeight == height) "• " else "") + label,
+                        onClick = { vm.update(settings.copy(minimumHeight = height)) })
+                }
+            }
+            Text("${vm.availableCount} of ${vm.collection?.paintings?.size ?: 0} match this framing and quality. A larger file cannot restore detail missing from its source.", color = Muted, fontSize = 12.sp)
+            vm.painting?.let { Text("Current source: ${it.width} × ${it.height} pixels", color = Muted, fontSize = 12.sp) }
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.12f)))
             Text("Offline collection", color = Ivory, fontSize = 21.sp, fontFamily = FontFamily.Serif)
             Text("${vm.collection?.paintings?.size ?: 0} paintings installed · ${vm.freeSpace()}", color = Muted, fontSize = 13.sp)
