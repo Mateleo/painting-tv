@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "paintings": [
+    {
+      "id": "met-436535",
+      "title": "Wheat Field with Cypresses",
+      "artist": "Vincent van Gogh",
+      "year": "1889",
+      "movement": "",
+      "imageUrl": "images/met-436535.jpg",
+      "width": 3840,
+      "height": 3057,
+      "sourceUrl": "https://www.metmuseum.org/art/collection/search/436535",
+      "license": "CC0 — The Metropolitan Museum of Art"
+    },
+    {
+      "id": "met-435882",
+      "title": "Still Life with Apples and a Pot of Primroses",
+      "artist": "Paul Cézanne",
+      "year": "ca. 1890",
+      "movement": "",
+      "imageUrl": "images/met-435882.jpg",
+      "width": 3807,
+      "height": 3021,
+      "sourceUrl": "https://www.metmuseum.org/art/collection/search/435882",
+      "license": "CC0 — The Metropolitan Museum of Art"
+    }
+  ]
+}
