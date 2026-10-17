@@ -166,6 +166,58 @@ class QualityPackTests(unittest.TestCase):
             self.assertEqual(rows[1]["sourceSelection"]["source"], "embedded deck image")
             self.assertEqual(report["modelVisualReviews"], 2)
 
+    def test_research_match_beats_smaller_commons_record_with_distinct_provenance(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "old.jpg").write_bytes(b"old")
+            (root / "commons.jpg").write_bytes(b"commons")
+            (root / "research.jpg").write_bytes(b"larger")
+            catalog = root / "catalog.json"
+            catalog.write_text(json.dumps({"paintings": [{"id": "a", "imageUrl": "old.jpg"}]}))
+            commons = root / "commons.json"
+            commons.write_text(
+                json.dumps(
+                    {
+                        "records": {
+                            "a": {
+                                "status": "accepted",
+                                "master_path": "commons.jpg",
+                                "candidate_dimensions": [2000, 1500],
+                            }
+                        }
+                    }
+                )
+            )
+            research = root / "research.json"
+            research.write_text(
+                json.dumps(
+                    {
+                        "records": {
+                            "a": {
+                                "status": "accepted",
+                                "master_path": "research.jpg",
+                                "candidate_dimensions": [6000, 4500],
+                                "source_page_url": "https://commons.wikimedia.org/example",
+                            }
+                        }
+                    }
+                )
+            )
+            output = root / "selected.json"
+            report = merge_sources(
+                catalog,
+                root / "absent-wiki.json",
+                commons,
+                output,
+                research_path=research,
+            )
+            row = json.loads(output.read_text())["paintings"][0]
+            self.assertEqual(row["sourceSelection"]["source"], "Wikimedia Commons (researched)")
+            self.assertEqual((row["width"], row["height"]), (6000, 4500))
+            self.assertEqual(row["imageUrl"], "research.jpg")
+            self.assertEqual(report["commonsRecordsChecked"], 1)
+            self.assertEqual(report["researchRecordsChecked"], 1)
+
     def test_commons_rate_limit_saves_progress_and_stops_requests(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

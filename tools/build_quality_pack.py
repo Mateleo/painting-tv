@@ -28,6 +28,7 @@ def merge_sources(
     *,
     curated_path: Path | None = None,
     reviewed_path: Path | None = None,
+    research_path: Path | None = None,
 ) -> dict[str, Any]:
     catalog = json.loads(catalog_path.read_text())
     wikiart = state_records(wikiart_path)
@@ -39,6 +40,9 @@ def merge_sources(
     reviewed = state_records(reviewed_path) if reviewed_path else {}
     if reviewed_path:
         sources.append(("WikiArt (visual review)", reviewed, reviewed_path))
+    research = state_records(research_path) if research_path else {}
+    if research_path:
+        sources.append(("Wikimedia Commons (researched)", research, research_path))
     output.parent.mkdir(parents=True, exist_ok=True)
     paintings = []
     origins = collections.Counter()
@@ -108,6 +112,7 @@ def merge_sources(
         "commonsRecordsChecked": len(commons),
         "curatedRecordsChecked": len(curated),
         "modelVisualReviews": len(reviewed),
+        "researchRecordsChecked": len(research),
     }
     write_json(output, {"version": 1, "paintings": paintings, "sourceReport": report})
     return report
@@ -197,6 +202,7 @@ def main() -> None:
     parser.add_argument("--commons", type=Path, default=ROOT / "data/commons-upgrades/state.json")
     parser.add_argument("--curated", type=Path, default=ROOT / "data/curated-upgrades/state.json")
     parser.add_argument("--reviewed", type=Path, default=ROOT / "data/review-upgrades/state.json")
+    parser.add_argument("--research", type=Path, default=ROOT / "data/research-upgrades/state.json")
     parser.add_argument("--selected", type=Path, default=ROOT / "data/selected/catalog.json")
     parser.add_argument("--pack", type=Path, default=ROOT / "data/tv-quality-pack")
     parser.add_argument("--report", type=Path, default=ROOT / "catalog/quality-upgrade-report.json")
@@ -211,6 +217,7 @@ def main() -> None:
                 args.selected.resolve(),
                 curated_path=args.curated.resolve(),
                 reviewed_path=args.reviewed.resolve(),
+                research_path=args.research.resolve(),
             )
         ),
         flush=True,

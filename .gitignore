@@ -16,3 +16,4 @@ data/
 *.jks
 *.keystore
 .DS_Store
+.research/
