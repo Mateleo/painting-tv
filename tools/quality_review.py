@@ -54,7 +54,7 @@ def render_summary(report: Path, output: Path) -> str:
     </style><div class="cards"><div class="card"><strong>{total:,}</strong><span class="label">images checked</span></div><div class="card"><strong>{summary['improved']:,}</strong><span class="label">larger / restored</span></div><div class="card"><strong>{summary['native4kFit']:,}</strong><span class="label">4K with whole painting</span></div></div>
     <p>Updated collection · enlargement needed to fill a 4K screen</p><div class="bar">{bars}</div><div class="legend">{keys}</div>
     <p>{summary['missing']} missing · {summary['corrupt']} corrupt. Four absent deck images restored. Compression saves {saved / 1_000_000:.0f} MB; native dimensions are preserved and efficient JPEGs stay unchanged.</p>
-    <p>Every file was technically checked; source matches use automated image comparison. Larger pixel dimensions alone cannot certify scan detail. The collection still includes small reproductions.</p>
+    <p>Every file was technically checked; source matching used automated comparisons and a separate model visual review. Larger pixel dimensions alone cannot certify scan detail. The collection still includes small reproductions.</p>
     <p><a href="https://github.com/Mateleo/painting-tv/blob/main/catalog/quality-upgrade-report.csv" target="_blank" rel="noopener">Review every painting in the CSV audit ↗</a></p></html>'''
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(result, encoding="utf-8")

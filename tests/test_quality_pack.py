@@ -49,6 +49,26 @@ class QualityPackTests(unittest.TestCase):
             self.assertEqual(result["improved"], 1)
             self.assertTrue(output.with_suffix(".csv").exists())
 
+    def test_reviewed_match_keeps_distinct_provenance_and_rejection_is_not_selected(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "old.jpg").write_bytes(b"old")
+            (root / "review.jpg").write_bytes(b"larger")
+            catalog = root / "catalog.json"
+            catalog.write_text(json.dumps({"paintings": [{"id": "accepted", "imageUrl": "old.jpg"}, {"id": "rejected", "imageUrl": "old.jpg"}]}))
+            reviewed = root / "reviewed.json"
+            reviewed.write_text(json.dumps({"records": {
+                "accepted": {"status": "accepted", "master_path": "review.jpg", "candidate_dimensions": [4000, 3000], "method": "model visual review", "source_page_url": "https://www.wikiart.org/example"},
+                "rejected": {"status": "rejected", "master_path": "review.jpg", "candidate_dimensions": [4000, 3000]},
+            }}))
+            output = root / "selected.json"
+            report = merge_sources(catalog, root / "absent-wiki.json", root / "absent-commons.json", output, reviewed_path=reviewed)
+            rows = json.loads(output.read_text())["paintings"]
+            self.assertEqual(rows[0]["sourceSelection"]["method"], "model visual review")
+            self.assertEqual(rows[0]["sourceSelection"]["source"], "WikiArt (visual review)")
+            self.assertEqual(rows[1]["sourceSelection"]["source"], "embedded deck image")
+            self.assertEqual(report["modelVisualReviews"], 2)
+
     def test_commons_rate_limit_saves_progress_and_stops_requests(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

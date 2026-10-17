@@ -1,0 +1,3816 @@
+{
+  "schema_version": 1,
+  "method": "model visual review of paired reference and candidate thumbnails; accepted only when the same work/composition is clear and candidate dimensions are larger",
+  "reviewed_count": 141,
+  "accepted_count": 108,
+  "rejected_count": 33,
+  "records": [
+    {
+      "id": "04021687bd493a28",
+      "accepted": true,
+      "candidate_dimensions": [
+        516,
+        800
+      ],
+      "source_page_url": "https://www.wikiart.org/en/egon-schiele/seated-woman-with-bent-knee-1917",
+      "source_image_url": "https://uploads4.wikiart.org/00475/images/egon-schiele/sed-c-ena-s-pokr-en-mi-koleny-cze-ng-k-17864.jpg",
+      "candidate_sha256": "d5aa7799f5d405038274f16f40d93bd955b5c470b1f3c293ddced3aa329eb761",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          267,
+          400
+        ],
+        "candidate_dimensions": [
+          516,
+          800
+        ],
+        "aspect_delta_fraction": 0.03371,
+        "thumbnail_rgb_rmse": 42.982,
+        "dhash_distance": 3,
+        "match": false
+      }
+    },
+    {
+      "id": "0544f5d87c5b714e",
+      "accepted": true,
+      "candidate_dimensions": [
+        2740,
+        2630
+      ],
+      "source_page_url": "https://www.wikiart.org/en/ilia-repine/unexpected-visitors-1888",
+      "source_image_url": "https://uploads5.wikiart.org/00475/images/ilya-repin/unexpected-visitors-1884-1888.jpg",
+      "candidate_sha256": "de35670cb865e9481761d0fffe7ba086ec21a3a933ebb2064756dbcda6aae110",
+      "method": "model visual review of same painting with additional canvas context",
+      "reason": "Independent second model review of sheet 01 identifies the same Repin painting, with the same figures and furniture. The candidate includes more floor and upper room than the cropped deck reference; this is additional canvas context, not another work.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          294
+        ],
+        "candidate_dimensions": [
+          2740,
+          2630
+        ],
+        "aspect_delta_fraction": 0.23426,
+        "thumbnail_rgb_rmse": 64.985,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "06bc0f3694f5a33f",
+      "accepted": true,
+      "candidate_dimensions": [
+        2311,
+        3009
+      ],
+      "source_page_url": "https://www.wikiart.org/en/caravaggio/young-sick-bacchus",
+      "source_image_url": "https://uploads7.wikiart.org/00142/images/57726d7cedc2cb3880b47b1a/self-portrait-as-the-sick-bacchus-by-caravaggio.jpg",
+      "candidate_sha256": "6ec6de25edd9c73b3f9cdd90ee8cd64860abba520fe5944f33d484affdef9630",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          477,
+          600
+        ],
+        "candidate_dimensions": [
+          2311,
+          3009
+        ],
+        "aspect_delta_fraction": 0.03393,
+        "thumbnail_rgb_rmse": 24.695,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "07b4ff6cf3302a1c",
+      "accepted": false,
+      "candidate_dimensions": [
+        450,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/parmigianino/madonna-with-saint-zacharias-1530",
+      "source_image_url": "https://uploads6.wikiart.org/00383/images/parmigianino/450px-parmigianino-1503-1540-after-the-madonna-and-child-with-the-infant-saint-john-the-baptist-the.jpg",
+      "candidate_sha256": "4ef4c312982005d422b7d72c9795db2719f3d18c03bda3cc1d43548aa306ff78",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          496,
+          600
+        ],
+        "candidate_dimensions": [
+          450,
+          600
+        ],
+        "aspect_delta_fraction": 0.09274,
+        "thumbnail_rgb_rmse": 68.99,
+        "dhash_distance": 23,
+        "match": false
+      }
+    },
+    {
+      "id": "07bb0e9976ebf716",
+      "accepted": true,
+      "candidate_dimensions": [
+        6009,
+        2385
+      ],
+      "source_page_url": "https://www.wikiart.org/en/titian/sacred-and-profane-love-1514",
+      "source_image_url": "https://uploads8.wikiart.org/00129/images/titian/sacred-and-profane-love.jpg",
+      "candidate_sha256": "da7b49070dfd95b27294e0abcea5e3a39e7a54772d43ff1aed1b72055591c432",
+      "method": "model visual review of same painting with additional canvas context",
+      "reason": "Independent second model review of sheet 01 identifies the same Titian painting and all figures. The candidate includes more canvas above and below the deck crop; its 6009 × 2385 pixels restore a more complete reproduction.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          258
+        ],
+        "candidate_dimensions": [
+          6009,
+          2385
+        ],
+        "aspect_delta_fraction": 0.13329,
+        "thumbnail_rgb_rmse": 22.195,
+        "dhash_distance": 2,
+        "match": false
+      }
+    },
+    {
+      "id": "07cf6e7c486489bd",
+      "accepted": false,
+      "candidate_dimensions": [
+        474,
+        579
+      ],
+      "source_page_url": "https://www.wikiart.org/en/john-constable/portrait-of-maria-bicknell-1816",
+      "source_image_url": "https://uploads3.wikiart.org/00381/images/john-constable/14666b1521c76c48d88dbdc59376ae5e.jpg",
+      "candidate_sha256": "6426d14abcd537b34237493a58a19bc3ba26ea4f8c6859c85dcfa8980c15573d",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          459,
+          600
+        ],
+        "candidate_dimensions": [
+          474,
+          579
+        ],
+        "aspect_delta_fraction": 0.07013,
+        "thumbnail_rgb_rmse": 45.942,
+        "dhash_distance": 15,
+        "match": false
+      }
+    },
+    {
+      "id": "07d9aad74bfd4e63",
+      "accepted": true,
+      "candidate_dimensions": [
+        1400,
+        997
+      ],
+      "source_page_url": "https://www.wikiart.org/en/raphael/lecole-dathenes-1511",
+      "source_image_url": "https://uploads6.wikiart.org/00475/images/raphael/1-xvkpn0qm3eiqpzivkggfea.jpg",
+      "candidate_sha256": "87254929b29a642acc908fbe2dd95315535c4b62fbaaa294d786498e5af9d745",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "The candidate depicts the same full fresco and figures; the visible differences are white corner cutouts/border context and a modest crop variation. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          267
+        ],
+        "candidate_dimensions": [
+          1400,
+          997
+        ],
+        "aspect_delta_fraction": 0.06269,
+        "thumbnail_rgb_rmse": 75.564,
+        "dhash_distance": 32,
+        "match": false
+      }
+    },
+    {
+      "id": "085d75cdba14c4b9",
+      "accepted": true,
+      "candidate_dimensions": [
+        777,
+        599
+      ],
+      "source_page_url": "https://www.wikiart.org/en/camille-pissarro/the-harvest-of-hay-in-eragny-1887",
+      "source_image_url": "https://uploads3.wikiart.org/00330/images/camille-pissarro/het-hooien-ragny-s0520s2010-van-gogh-museum.jpg",
+      "candidate_sha256": "9af37b818a0ec9fa69c60c513c28e33c2f603ca2547508351a092819d7bab72b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          314
+        ],
+        "candidate_dimensions": [
+          777,
+          599
+        ],
+        "aspect_delta_fraction": 0.01827,
+        "thumbnail_rgb_rmse": 51.271,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "09ac2833c184a4fb",
+      "accepted": true,
+      "candidate_dimensions": [
+        464,
+        798
+      ],
+      "source_page_url": "https://www.wikiart.org/en/alexandre-cabanel/nymph-and-satyr",
+      "source_image_url": "https://uploads8.wikiart.org/00380/images/alexandre-cabanel/nymph-abducted-by-a-faun-alexandre-cabanel.jpg",
+      "candidate_sha256": "a786456b67d11fa419a654860aa713105dfe376ab7d0718e20c91ed5fa45040c",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          359,
+          600
+        ],
+        "candidate_dimensions": [
+          464,
+          798
+        ],
+        "aspect_delta_fraction": 0.02821,
+        "thumbnail_rgb_rmse": 31.522,
+        "dhash_distance": 14,
+        "match": false
+      }
+    },
+    {
+      "id": "0aba4955a85ac631",
+      "accepted": true,
+      "candidate_dimensions": [
+        474,
+        641
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jusepe-de-ribera/st-francis-of-assisi-1643",
+      "source_image_url": "https://uploads1.wikiart.org/00364/images/jusepe-de-ribera/th.jpg",
+      "candidate_sha256": "60ba530cbf058fb6c71911f2c7b54f27bdbbb4a71d48f9e11c39bea6f11f565d",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          444,
+          600
+        ],
+        "candidate_dimensions": [
+          474,
+          641
+        ],
+        "aspect_delta_fraction": 0.00072,
+        "thumbnail_rgb_rmse": 20.436,
+        "dhash_distance": 25,
+        "match": false
+      }
+    },
+    {
+      "id": "0b408b56b5d47c2b",
+      "accepted": true,
+      "candidate_dimensions": [
+        5000,
+        8234
+      ],
+      "source_page_url": "https://www.wikiart.org/en/anthony-van-dyck/queen-henrietta-maria-and-her-dwarf-sir-jeffrey-hudson-1633",
+      "source_image_url": "https://uploads3.wikiart.org/00180/images/57726d80edc2cb3880b4827d/anthonis-van-dyck-013.jpg",
+      "candidate_sha256": "237c364dfb9fc5cf94b415390e30dcf4f3a8302e23fddcba10d3db4dddb2276b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          379,
+          600
+        ],
+        "candidate_dimensions": [
+          5000,
+          8234
+        ],
+        "aspect_delta_fraction": 0.03867,
+        "thumbnail_rgb_rmse": 42.574,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "0b9564d2c797b70a",
+      "accepted": true,
+      "candidate_dimensions": [
+        637,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/alfons-mucha/madonna-of-the-lilies-1905",
+      "source_image_url": "https://uploads1.wikiart.org/00380/images/alphonse-mucha/1-madonna-of-the-lilies-alphonse-mucha.jpg",
+      "candidate_sha256": "3c71aad62eb72ee2cfcd081bbc26f8dd7b2657921782e2f56e8f1ac85919622e",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          290,
+          400
+        ],
+        "candidate_dimensions": [
+          637,
+          900
+        ],
+        "aspect_delta_fraction": 0.02375,
+        "thumbnail_rgb_rmse": 27.465,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "0bc9b6336f6c9d1e",
+      "accepted": false,
+      "candidate_dimensions": [
+        956,
+        640
+      ],
+      "source_page_url": "https://www.wikiart.org/en/nicolas-poussin/ordination-1640",
+      "source_image_url": "https://uploads6.wikiart.org/00340/images/nicolas-poussin/ordination.jpg",
+      "candidate_sha256": "3c6d540e5569c6ebe54e37d5bad48c493b30f6ddcc7748b887a508be03c33ec5",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          586
+        ],
+        "candidate_dimensions": [
+          956,
+          640
+        ],
+        "aspect_delta_fraction": 0.16712,
+        "thumbnail_rgb_rmse": 60.793,
+        "dhash_distance": 20,
+        "match": false
+      }
+    },
+    {
+      "id": "0d84c029d3391941",
+      "accepted": true,
+      "candidate_dimensions": [
+        3881,
+        5180
+      ],
+      "source_page_url": "https://www.wikiart.org/en/franz-marc/blue-horse-i-1911",
+      "source_image_url": "https://uploads2.wikiart.org/00475/images/franz-marc/marc-franz-blue-horse-i-google-art-project-1.jpg",
+      "candidate_sha256": "7bafec0cee0648d5a8450c9d2845698ddd80b2f0d517f86d206297f897ed738a",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          461,
+          600
+        ],
+        "candidate_dimensions": [
+          3881,
+          5180
+        ],
+        "aspect_delta_fraction": 0.02487,
+        "thumbnail_rgb_rmse": 42.84,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "0df7790e7c43f02d",
+      "accepted": true,
+      "candidate_dimensions": [
+        359,
+        515
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/fly-on-a-platter-1947",
+      "source_image_url": "https://uploads4.wikiart.org/00362/images/qi-baishi/fly-on-a-platter-1947-jpg-large.jpg",
+      "candidate_sha256": "8186b54bd0df5c4374bcddf92b6f977ea5942c310fa68884fb4537f5a205bb97",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          272,
+          400
+        ],
+        "candidate_dimensions": [
+          359,
+          515
+        ],
+        "aspect_delta_fraction": 0.02513,
+        "thumbnail_rgb_rmse": 49.198,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "0e11178019900deb",
+      "accepted": true,
+      "candidate_dimensions": [
+        2560,
+        1768
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-baptiste-camille-corot/the-augustan-bridge-at-narni-1826",
+      "source_image_url": "https://uploads5.wikiart.org/00524/images/camille-corot/jean-baptiste-camille-corot-006.jpg",
+      "candidate_sha256": "27f43b042a32e8b54fe41a7cd26a07472dfd92047828b31e7609860866bfc37f",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          267
+        ],
+        "candidate_dimensions": [
+          2560,
+          1768
+        ],
+        "aspect_delta_fraction": 0.03348,
+        "thumbnail_rgb_rmse": 34.552,
+        "dhash_distance": 22,
+        "match": false
+      }
+    },
+    {
+      "id": "132d456335cd93e5",
+      "accepted": true,
+      "candidate_dimensions": [
+        367,
+        526
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/loquat-1945",
+      "source_image_url": "https://uploads3.wikiart.org/00362/images/qi-baishi/loquat-1945-jpg-large.jpg",
+      "candidate_sha256": "ae1c0e08a3608529037a5a3a86739a5492fc08009ba41e9062f94ec6054c7af7",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          266,
+          400
+        ],
+        "candidate_dimensions": [
+          367,
+          526
+        ],
+        "aspect_delta_fraction": 0.0492,
+        "thumbnail_rgb_rmse": 67.652,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "13968aee85ce6fa2",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        783
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/the-meeting-bonjour-monsieur-courbet-1854",
+      "source_image_url": "https://uploads2.wikiart.org/00380/images/gustave-courbet/bonjour-monsieur-courbet-artist-heritage-images.jpg",
+      "candidate_sha256": "2a9dd5e27b22bc45cbc3c9d8c362022aa42172bc0e75e7e0ba79cb41cfcf5477",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          697,
+          600
+        ],
+        "candidate_dimensions": [
+          900,
+          783
+        ],
+        "aspect_delta_fraction": 0.01054,
+        "thumbnail_rgb_rmse": 42.058,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "1714c61cb0722ef4",
+      "accepted": true,
+      "candidate_dimensions": [
+        3973,
+        2933
+      ],
+      "source_page_url": "https://www.wikiart.org/en/pierre-auguste-renoir/the-luncheon-of-the-boating-party-1881-1",
+      "source_image_url": "https://uploads6.wikiart.org/00129/images/pierre-auguste-renoir/the-luncheon-of-the-boating-party.jpg",
+      "candidate_sha256": "8bae6940922f43d92937ddb1b9a1fc268075203e4b49883930b85aa1b1e73682",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          498
+        ],
+        "candidate_dimensions": [
+          3973,
+          2933
+        ],
+        "aspect_delta_fraction": 0.10056,
+        "thumbnail_rgb_rmse": 45.592,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "172e5b403cf36e0e",
+      "accepted": false,
+      "candidate_dimensions": [
+        950,
+        1208
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jacob-jordaens/the-return-from-egypt-of-the-holy-family-1616",
+      "source_image_url": "https://uploads1.wikiart.org/00340/images/jacob-jordaens/the-return-from-egypt-of-the-holy-family-1.jpg",
+      "candidate_sha256": "9b00223e3f43042e3b19bee1bc79b8c7718b2805e04188efebb684332efcc319",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          435,
+          600
+        ],
+        "candidate_dimensions": [
+          950,
+          1208
+        ],
+        "aspect_delta_fraction": 0.08472,
+        "thumbnail_rgb_rmse": 69.226,
+        "dhash_distance": 31,
+        "match": false
+      }
+    },
+    {
+      "id": "17ea45c23001fafd",
+      "accepted": false,
+      "candidate_dimensions": [
+        256,
+        256
+      ],
+      "source_page_url": "https://www.wikiart.org/en/leon-bakst/costume-design-for-the-ballet-cleopatra-1909-1",
+      "source_image_url": "https://uploads.wikiart.org/Content/wiki/img/favicon-256x256.png",
+      "candidate_sha256": "f05ed0c2426a85ce736098ed7fbebb5e7aca6e1ea91b9e7ebc432056c20476ce",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          275,
+          400
+        ],
+        "candidate_dimensions": [
+          256,
+          256
+        ],
+        "aspect_delta_fraction": 0.45455,
+        "thumbnail_rgb_rmse": 132.785,
+        "dhash_distance": 30,
+        "match": false
+      }
+    },
+    {
+      "id": "1920f14d0658835f",
+      "accepted": true,
+      "candidate_dimensions": [
+        1048,
+        1034
+      ],
+      "source_page_url": "https://www.wikiart.org/en/raphael/the-madonna-conestabile-1502",
+      "source_image_url": "https://uploads3.wikiart.org/00340/images/raphael/madonna-conestabile-1504.jpg",
+      "candidate_sha256": "854be46fb9d8929f3bac3ed40c398312dba9dcafebc425d1568b6fa7c469e0b0",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          586,
+          600
+        ],
+        "candidate_dimensions": [
+          1048,
+          1034
+        ],
+        "aspect_delta_fraction": 0.03775,
+        "thumbnail_rgb_rmse": 90.783,
+        "dhash_distance": 26,
+        "match": false
+      }
+    },
+    {
+      "id": "1dc057c942eedaa8",
+      "accepted": false,
+      "candidate_dimensions": [
+        1387,
+        1900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/raphael/la-madone-sixtine-1513",
+      "source_image_url": "https://uploads3.wikiart.org/00340/images/raphael/the-sistine-madonna-1513.jpg",
+      "candidate_sha256": "4e900b46919d65a24879d340cb405bd69ae4bc6bf69a3f3ada6f9452e31869c6",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          280,
+          400
+        ],
+        "candidate_dimensions": [
+          1387,
+          1900
+        ],
+        "aspect_delta_fraction": 0.04286,
+        "thumbnail_rgb_rmse": 38.016,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "2045736aa0a1e09d",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        718
+      ],
+      "source_page_url": "https://www.wikiart.org/en/francisco-de-zurbaran/appearance-of-st-peter-to-st-peter-nolasco-1629",
+      "source_image_url": "https://uploads3.wikiart.org/00380/images/francisco-de-zurbaran/apparition-of-apostle-saint-peter-to-saint-peter-nolasco-francisco-de-zurbaran.jpg",
+      "candidate_sha256": "930132062fd4b56f88a5d6c7b7e9e278393a68ed1c9538479de206c7a81e5be6",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          594
+        ],
+        "candidate_dimensions": [
+          900,
+          718
+        ],
+        "aspect_delta_fraction": 0.00724,
+        "thumbnail_rgb_rmse": 48.283,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "21a946ec0ef75b65",
+      "accepted": true,
+      "candidate_dimensions": [
+        1600,
+        1561
+      ],
+      "source_page_url": "https://www.wikiart.org/en/el-greco/coronation-of-the-virgin-1591-1",
+      "source_image_url": "https://uploads5.wikiart.org/00382/images/el-greco/el-greco-the-coronation-of-virgin-prado.jpg",
+      "candidate_sha256": "ca1279ee43ecb9049bf44dd2f1d7552ea9c2f45e62feb36710bb312ed51f38cd",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          394
+        ],
+        "candidate_dimensions": [
+          1600,
+          1561
+        ],
+        "aspect_delta_fraction": 0.00961,
+        "thumbnail_rgb_rmse": 37.28,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "26964e8d73895370",
+      "accepted": false,
+      "candidate_dimensions": [
+        422,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/zdislav-beksinski/untitled-158",
+      "source_image_url": "https://uploads1.wikiart.org/images/zdislav-beksinski/untitled-514.jpg",
+      "candidate_sha256": "82f8494f9201725dffc3074cc73c42345339ff3cc377ebb9a38e38940d6c26cd",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          746,
+          600
+        ],
+        "candidate_dimensions": [
+          422,
+          600
+        ],
+        "aspect_delta_fraction": 0.43432,
+        "thumbnail_rgb_rmse": 106.768,
+        "dhash_distance": 28,
+        "match": false
+      }
+    },
+    {
+      "id": "2836e826523c3e36",
+      "accepted": true,
+      "candidate_dimensions": [
+        1200,
+        1635
+      ],
+      "source_page_url": "https://www.wikiart.org/en/correggio/adoration-of-the-shepherds-the-holy-night-1522",
+      "source_image_url": "https://uploads8.wikiart.org/00380/images/correggio/1200px-correggio-the-holy-night-google-art-project.jpg",
+      "candidate_sha256": "2ebc58a9244f27637dd7f25114296a7d1f6cbb53e26a5f73ad5b0725c7c125d0",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          428,
+          600
+        ],
+        "candidate_dimensions": [
+          1200,
+          1635
+        ],
+        "aspect_delta_fraction": 0.02889,
+        "thumbnail_rgb_rmse": 37.449,
+        "dhash_distance": 25,
+        "match": false
+      }
+    },
+    {
+      "id": "2ae1554391654cc3",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        751
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/self-portrait-with-a-black-dog-1841",
+      "source_image_url": "https://uploads6.wikiart.org/00380/images/gustave-courbet/self-portrait-with-black-dog-artist-heritage-images.jpg",
+      "candidate_sha256": "e5b3fa54c111e6d1a86c4732ba3d10c3b23c63fadd5a030bb405f23bb5258a27",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          722,
+          600
+        ],
+        "candidate_dimensions": [
+          900,
+          751
+        ],
+        "aspect_delta_fraction": 0.0041,
+        "thumbnail_rgb_rmse": 48.575,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "2b15ae3703838b85",
+      "accepted": true,
+      "candidate_dimensions": [
+        455,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/vasily-perov/portrait-of-the-author-feodor-dostoyevsky-1872",
+      "source_image_url": "https://uploads7.wikiart.org/00341/images/vasily-perov/portrait-of-dostoyevsky.jpg",
+      "candidate_sha256": "66378a3e661d90f61deb9c4b4e7973dbed7b2d97fdef1675fd4c5c885aeeff45",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          321,
+          400
+        ],
+        "candidate_dimensions": [
+          455,
+          600
+        ],
+        "aspect_delta_fraction": 0.05504,
+        "thumbnail_rgb_rmse": 23.033,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "2baf592145c661ca",
+      "accepted": true,
+      "candidate_dimensions": [
+        1616,
+        2889
+      ],
+      "source_page_url": "https://www.wikiart.org/en/francisco-de-goya/saturne-devorant-un-de-ses-enfants-1823",
+      "source_image_url": "https://uploads6.wikiart.org/00142/images/57726d7fedc2cb3880b480ca/francisco-de-goya-saturno-devorando-a-su-hijo-1819-1823.jpg",
+      "candidate_sha256": "7894b35bd192ea1334d1fe1929a4c3417c24bb75f5578e641d2a8d0dc9f83815",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          218,
+          400
+        ],
+        "candidate_dimensions": [
+          1616,
+          2889
+        ],
+        "aspect_delta_fraction": 0.02635,
+        "thumbnail_rgb_rmse": 12.972,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "2fd7d4dd4aceb5a3",
+      "accepted": true,
+      "candidate_dimensions": [
+        358,
+        511
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/pumpkin-1930",
+      "source_image_url": "https://uploads3.wikiart.org/00362/images/qi-baishi/pumpkin-1930.jpg",
+      "candidate_sha256": "59b855b78c5c6c902cb75fc7f005a18692cd9a6ad18d882cebcea0834b4c79f2",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          269,
+          400
+        ],
+        "candidate_dimensions": [
+          358,
+          511
+        ],
+        "aspect_delta_fraction": 0.04177,
+        "thumbnail_rgb_rmse": 64.918,
+        "dhash_distance": 8,
+        "match": false
+      }
+    },
+    {
+      "id": "3225fff51ddb15db",
+      "accepted": true,
+      "candidate_dimensions": [
+        941,
+        768
+      ],
+      "source_page_url": "https://www.wikiart.org/en/francisco-de-goya/la-famille-de-charles-iv-1800",
+      "source_image_url": "https://uploads6.wikiart.org/00391/images/francisco-goya/the-family-of-charles-iv.jpg",
+      "candidate_sha256": "e402b06b1289064ceaf7a8334c35718bf35af24d76e9eff4a8379cb6d7af3e66",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          718,
+          600
+        ],
+        "candidate_dimensions": [
+          941,
+          768
+        ],
+        "aspect_delta_fraction": 0.02389,
+        "thumbnail_rgb_rmse": 27.803,
+        "dhash_distance": 4,
+        "match": false
+      }
+    },
+    {
+      "id": "354b7dd09b6ca105",
+      "accepted": false,
+      "candidate_dimensions": [
+        2760,
+        2259
+      ],
+      "source_page_url": "https://www.wikiart.org/en/nicolas-poussin/le-printemps-ou-le-paradis-terrestre-1664",
+      "source_image_url": "https://uploads5.wikiart.org/00340/images/nicolas-poussin/spring-the-earthly-paradise.jpg",
+      "candidate_sha256": "32554718ff22c741e331cb004d0ed76a5f293d2b4f237a1766528e38e5def802",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          297
+        ],
+        "candidate_dimensions": [
+          2760,
+          2259
+        ],
+        "aspect_delta_fraction": 0.09283,
+        "thumbnail_rgb_rmse": 57.529,
+        "dhash_distance": 14,
+        "match": false
+      }
+    },
+    {
+      "id": "368d15eceda0a345",
+      "accepted": false,
+      "candidate_dimensions": [
+        456,
+        345
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/birds-of-paradise-1940",
+      "source_image_url": "https://uploads4.wikiart.org/00362/images/qi-baishi/birds-of-paradise-1940.jpg",
+      "candidate_sha256": "9bf483e1e2c70fd35b58fd1ac070ddce10e1bafc1d81c4975f27bcf207cd1908",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          500,
+          421
+        ],
+        "candidate_dimensions": [
+          456,
+          345
+        ],
+        "aspect_delta_fraction": 0.1129,
+        "thumbnail_rgb_rmse": 77.921,
+        "dhash_distance": 12,
+        "match": false
+      }
+    },
+    {
+      "id": "3744e26c33e429ce",
+      "accepted": false,
+      "candidate_dimensions": [
+        358,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/william-bouguereau/the-little-knitter",
+      "source_image_url": "https://uploads7.wikiart.org/00340/images/william-adolphe-bouguereau/the-little-knitter.png!Large.png",
+      "candidate_sha256": "f5074e9cfe2839d8b0dfc53664328281647f9bdf542ca7a964b54a77f094848d",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          408,
+          600
+        ],
+        "candidate_dimensions": [
+          358,
+          600
+        ],
+        "aspect_delta_fraction": 0.12255,
+        "thumbnail_rgb_rmse": 74.89,
+        "dhash_distance": 12,
+        "match": false
+      }
+    },
+    {
+      "id": "38077affae472162",
+      "accepted": true,
+      "candidate_dimensions": [
+        763,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/eugene-delacroix/scenes-from-the-massacre-of-chios-1822",
+      "source_image_url": "https://uploads3.wikiart.org/00380/images/eugene-delacroix/the-massacre-at-chios-eugene-delacroix.jpg",
+      "candidate_sha256": "f9f911ef7d8fefaa75e590c55c1c52c5ffd75a36f4b7c91c8dc55e8d5ba8fba5",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          340,
+          400
+        ],
+        "candidate_dimensions": [
+          763,
+          900
+        ],
+        "aspect_delta_fraction": 0.00261,
+        "thumbnail_rgb_rmse": 43.828,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "3a1373b0f9a614a9",
+      "accepted": true,
+      "candidate_dimensions": [
+        2236,
+        1528
+      ],
+      "source_page_url": "https://www.wikiart.org/en/georges-de-la-tour/le-tricheur-a-las-de-carreau-1635",
+      "source_image_url": "https://uploads4.wikiart.org/00142/images/57726d83edc2cb3880b489fa/la-tour-le-tricheur-louvre-rf1972-8.jpg",
+      "candidate_sha256": "deca94301dda5c5a832765e27fb682f28403f8509eeb48750e4bd731509503ea",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          285
+        ],
+        "candidate_dimensions": [
+          2236,
+          1528
+        ],
+        "aspect_delta_fraction": 0.04264,
+        "thumbnail_rgb_rmse": 42.281,
+        "dhash_distance": 8,
+        "match": false
+      }
+    },
+    {
+      "id": "453f84d54257d6ea",
+      "accepted": false,
+      "candidate_dimensions": [
+        1200,
+        598
+      ],
+      "source_page_url": "https://www.wikiart.org/en/tintoretto/conquest-of-zara-1584",
+      "source_image_url": "https://uploads0.wikiart.org/00383/images/tintoretto/battle-of-zara-ptgby-tintorett-1.jpg",
+      "candidate_sha256": "6a5914362d618af171edde13cc4e4a07636666ffb80911de87af6196f24c4ce0",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          474,
+          600
+        ],
+        "candidate_dimensions": [
+          1200,
+          598
+        ],
+        "aspect_delta_fraction": 1.54011,
+        "thumbnail_rgb_rmse": 41.245,
+        "dhash_distance": 35,
+        "match": false
+      }
+    },
+    {
+      "id": "45968ae930f01141",
+      "accepted": false,
+      "candidate_dimensions": [
+        640,
+        511
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-leon-gerome/the-colossus-of-memnon",
+      "source_image_url": "https://uploads0.wikiart.org/00340/images/jean-leon-gerome/the-colossus-of-memnon.jpg",
+      "candidate_sha256": "89bba9f191d655e9def3d0fa313dc19686abde61f9124e35da4126a2c1e86db5",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          723,
+          570
+        ],
+        "candidate_dimensions": [
+          640,
+          511
+        ],
+        "aspect_delta_fraction": 0.01259,
+        "thumbnail_rgb_rmse": 53.173,
+        "dhash_distance": 22,
+        "match": false
+      }
+    },
+    {
+      "id": "46988f4b50d54274",
+      "accepted": false,
+      "candidate_dimensions": [
+        2048,
+        2754
+      ],
+      "source_page_url": "https://www.wikiart.org/en/leonard-de-vinci/la-dame-a-lhermine-1496",
+      "source_image_url": "https://uploads4.wikiart.org/00475/images/leonardo-da-vinci/dama-con-l-ermellino-1489-1491.jpg",
+      "candidate_sha256": "e0255fcf2da83689df212901f81426e38043429b7e1a5929ae38578784c9de09",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          436,
+          600
+        ],
+        "candidate_dimensions": [
+          2048,
+          2754
+        ],
+        "aspect_delta_fraction": 0.02337,
+        "thumbnail_rgb_rmse": 20.917,
+        "dhash_distance": 8,
+        "match": false
+      }
+    },
+    {
+      "id": "49c87dd8f125a354",
+      "accepted": true,
+      "candidate_dimensions": [
+        863,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/le-caravage/garcon-avec-un-panier-de-fruits-1593",
+      "source_image_url": "https://uploads7.wikiart.org/00339/images/caravaggio/boy-with-a-basket-of-fruit.jpg",
+      "candidate_sha256": "700184e17500d996dcfe9853c79eb6208bbc07327aa4faf2057ffcacaa9133d9",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          364,
+          400
+        ],
+        "candidate_dimensions": [
+          863,
+          900
+        ],
+        "aspect_delta_fraction": 0.05372,
+        "thumbnail_rgb_rmse": 53.024,
+        "dhash_distance": 21,
+        "match": false
+      }
+    },
+    {
+      "id": "4a8f23de8326f982",
+      "accepted": false,
+      "candidate_dimensions": [
+        679,
+        556
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gwen-john/the-cat",
+      "source_image_url": "https://uploads5.wikiart.org/00338/images/gwen-john/the-cat-jpg-large.jpg",
+      "candidate_sha256": "b5e5d8737c9ef6316fa4ee9ba4d4a50c854b5e380ad2570a6c052d75e02042b3",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          680,
+          600
+        ],
+        "candidate_dimensions": [
+          679,
+          556
+        ],
+        "aspect_delta_fraction": 0.07755,
+        "thumbnail_rgb_rmse": 54.648,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "4bded64e470d2903",
+      "accepted": true,
+      "candidate_dimensions": [
+        701,
+        850
+      ],
+      "source_page_url": "https://www.wikiart.org/en/berthe-morisot/the-cradle-1872",
+      "source_image_url": "https://uploads1.wikiart.org/00452/images/berthe-morisot/1872le-berceau-the-cradle-1872-2.jpg",
+      "candidate_sha256": "3f1d06d520a5655d3c5f83b555e54aa5d61bd7626c34eace525ad316b0876422",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          466,
+          600
+        ],
+        "candidate_dimensions": [
+          701,
+          850
+        ],
+        "aspect_delta_fraction": 0.06185,
+        "thumbnail_rgb_rmse": 37.547,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "4d7fe7d127449408",
+      "accepted": true,
+      "candidate_dimensions": [
+        1244,
+        3400
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustav-klimt/goldfish-1902",
+      "source_image_url": "https://uploads5.wikiart.org/00475/images/gustav-klimt/goldfish-1901-1902.jpg",
+      "candidate_sha256": "b3d015077cd351485a9e84aeb7042b2c8064e924333d48fcae2f3f7d7480c4ad",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          213,
+          600
+        ],
+        "candidate_dimensions": [
+          1244,
+          3400
+        ],
+        "aspect_delta_fraction": 0.03065,
+        "thumbnail_rgb_rmse": 29.808,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "5257ba9a51123054",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        523
+      ],
+      "source_page_url": "https://www.wikiart.org/en/francisco-de-zurbaran/still-life",
+      "source_image_url": "https://uploads6.wikiart.org/00380/images/francisco-de-zurbaran/1-still-life-with-four-vessels-francisco-de-zurbaran-1.jpg",
+      "candidate_sha256": "134075ad431c81aedcad838bc0eb4245d783a9964ef8efd09b3b4df794888667",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          219
+        ],
+        "candidate_dimensions": [
+          900,
+          523
+        ],
+        "aspect_delta_fraction": 0.05784,
+        "thumbnail_rgb_rmse": 23.491,
+        "dhash_distance": 15,
+        "match": false
+      }
+    },
+    {
+      "id": "53a248de41b1e840",
+      "accepted": false,
+      "candidate_dimensions": [
+        720,
+        886
+      ],
+      "source_page_url": "https://www.wikiart.org/en/rogier-van-der-weyden/st-luke-drawing-a-portrait-of-the-virgin-mary-1440",
+      "source_image_url": "https://uploads2.wikiart.org/00340/images/rogier-van-der-weyden/st-luke-drawing-a-portrait-of-the-virgin-mary.jpg",
+      "candidate_sha256": "fae5305c1fd7cdbeb66697cbc8302a762ffb82d63c4ce0868fb6c1ae0adb3e2e",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          307,
+          400
+        ],
+        "candidate_dimensions": [
+          720,
+          886
+        ],
+        "aspect_delta_fraction": 0.05882,
+        "thumbnail_rgb_rmse": 31.107,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "5573228a4bc7b8a8",
+      "accepted": false,
+      "candidate_dimensions": [
+        5000,
+        4188
+      ],
+      "source_page_url": "https://www.wikiart.org/en/anthony-van-dyck/charles-i-in-three-positions-1636",
+      "source_image_url": "https://uploads8.wikiart.org/00142/images/57726d80edc2cb3880b4827d/sir-anthony-van-dyck-charles-i-1600-49-google-art-project.jpg",
+      "candidate_sha256": "cf8c2ff54424fc3a4f890536088fa99e4e64dc92372bfd4853db7f863a4e2157",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          723,
+          600
+        ],
+        "candidate_dimensions": [
+          5000,
+          4188
+        ],
+        "aspect_delta_fraction": 0.00922,
+        "thumbnail_rgb_rmse": 58.154,
+        "dhash_distance": 24,
+        "match": false
+      }
+    },
+    {
+      "id": "59aab535e9c8ca5a",
+      "accepted": true,
+      "candidate_dimensions": [
+        4724,
+        3186
+      ],
+      "source_page_url": "https://www.wikiart.org/en/thomas-eakins/the-agnew-clinic-1889",
+      "source_image_url": "https://uploads8.wikiart.org/00142/images/57726d9aedc2cb3880b4b6e8/the-agnew-clinic-thomas-eakins.jpg",
+      "candidate_sha256": "f5ccc41cfd4b0a04b22d51a4867fa3402d6fb6aada735ba4689e184cf91987ec",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          522
+        ],
+        "candidate_dimensions": [
+          4724,
+          3186
+        ],
+        "aspect_delta_fraction": 0.03198,
+        "thumbnail_rgb_rmse": 30.628,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "5c70983347d4c21a",
+      "accepted": true,
+      "candidate_dimensions": [
+        750,
+        578
+      ],
+      "source_page_url": "https://www.wikiart.org/en/joshua-reynolds/david-garrick-between-tragedy-and-comedy-1761",
+      "source_image_url": "https://uploads4.wikiart.org/00375/images/joshua-reynolds/59184fbb667671ad0740f6606b75d5f9.png!Large.png",
+      "candidate_sha256": "1d339bdf6315973b0388c79e8c76e90be4795d7be4f423d6a4b77cde36cb33ee",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          320
+        ],
+        "candidate_dimensions": [
+          750,
+          578
+        ],
+        "aspect_delta_fraction": 0.03806,
+        "thumbnail_rgb_rmse": 32.219,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "5d098c0422e51f9e",
+      "accepted": true,
+      "candidate_dimensions": [
+        1484,
+        1800
+      ],
+      "source_page_url": "https://www.wikiart.org/en/guido-reni/the-penitent-magdalene-1635",
+      "source_image_url": "https://uploads2.wikiart.org/00497/images/guido-reni/ps4-37-2631-fnt-dd-at22-37195-tms.jpg",
+      "candidate_sha256": "35f7508060e914ff309a9c8200eb6e204db3a895409a9dbc24000ebdd53fe1ca",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          450,
+          600
+        ],
+        "candidate_dimensions": [
+          1484,
+          1800
+        ],
+        "aspect_delta_fraction": 0.09926,
+        "thumbnail_rgb_rmse": 52.054,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "5f95952face5c2ba",
+      "accepted": false,
+      "candidate_dimensions": [
+        583,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/michelangelo/holy-family-with-st-john-the-baptist-1506-1",
+      "source_image_url": "https://uploads3.wikiart.org/00382/images/michelangelo/tondo-doni-2015.png!Large.png",
+      "candidate_sha256": "1f6e159a1394e7227328a4b5e8e8d8994936541f41a777c771bac6e67503a7f9",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          594,
+          600
+        ],
+        "candidate_dimensions": [
+          583,
+          600
+        ],
+        "aspect_delta_fraction": 0.01852,
+        "thumbnail_rgb_rmse": 60.255,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "6184f3f3b0b23d6f",
+      "accepted": true,
+      "candidate_dimensions": [
+        723,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/bartolome-esteban-murillo/old-woman-with-distaff",
+      "source_image_url": "https://uploads2.wikiart.org/00375/images/bartolome-esteban-murillo/bartolome-esteban-murillo-an-old-woman-holding-a-distaff-and-a-spindle-les-classics.jpg",
+      "candidate_sha256": "2d88a369fb61a8daddbdcdadb277eb022aeffa416d35741585c7a71e30ced8fd",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          483,
+          600
+        ],
+        "candidate_dimensions": [
+          723,
+          900
+        ],
+        "aspect_delta_fraction": 0.00207,
+        "thumbnail_rgb_rmse": 43.203,
+        "dhash_distance": 20,
+        "match": false
+      }
+    },
+    {
+      "id": "61c873fefab40e9c",
+      "accepted": true,
+      "candidate_dimensions": [
+        706,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/leonard-de-vinci/madonna-litta-madonna-and-the-child",
+      "source_image_url": "https://uploads7.wikiart.org/00339/images/leonardo-da-vinci/madonna-and-the-child-c-1490.jpg",
+      "candidate_sha256": "9b5921f4cb68fd2fac5b95c2c7a39676e752922ebf4764f716296bf0c98f5b5a",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          466,
+          600
+        ],
+        "candidate_dimensions": [
+          706,
+          900
+        ],
+        "aspect_delta_fraction": 0.01001,
+        "thumbnail_rgb_rmse": 36.228,
+        "dhash_distance": 9,
+        "match": false
+      }
+    },
+    {
+      "id": "6424474bad2b9f55",
+      "accepted": true,
+      "candidate_dimensions": [
+        703,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/andrea-del-sarto/the-sacrifice-of-abraham",
+      "source_image_url": "https://uploads6.wikiart.org/00380/images/andrea-del-sarto/3-the-sacrifice-of-isaac-andrea-del-sarto.jpg",
+      "candidate_sha256": "3ee837ff89d3567e049148c32ed5c096d79610ff7b7ed0ee2fd2a4ee3993b869",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          305,
+          400
+        ],
+        "candidate_dimensions": [
+          703,
+          900
+        ],
+        "aspect_delta_fraction": 0.02441,
+        "thumbnail_rgb_rmse": 48.162,
+        "dhash_distance": 17,
+        "match": false
+      }
+    },
+    {
+      "id": "65a9549894eccc8c",
+      "accepted": false,
+      "candidate_dimensions": [
+        474,
+        603
+      ],
+      "source_page_url": "https://www.wikiart.org/en/albert-bierstadt/the-wolf-river-kansas",
+      "source_image_url": "https://uploads0.wikiart.org/00340/images/albert-bierstadt/the-wolf-river-kansas.jpg",
+      "candidate_sha256": "cbfb12ee28cf3619c8641bdbd3f2ffa6ff5d60941a356ef7338d7392d8f3efc9",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          486,
+          600
+        ],
+        "candidate_dimensions": [
+          474,
+          603
+        ],
+        "aspect_delta_fraction": 0.02954,
+        "thumbnail_rgb_rmse": 32.644,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "66d5524fbb158e44",
+      "accepted": false,
+      "candidate_dimensions": [
+        453,
+        500
+      ],
+      "source_page_url": "https://www.wikiart.org/en/johannes-vermeer/le-concert-1664",
+      "source_image_url": "https://uploads7.wikiart.org/00340/images/johannes-vermeer/the-concert.jpg",
+      "candidate_sha256": "69596a1ced4beaa152704a337e7709644a8f8922812b91f693b63701c8c92151",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          354,
+          400
+        ],
+        "candidate_dimensions": [
+          453,
+          500
+        ],
+        "aspect_delta_fraction": 0.02373,
+        "thumbnail_rgb_rmse": 38.666,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "69ed8534de2895a7",
+      "accepted": true,
+      "candidate_dimensions": [
+        1024,
+        751
+      ],
+      "source_page_url": "https://www.wikiart.org/en/tintoretto/the-miracle-of-st-mark-freeing-the-slave-1548",
+      "source_image_url": "https://uploads0.wikiart.org/00383/images/tintoretto/8618528210-74be591bf3-b.jpg",
+      "candidate_sha256": "56d6ea7237b3e97bf5e95be03de2d47fe8fcce44d9beecfb8643675abfcfb353",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          570
+        ],
+        "candidate_dimensions": [
+          1024,
+          751
+        ],
+        "aspect_delta_fraction": 0.03627,
+        "thumbnail_rgb_rmse": 55.224,
+        "dhash_distance": 9,
+        "match": false
+      }
+    },
+    {
+      "id": "6ab85d60b5641b76",
+      "accepted": true,
+      "candidate_dimensions": [
+        379,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/georges-seurat/la-tour-eiffel-1889",
+      "source_image_url": "https://uploads3.wikiart.org/00475/images/georges-seurat/eiffel-tower-c-1889-1.jpeg!Large.jpeg",
+      "candidate_sha256": "e0ef356900b7ec5f47b152ae4e5650456908995cc336c43042b821e7ee8dbc22",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          244,
+          400
+        ],
+        "candidate_dimensions": [
+          379,
+          600
+        ],
+        "aspect_delta_fraction": 0.03552,
+        "thumbnail_rgb_rmse": 35.129,
+        "dhash_distance": 4,
+        "match": false
+      }
+    },
+    {
+      "id": "728fce187fa2e536",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        785
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-honore-fragonard/psyche-showing-her-sisters-her-gifts-from-cupid-1753",
+      "source_image_url": "https://uploads2.wikiart.org/00376/images/jean-honore-fragonard/psyche-showing-her-sisters-her-gifts-from-cupid-jean-honore-fragonard.jpg",
+      "candidate_sha256": "f7cc4ddf11aff71874f3fa1899d8d9f90acbe6150f59b1cb084795f7a633023a",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          691,
+          600
+        ],
+        "candidate_dimensions": [
+          900,
+          785
+        ],
+        "aspect_delta_fraction": 0.00449,
+        "thumbnail_rgb_rmse": 36.809,
+        "dhash_distance": 9,
+        "match": false
+      }
+    },
+    {
+      "id": "73b067d51437dbff",
+      "accepted": true,
+      "candidate_dimensions": [
+        3054,
+        2481
+      ],
+      "source_page_url": "https://www.wikiart.org/en/egon-schiele/portrait-of-valerie-neuzil-1912",
+      "source_image_url": "https://uploads7.wikiart.org/00475/images/egon-schiele/portrait-of-wally-neuzil-1912.jpg",
+      "candidate_sha256": "9d804162d419ca845018c0d53faea140062f434bc11f163cc5601d0432fffe95",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          327
+        ],
+        "candidate_dimensions": [
+          3054,
+          2481
+        ],
+        "aspect_delta_fraction": 0.00631,
+        "thumbnail_rgb_rmse": 39.7,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "747b575fc2bc8e91",
+      "accepted": true,
+      "candidate_dimensions": [
+        2362,
+        2664
+      ],
+      "source_page_url": "https://www.wikiart.org/en/caravaggio/david-and-goliath",
+      "source_image_url": "https://uploads6.wikiart.org/00129/images/caravaggio/david-and-goliath.jpg",
+      "candidate_sha256": "c2bd0ebdf7764d1f7d7448d8f7bafdd8dc8c984ad94b1ec2c6bd7665b96a1735",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          496,
+          600
+        ],
+        "candidate_dimensions": [
+          2362,
+          2664
+        ],
+        "aspect_delta_fraction": 0.07254,
+        "thumbnail_rgb_rmse": 39.759,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "75f576d86856fde7",
+      "accepted": true,
+      "candidate_dimensions": [
+        5000,
+        4317
+      ],
+      "source_page_url": "https://www.wikiart.org/en/johannes-vermeer/the-glass-of-wine",
+      "source_image_url": "https://uploads0.wikiart.org/00142/images/57726d86edc2cb3880b48f87/jan-vermeer-van-delft-the-glass-of-wine-google-art-project.jpg",
+      "candidate_sha256": "4678b59d5819b35edcabd258d63ebf55290d229a94553c7cd63f5bd909e05a35",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          710,
+          600
+        ],
+        "candidate_dimensions": [
+          5000,
+          4317
+        ],
+        "aspect_delta_fraction": 0.02123,
+        "thumbnail_rgb_rmse": 20.339,
+        "dhash_distance": 3,
+        "match": false
+      }
+    },
+    {
+      "id": "7649f2e3c8e3aad3",
+      "accepted": true,
+      "candidate_dimensions": [
+        2000,
+        1580
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/les-cribleuses-de-ble-1855",
+      "source_image_url": "https://uploads8.wikiart.org/00180/images/gustave-courbet/the-wheat-sifters.jpg",
+      "candidate_sha256": "d96b5ec8da60e7a216c22aa26ef4680e220bdd59d48847c49906de3e8146d074",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          314
+        ],
+        "candidate_dimensions": [
+          2000,
+          1580
+        ],
+        "aspect_delta_fraction": 0.00633,
+        "thumbnail_rgb_rmse": 40.205,
+        "dhash_distance": 15,
+        "match": false
+      }
+    },
+    {
+      "id": "76d07888b2782c34",
+      "accepted": true,
+      "candidate_dimensions": [
+        2024,
+        1960
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustav-klimt/danae-1908",
+      "source_image_url": "https://uploads5.wikiart.org/00129/images/gustav-klimt/danae.jpg",
+      "candidate_sha256": "d0c0405c5ecfed824b942c94125c640b6084382ba941d0b1e0e0959c7abfdf72",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          627,
+          600
+        ],
+        "candidate_dimensions": [
+          2024,
+          1960
+        ],
+        "aspect_delta_fraction": 0.01182,
+        "thumbnail_rgb_rmse": 48.183,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "77054cdf0ff8bc16",
+      "accepted": true,
+      "candidate_dimensions": [
+        549,
+        410
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-simeon-chardin/boy-with-a-top",
+      "source_image_url": "https://uploads6.wikiart.org/00366/images/jean-baptiste-simeon-chardin/image-2021-11-09-150016.png",
+      "candidate_sha256": "4277709658c5106d323ead1b1d6245e2e2c9f63376b9bc2d1b84093c821a8f49",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          360
+        ],
+        "candidate_dimensions": [
+          549,
+          410
+        ],
+        "aspect_delta_fraction": 0.20512,
+        "thumbnail_rgb_rmse": 30.763,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "77eec9b4c2824aee",
+      "accepted": true,
+      "candidate_dimensions": [
+        5000,
+        4978
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-auguste-dominique-ingres/the-turkish-bath-1862",
+      "source_image_url": "https://uploads8.wikiart.org/00142/images/57726d7fedc2cb3880b48098/le-bain-turc-by-jean-auguste-dominique-ingres-from-c2rmf-retouched.jpg",
+      "candidate_sha256": "aee3666429525c24f89cc7b9d7567d13593915bbaba00986394fda7a8eef8fa6",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          389,
+          400
+        ],
+        "candidate_dimensions": [
+          5000,
+          4978
+        ],
+        "aspect_delta_fraction": 0.03282,
+        "thumbnail_rgb_rmse": 64.758,
+        "dhash_distance": 9,
+        "match": false
+      }
+    },
+    {
+      "id": "7c6e29180fb2ae00",
+      "accepted": true,
+      "candidate_dimensions": [
+        750,
+        901
+      ],
+      "source_page_url": "https://www.wikiart.org/en/el-greco/dormition-of-the-virgin-1566",
+      "source_image_url": "https://uploads1.wikiart.org/00392/images/el-greco/el-greco-dormition-of-the-virgin-1.jpg",
+      "candidate_sha256": "4117e2e30b122f634af7877278dcae99fc88bb59d177bce3d97e103be8f708fa",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          510,
+          600
+        ],
+        "candidate_dimensions": [
+          750,
+          901
+        ],
+        "aspect_delta_fraction": 0.0207,
+        "thumbnail_rgb_rmse": 52.699,
+        "dhash_distance": 18,
+        "match": false
+      }
+    },
+    {
+      "id": "7d6cdfe9e2c0c666",
+      "accepted": true,
+      "candidate_dimensions": [
+        2124,
+        1317
+      ],
+      "source_page_url": "https://www.wikiart.org/en/john-william-waterhouse/hylas-and-the-nymphs-1896-1",
+      "source_image_url": "https://uploads4.wikiart.org/00142/images/57726d7cedc2cb3880b47bc2/waterhouse-hylas-and-the-nymphs-manchester-art-gallery-1896-15.jpg",
+      "candidate_sha256": "7cfeded41a3b79a92eca09d47e94be7c8f58f072b5f1239c80afbbc972d50d3a",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          446
+        ],
+        "candidate_dimensions": [
+          2124,
+          1317
+        ],
+        "aspect_delta_fraction": 0.04095,
+        "thumbnail_rgb_rmse": 31.594,
+        "dhash_distance": 4,
+        "match": false
+      }
+    },
+    {
+      "id": "7debfd897e86c97f",
+      "accepted": true,
+      "candidate_dimensions": [
+        4000,
+        3091
+      ],
+      "source_page_url": "https://www.wikiart.org/en/john-collier/lady-godiva-1897",
+      "source_image_url": "https://uploads7.wikiart.org/00509/images/john-collier/lady-godiva-c-1898.jpg",
+      "candidate_sha256": "b92e51f5a7948de8ea37aa89de53c7995267f454201d84f1b3cbdd627335e4c7",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          536
+        ],
+        "candidate_dimensions": [
+          4000,
+          3091
+        ],
+        "aspect_delta_fraction": 0.07516,
+        "thumbnail_rgb_rmse": 37.822,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "811eb6169bbf7281",
+      "accepted": true,
+      "candidate_dimensions": [
+        4988,
+        3991
+      ],
+      "source_page_url": "https://www.wikiart.org/en/edgar-degas/la-famille-bellelli-1862",
+      "source_image_url": "https://uploads1.wikiart.org/00142/images/57726d83edc2cb3880b489b9/edgar-degas-the-bellelli-family-google-art-project.jpg",
+      "candidate_sha256": "9ad6ce7b717b25d603ce498f1da2c6703113a8555608d46de2048afc95e11be6",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          316
+        ],
+        "candidate_dimensions": [
+          4988,
+          3991
+        ],
+        "aspect_delta_fraction": 0.01265,
+        "thumbnail_rgb_rmse": 36.299,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "82afd0472e1ef8f7",
+      "accepted": true,
+      "candidate_dimensions": [
+        1200,
+        1194
+      ],
+      "source_page_url": "https://www.wikiart.org/en/tintoretto/finding-of-the-body-of-st-mark",
+      "source_image_url": "https://uploads5.wikiart.org/00340/images/tintoretto/finding-of-the-body-of-st-mark-tintoretto.jpg",
+      "candidate_sha256": "58528d233e2534c1af33efebafcfc41468c40e3339202a14062a2da24d0eb23b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          601,
+          600
+        ],
+        "candidate_dimensions": [
+          1200,
+          1194
+        ],
+        "aspect_delta_fraction": 0.00335,
+        "thumbnail_rgb_rmse": 49.459,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "84b98fa687d9e589",
+      "accepted": true,
+      "candidate_dimensions": [
+        852,
+        1024
+      ],
+      "source_page_url": "https://www.wikiart.org/en/le-tintoret/recovery-of-the-corpse-of-st-mark-1566",
+      "source_image_url": "https://uploads6.wikiart.org/00340/images/tintoretto/recovery-of-the-corpse-of-st-mark.jpg",
+      "candidate_sha256": "cbe405a9fe4b0726f7a9fbdba9df87606c1c6404f4e67e9b20b9c188d4bb7957",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          297,
+          400
+        ],
+        "candidate_dimensions": [
+          852,
+          1024
+        ],
+        "aspect_delta_fraction": 0.12058,
+        "thumbnail_rgb_rmse": 45.978,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "8541f63f897e9773",
+      "accepted": true,
+      "candidate_dimensions": [
+        800,
+        972
+      ],
+      "source_page_url": "https://www.wikiart.org/en/titian/portrait-of-ariosto-1510",
+      "source_image_url": "https://uploads5.wikiart.org/00380/images/titian/800px-titian-a-man-with-a-quilted-sleeve-google-art-project.jpg",
+      "candidate_sha256": "d3d5cb3434920f275a15235f5af406a59341e2e18ff9a7b5b79f7d299ae8f749",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          504,
+          600
+        ],
+        "candidate_dimensions": [
+          800,
+          972
+        ],
+        "aspect_delta_fraction": 0.02018,
+        "thumbnail_rgb_rmse": 28.427,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "87406bea3a8756f6",
+      "accepted": true,
+      "candidate_dimensions": [
+        3369,
+        3453
+      ],
+      "source_page_url": "https://www.wikiart.org/en/le-caravage/meduse-1597",
+      "source_image_url": "https://uploads5.wikiart.org/00142/images/57726d7cedc2cb3880b47b1a/caravaggio-medusa-google-art-project.jpg",
+      "candidate_sha256": "42078a6358f3591b9a1405395d8930b33a57b887cc192a9c153b15dce8a1f13f",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          599,
+          600
+        ],
+        "candidate_dimensions": [
+          3369,
+          3453
+        ],
+        "aspect_delta_fraction": 0.0227,
+        "thumbnail_rgb_rmse": 60.422,
+        "dhash_distance": 3,
+        "match": false
+      }
+    },
+    {
+      "id": "87c99fd65383cd18",
+      "accepted": false,
+      "candidate_dimensions": [
+        1280,
+        1059
+      ],
+      "source_page_url": "https://www.wikiart.org/en/correggio/the-assumption-of-the-virgin-1530",
+      "source_image_url": "https://uploads6.wikiart.org/00380/images/correggio/cathedral-parma-assumption-by-correggio.jpg",
+      "candidate_sha256": "5df3bed7d2e902262c75f4db5d39b21e65e5e75db0beafcd4b0e53e7eb28f5aa",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          720,
+          600
+        ],
+        "candidate_dimensions": [
+          1280,
+          1059
+        ],
+        "aspect_delta_fraction": 0.00724,
+        "thumbnail_rgb_rmse": 62.551,
+        "dhash_distance": 29,
+        "match": false
+      }
+    },
+    {
+      "id": "88287843722dee8f",
+      "accepted": true,
+      "candidate_dimensions": [
+        1000,
+        844
+      ],
+      "source_page_url": "https://www.wikiart.org/en/tarsila-do-amaral/the-egg-1928",
+      "source_image_url": "https://uploads7.wikiart.org/00453/images/tarsila-do-amaral/1928urutu-viper-2.jpg",
+      "candidate_sha256": "786f2b7494954dc9b24b55fe5880760b533549f61aed013f48e0a35b982c5705",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          559,
+          462
+        ],
+        "candidate_dimensions": [
+          1000,
+          844
+        ],
+        "aspect_delta_fraction": 0.02076,
+        "thumbnail_rgb_rmse": 31.428,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "8c1c9b6669e91cbe",
+      "accepted": false,
+      "candidate_dimensions": [
+        1150,
+        1000
+      ],
+      "source_page_url": "https://www.wikiart.org/en/giovanni-bellini/the-san-giobbe-altarpiece-detail-of-music-making-angels-1480",
+      "source_image_url": "https://uploads6.wikiart.org/00380/images/giovanni-bellini/8623b0651c5281710628a65d5815ae80.jpg",
+      "candidate_sha256": "8faf3caea6980fa72001b9e0c437791cd2ad42a2df553458a82356f92f3dae22",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          478,
+          600
+        ],
+        "candidate_dimensions": [
+          1150,
+          1000
+        ],
+        "aspect_delta_fraction": 0.44351,
+        "thumbnail_rgb_rmse": 78.777,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "8d68ff14fce34534",
+      "accepted": true,
+      "candidate_dimensions": [
+        2613,
+        2609
+      ],
+      "source_page_url": "https://www.wikiart.org/en/parmigianino/self-portrait-at-the-mirror",
+      "source_image_url": "https://uploads5.wikiart.org/00129/images/parmigianino/self-portrait-in-a-convex-mirror.jpg",
+      "candidate_sha256": "b9a25c0fa31e8f03a9310357be3072ebe9c3435cd1f0c5264b83c61002317d94",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          614,
+          600
+        ],
+        "candidate_dimensions": [
+          2613,
+          2609
+        ],
+        "aspect_delta_fraction": 0.0213,
+        "thumbnail_rgb_rmse": 133.682,
+        "dhash_distance": 32,
+        "match": false
+      }
+    },
+    {
+      "id": "8e7fe4ae96bff0f6",
+      "accepted": true,
+      "candidate_dimensions": [
+        1986,
+        2000
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustav-klimt/les-trois-ages-de-la-femme-1905",
+      "source_image_url": "https://uploads6.wikiart.org/00475/images/gustav-klimt/the-three-ages-of-woman-1905.jpg",
+      "candidate_sha256": "565da1f2cdbd72a6cf80ecf584f58e85d40aa2094c2cd1b354dbdf0394d8a663",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          621,
+          600
+        ],
+        "candidate_dimensions": [
+          1986,
+          2000
+        ],
+        "aspect_delta_fraction": 0.04058,
+        "thumbnail_rgb_rmse": 62.592,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "9283e0d158a75231",
+      "accepted": false,
+      "candidate_dimensions": [
+        474,
+        557
+      ],
+      "source_page_url": "https://www.wikiart.org/en/thomas-cole/the-titan-s-goblet-1833",
+      "source_image_url": "https://uploads2.wikiart.org/00340/images/thomas-cole/th.jpg",
+      "candidate_sha256": "b3567e37f8ae38e01059398612248f1a10e739d6679cf05ea0fd705129a179ad",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          515,
+          600
+        ],
+        "candidate_dimensions": [
+          474,
+          557
+        ],
+        "aspect_delta_fraction": 0.00856,
+        "thumbnail_rgb_rmse": 37.016,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "9690019d9ef8893e",
+      "accepted": true,
+      "candidate_dimensions": [
+        3312,
+        3668
+      ],
+      "source_page_url": "https://www.wikiart.org/en/el-greco/portrait-of-an-old-man-presumed-self-portrait-of-el-greco",
+      "source_image_url": "https://uploads0.wikiart.org/00382/images/el-greco/dt390-1.jpg",
+      "candidate_sha256": "8886be1bfcbaeb42dcfc3a2fd1ac1aaf63cd4314da718e521862dc69d1771a0b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          352,
+          400
+        ],
+        "candidate_dimensions": [
+          3312,
+          3668
+        ],
+        "aspect_delta_fraction": 0.02607,
+        "thumbnail_rgb_rmse": 30.144,
+        "dhash_distance": 17,
+        "match": false
+      }
+    },
+    {
+      "id": "9769fd5bdafdf939",
+      "accepted": true,
+      "candidate_dimensions": [
+        1207,
+        1536
+      ],
+      "source_page_url": "https://www.wikiart.org/en/dante-gabriel-rossetti/the-childhood-of-mary-virgin-1849",
+      "source_image_url": "https://uploads1.wikiart.org/00142/images/57726d85edc2cb3880b48e32/dante-gabriel-rossetti-the-girlhood-of-mary-virgin.jpg",
+      "candidate_sha256": "bf2323f88e434fc67ce87b5ad268c1c278c3352985f6af8306ebb8ebf7bd0dde",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          435,
+          600
+        ],
+        "candidate_dimensions": [
+          1207,
+          1536
+        ],
+        "aspect_delta_fraction": 0.08387,
+        "thumbnail_rgb_rmse": 37.561,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "9bcd646d08418153",
+      "accepted": false,
+      "candidate_dimensions": [
+        474,
+        604
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-leon-gerome/the-carpet-merchant",
+      "source_image_url": "https://uploads4.wikiart.org/00339/images/jean-leon-gerome/the-carpet-merchant-1887-1.jpg",
+      "candidate_sha256": "bcf0d0d78ac5320add3660be25ff63b259a2104fcc24f8656c1f89b1974c4f6e",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows a similar subject, but the candidate is not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          500,
+          582
+        ],
+        "candidate_dimensions": [
+          474,
+          604
+        ],
+        "aspect_delta_fraction": 0.08653,
+        "thumbnail_rgb_rmse": 57.545,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "9ebe4100b27d330b",
+      "accepted": true,
+      "candidate_dimensions": [
+        785,
+        600
+      ],
+      "source_page_url": "https://www.wikiart.org/en/ivan-aivazovsky/on-the-storm-1872",
+      "source_image_url": "https://uploads3.wikiart.org/00340/images/ivan-aivazovsky/n-the-storm-1872.jpg",
+      "candidate_sha256": "7c0ab60842eaacc851ab2685d0c730b6c9d8f1c84503e2ccea58d35c6c2d57b7",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          313
+        ],
+        "candidate_dimensions": [
+          785,
+          600
+        ],
+        "aspect_delta_fraction": 0.02377,
+        "thumbnail_rgb_rmse": 43.186,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "a11e04e8566acf2b",
+      "accepted": false,
+      "candidate_dimensions": [
+        5193,
+        2926
+      ],
+      "source_page_url": "https://www.wikiart.org/en/leonard-de-vinci/la-cene-1495",
+      "source_image_url": "https://uploads4.wikiart.org/00178/images/leonardo-da-vinci/ltima-cena-da-vinci-5.jpg",
+      "candidate_sha256": "fd3b18db255ba1c6b59b4b961d6d848dcd2d661d715148214f18052e35d610a3",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          216
+        ],
+        "candidate_dimensions": [
+          5193,
+          2926
+        ],
+        "aspect_delta_fraction": 0.04162,
+        "thumbnail_rgb_rmse": 31.691,
+        "dhash_distance": 19,
+        "match": false
+      }
+    },
+    {
+      "id": "a22f7e71eef86537",
+      "accepted": true,
+      "candidate_dimensions": [
+        1500,
+        1228
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/the-desperate-man-self-portrait-1845",
+      "source_image_url": "https://uploads4.wikiart.org/00475/images/gustave-courbet/gustave-courbet-le-d-sesp-r-1843.jpg",
+      "candidate_sha256": "25b3d79f5afc6b32ca21c25e22ef49eb3f67054be6d9825146e7b4e55060c9b7",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          327
+        ],
+        "candidate_dimensions": [
+          1500,
+          1228
+        ],
+        "aspect_delta_fraction": 0.00143,
+        "thumbnail_rgb_rmse": 38.26,
+        "dhash_distance": 2,
+        "match": false
+      }
+    },
+    {
+      "id": "a369ff1c5ec6d6ba",
+      "accepted": true,
+      "candidate_dimensions": [
+        654,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/alfons-mucha/zodiac-1896",
+      "source_image_url": "https://uploads5.wikiart.org/00380/images/alphonse-mucha/mucha-zodiac-portfolio-arts-group.jpg",
+      "candidate_sha256": "9324ecabaded6d2efd850ffbe111e49a693712aa4256f4681900c19bcab12d4a",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          298,
+          400
+        ],
+        "candidate_dimensions": [
+          654,
+          900
+        ],
+        "aspect_delta_fraction": 0.02461,
+        "thumbnail_rgb_rmse": 55.356,
+        "dhash_distance": 3,
+        "match": false
+      }
+    },
+    {
+      "id": "a3d4df82390ae059",
+      "accepted": false,
+      "candidate_dimensions": [
+        768,
+        1347
+      ],
+      "source_page_url": "https://www.wikiart.org/en/pietro-da-cortona/allegory-of-divine-providence-and-barberini-power-1639",
+      "source_image_url": "https://uploads2.wikiart.org/00340/images/pietro-da-cortona/allegory-of-divine-providence-and-barberini-power.jpg",
+      "candidate_sha256": "1e194a569456d6266443218d643fec055287a99887eeebb94768035f78fbae11",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          415,
+          600
+        ],
+        "candidate_dimensions": [
+          768,
+          1347
+        ],
+        "aspect_delta_fraction": 0.17568,
+        "thumbnail_rgb_rmse": 61.664,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "a8fa0395648a6f6c",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        656
+      ],
+      "source_page_url": "https://www.wikiart.org/en/giovanni-bellini/pieta",
+      "source_image_url": "https://uploads7.wikiart.org/00380/images/giovanni-bellini/2-pieta-giovanni-bellini.jpg",
+      "candidate_sha256": "ac1df6ed25667e073277a666aca5c74e20dbfc32651932f0776bc292ef76f2ca",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          277
+        ],
+        "candidate_dimensions": [
+          900,
+          656
+        ],
+        "aspect_delta_fraction": 0.04992,
+        "thumbnail_rgb_rmse": 32.408,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "a98435fad87e3a47",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        705
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/the-wave-1870",
+      "source_image_url": "https://uploads2.wikiart.org/00380/images/gustave-courbet/the-wave-artist-courbet-gustave-heritage-images.jpg",
+      "candidate_sha256": "efc2e73b29b66bf1fdf27dc079f7249532b2df98f73bcf23d6290a68ee5f8160",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          704,
+          600
+        ],
+        "candidate_dimensions": [
+          900,
+          705
+        ],
+        "aspect_delta_fraction": 0.08801,
+        "thumbnail_rgb_rmse": 56.232,
+        "dhash_distance": 22,
+        "match": false
+      }
+    },
+    {
+      "id": "aaff4d385ecf15aa",
+      "accepted": false,
+      "candidate_dimensions": [
+        424,
+        525
+      ],
+      "source_page_url": "https://www.wikiart.org/en/el-greco/st-louis-king-of-france-with-a-page",
+      "source_image_url": "https://uploads5.wikiart.org/00376/images/el-greco/ceea1383a6d5d25997dc2bc7dd55dd23.jpg",
+      "candidate_sha256": "3124d3bdf91c968192d728fd4e3c05be72f17c1f73f053204d2787aa84a7bddd",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          477,
+          600
+        ],
+        "candidate_dimensions": [
+          424,
+          525
+        ],
+        "aspect_delta_fraction": 0.01587,
+        "thumbnail_rgb_rmse": 38.425,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "ae57746d2173aebd",
+      "accepted": true,
+      "candidate_dimensions": [
+        5444,
+        7660
+      ],
+      "source_page_url": "https://www.wikiart.org/en/ilia-repine/sadko-1876",
+      "source_image_url": "https://uploads4.wikiart.org/00142/images/57726d84edc2cb3880b48a43/ilya-repin-sadko-google-art-project.jpg",
+      "candidate_sha256": "cd3ee1bfce75529fb211b563410a8c5aea96fa972458304e87b498333e2ac1d7",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          272,
+          400
+        ],
+        "candidate_dimensions": [
+          5444,
+          7660
+        ],
+        "aspect_delta_fraction": 0.04515,
+        "thumbnail_rgb_rmse": 22.114,
+        "dhash_distance": 14,
+        "match": false
+      }
+    },
+    {
+      "id": "b3d97e7ef94e2e86",
+      "accepted": true,
+      "candidate_dimensions": [
+        565,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jacques-louis-david/napoleon-bonaparte-in-his-study-at-the-tuileries-1812",
+      "source_image_url": "https://uploads5.wikiart.org/00380/images/jacques-louis-david/napoleon-bonaparte-in-his-study-at-the-tuileries-1812-jacques-louis-david.jpg",
+      "candidate_sha256": "839655225f53fcbf9d758568966c0058dd0da433cf4a5e5a85bb3c1b01730ade",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          243,
+          400
+        ],
+        "candidate_dimensions": [
+          565,
+          900
+        ],
+        "aspect_delta_fraction": 0.03338,
+        "thumbnail_rgb_rmse": 29.319,
+        "dhash_distance": 15,
+        "match": false
+      }
+    },
+    {
+      "id": "b5f5553700f09395",
+      "accepted": true,
+      "candidate_dimensions": [
+        1139,
+        1400
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-auguste-dominique-ingres/the-portrait-of-the-chouan-rochejaquelin",
+      "source_image_url": "https://uploads6.wikiart.org/00381/images/jean-auguste-dominique-ingres/r.jpg",
+      "candidate_sha256": "6fec78ace0bf8f86b559b5b7876845b5dcfd4d0d990084acdbf533bb630cb260",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          314,
+          400
+        ],
+        "candidate_dimensions": [
+          1139,
+          1400
+        ],
+        "aspect_delta_fraction": 0.0364,
+        "thumbnail_rgb_rmse": 19.554,
+        "dhash_distance": 4,
+        "match": false
+      }
+    },
+    {
+      "id": "b92306f8a7b1d040",
+      "accepted": true,
+      "candidate_dimensions": [
+        3000,
+        1983
+      ],
+      "source_page_url": "https://www.wikiart.org/en/james-mcneill-whistler/whistler-nocturne-blue-and-gold-southampton-water",
+      "source_image_url": "https://uploads5.wikiart.org/00376/images/james-mcneill-whistler/james-mcneill-whistler-nocturne-blue-and-gold-southampton-water-1900-52-art-institute-of-chicago-1.jpg",
+      "candidate_sha256": "39cd759a447b783d3f4079ceb9db4d2bea74cf3d727cf140539b41a1272a7b74",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          499
+        ],
+        "candidate_dimensions": [
+          3000,
+          1983
+        ],
+        "aspect_delta_fraction": 0.00656,
+        "thumbnail_rgb_rmse": 40.907,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "b9ef5b967c986382",
+      "accepted": true,
+      "candidate_dimensions": [
+        377,
+        508
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/protein-and-cherries-1944",
+      "source_image_url": "https://uploads8.wikiart.org/00362/images/qi-baishi/protein-and-cherries-1944-jpg-large.jpg",
+      "candidate_sha256": "fde2b967db5d69c065a0550fbae50cb3616b2bdc35325ad68f0cf3d57721682a",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          275,
+          400
+        ],
+        "candidate_dimensions": [
+          377,
+          508
+        ],
+        "aspect_delta_fraction": 0.07946,
+        "thumbnail_rgb_rmse": 77.178,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "baea1ac8421ad030",
+      "accepted": true,
+      "candidate_dimensions": [
+        4000,
+        3011
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-auguste-dominique-ingres/the-apotheosis-of-homer-1827",
+      "source_image_url": "https://uploads2.wikiart.org/00381/images/jean-auguste-dominique-ingres/the-apotheosis-of-homer-jean-auguste-dominique-ingres-painting-classic-art-greek-mythology-greek.jpg",
+      "candidate_sha256": "132a927326b73b2fa99ef0e9b2f5b5f769bd2acea9199eacefb92fb8410d6e3c",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          574
+        ],
+        "candidate_dimensions": [
+          4000,
+          3011
+        ],
+        "aspect_delta_fraction": 0.01672,
+        "thumbnail_rgb_rmse": 41.568,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "bdaaa9b6417b2e37",
+      "accepted": false,
+      "candidate_dimensions": [
+        332,
+        400
+      ],
+      "source_page_url": "https://www.wikiart.org/en/guido-reni/st-joseph-1",
+      "source_image_url": "https://uploads8.wikiart.org/00340/images/guido-reni/st-joseph.jpg",
+      "candidate_sha256": "71fc99424d3645f84d02f50bc338832c4ef4b7ce3695b5406c72538c7a19a0ea",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          337,
+          400
+        ],
+        "candidate_dimensions": [
+          332,
+          400
+        ],
+        "aspect_delta_fraction": 0.01484,
+        "thumbnail_rgb_rmse": 58.896,
+        "dhash_distance": 19,
+        "match": false
+      }
+    },
+    {
+      "id": "bfd8f2928c50880b",
+      "accepted": true,
+      "candidate_dimensions": [
+        736,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/the-man-made-mad-by-fear-1844-1",
+      "source_image_url": "https://uploads0.wikiart.org/00380/images/gustave-courbet/self-portrait-the-man-made-mad-by-fear-heritage-images.jpg",
+      "candidate_sha256": "4d3daeecbc638e969f80cef17d4dad8de0a4d2833348cf6ab3577dc1ea057d58",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          499,
+          600
+        ],
+        "candidate_dimensions": [
+          736,
+          900
+        ],
+        "aspect_delta_fraction": 0.0167,
+        "thumbnail_rgb_rmse": 88.384,
+        "dhash_distance": 27,
+        "match": false
+      }
+    },
+    {
+      "id": "c183de694acf1e70",
+      "accepted": true,
+      "candidate_dimensions": [
+        1024,
+        780
+      ],
+      "source_page_url": "https://www.wikiart.org/en/nicolas-poussin/rape-of-the-sabine-women-1638-1",
+      "source_image_url": "https://uploads7.wikiart.org/00340/images/nicolas-poussin/abduction-of-the-sabine-women.jpg",
+      "candidate_sha256": "ba4659b02c11e089754b207f9138ba75173d88a47c57b4c9cfe4ddfc61c652f3",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          572
+        ],
+        "candidate_dimensions": [
+          1024,
+          780
+        ],
+        "aspect_delta_fraction": 0.00124,
+        "thumbnail_rgb_rmse": 37.459,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "c1b81aa36f6eb2e4",
+      "accepted": true,
+      "candidate_dimensions": [
+        3265,
+        4087
+      ],
+      "source_page_url": "https://www.wikiart.org/en/caravaggio/ecce-homo",
+      "source_image_url": "https://uploads7.wikiart.org/00129/images/caravaggio/ecce-homo.jpg",
+      "candidate_sha256": "0cc00ba2434e36ade289a6349d9e6eff184eef2af53c1f415ef28995981a3cda",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          364,
+          400
+        ],
+        "candidate_dimensions": [
+          3265,
+          4087
+        ],
+        "aspect_delta_fraction": 0.12212,
+        "thumbnail_rgb_rmse": 58.723,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "c31806003ff2e491",
+      "accepted": true,
+      "candidate_dimensions": [
+        413,
+        520
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/whisk-rice-and-grasshoppers-1942",
+      "source_image_url": "https://uploads6.wikiart.org/00362/images/qi-baishi/whisk-rice-and-grasshoppers-1942-jpg-large.jpg",
+      "candidate_sha256": "fd2e9ec3ec1c3a9c49624761b23492b63a6991222117514a8f58a71df1a9d4f4",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          296,
+          400
+        ],
+        "candidate_dimensions": [
+          413,
+          520
+        ],
+        "aspect_delta_fraction": 0.07328,
+        "thumbnail_rgb_rmse": 63.971,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "c49d084b4996bf22",
+      "accepted": true,
+      "candidate_dimensions": [
+        1836,
+        1256
+      ],
+      "source_page_url": "https://www.wikiart.org/en/john-singleton-copley/the-major-peirson-s-death-1784",
+      "source_image_url": "https://uploads0.wikiart.org/00142/images/john-singleton-copley/the-major-peirson-s-death.jpg",
+      "candidate_sha256": "d324b5779471630b56a492fc39b095e429483dcd81b4a6b4ee886e1ca3139baa",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          522
+        ],
+        "candidate_dimensions": [
+          1836,
+          1256
+        ],
+        "aspect_delta_fraction": 0.0174,
+        "thumbnail_rgb_rmse": 48.724,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "c683c02b7d4cf6ac",
+      "accepted": true,
+      "candidate_dimensions": [
+        1200,
+        1944
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-auguste-dominique-ingres/portrait-of-napoleon-on-the-imperial-throne-1806",
+      "source_image_url": "https://uploads3.wikiart.org/00180/images/jean-auguste-dominique-ingres/portrait-of-napol-on-on-the-imperial-throne.jpg",
+      "candidate_sha256": "ef024a2fe9efad6852fddcdc333b7e8c47d756c8abfdd7e28afae6026b21a53b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          368,
+          600
+        ],
+        "candidate_dimensions": [
+          1200,
+          1944
+        ],
+        "aspect_delta_fraction": 0.00644,
+        "thumbnail_rgb_rmse": 25.444,
+        "dhash_distance": 19,
+        "match": false
+      }
+    },
+    {
+      "id": "c86ec965bd11744c",
+      "accepted": true,
+      "candidate_dimensions": [
+        2692,
+        4150
+      ],
+      "source_page_url": "https://www.wikiart.org/en/leonard-de-vinci/la-vierge-aux-rochers-1505",
+      "source_image_url": "https://uploads3.wikiart.org/00142/images/57726d85edc2cb3880b48ccd/leonardo-da-vinci-virgin-of-the-rocks-national-gallery-london.jpg",
+      "candidate_sha256": "108d7ad12f6fc76263ba36256acfff8ae1b551944582148f0bdd1f20e52332bb",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          382,
+          600
+        ],
+        "candidate_dimensions": [
+          2692,
+          4150
+        ],
+        "aspect_delta_fraction": 0.01886,
+        "thumbnail_rgb_rmse": 61.822,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "ca48174ec3fbca1b",
+      "accepted": false,
+      "candidate_dimensions": [
+        474,
+        326
+      ],
+      "source_page_url": "https://www.wikiart.org/en/alexandre-cabanel/phedre",
+      "source_image_url": "https://uploads3.wikiart.org/00340/images/alexandre-cabanel/phedre.jpg",
+      "candidate_sha256": "ced0ee79a41d93109ca9505bb55e1cdb1f97871b090502cfb6ab5cb2f7e81328",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          538
+        ],
+        "candidate_dimensions": [
+          474,
+          326
+        ],
+        "aspect_delta_fraction": 0.04299,
+        "thumbnail_rgb_rmse": 45.13,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "cc6586a7e5a72aea",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        589
+      ],
+      "source_page_url": "https://www.wikiart.org/en/ivan-aivazovsky/russian-turkish-sea-battle-of-sinop-on-18th-november-1853-1853",
+      "source_image_url": "https://uploads6.wikiart.org/00380/images/ivan-aivazovsky/1-russian-turkish-sea-battle-of-sinop-ivan-konstantinovich-aivazovsky.jpg",
+      "candidate_sha256": "a0b810a873bc8a39c246b55e35f51fb337e1bf02772b3e5416409a91394725b9",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          474
+        ],
+        "candidate_dimensions": [
+          900,
+          589
+        ],
+        "aspect_delta_fraction": 0.0343,
+        "thumbnail_rgb_rmse": 28.747,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "cd3cd972083b6ba9",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        878
+      ],
+      "source_page_url": "https://www.wikiart.org/en/antoine-van-dyck/amour-et-psyche-1640",
+      "source_image_url": "https://uploads2.wikiart.org/00381/images/anthony-van-dyck/cupid-and-psyche-sir-anthony-van-dyck.jpg",
+      "candidate_sha256": "823990d4a2dcc3f85f20b3de74e7fc3bb8c5b2da198a08ac331cea22e4c1ff42",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          609,
+          600
+        ],
+        "candidate_dimensions": [
+          900,
+          878
+        ],
+        "aspect_delta_fraction": 0.00991,
+        "thumbnail_rgb_rmse": 36.349,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "cdc11c5cfcf68a7f",
+      "accepted": true,
+      "candidate_dimensions": [
+        1047,
+        899
+      ],
+      "source_page_url": "https://www.wikiart.org/en/pieter-de-hooch/the-bedroom",
+      "source_image_url": "https://uploads7.wikiart.org/00340/images/pieter-de-hooch/the-bedroom.jpg",
+      "candidate_sha256": "8f1fac87525954a7749c49c5a12d68c14f4104f15a97fad84fef4be0193333cf",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          680,
+          600
+        ],
+        "candidate_dimensions": [
+          1047,
+          899
+        ],
+        "aspect_delta_fraction": 0.02761,
+        "thumbnail_rgb_rmse": 40.176,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "cef8de020b7028b6",
+      "accepted": false,
+      "candidate_dimensions": [
+        553,
+        800
+      ],
+      "source_page_url": "https://www.wikiart.org/en/correggio/the-vision-of-st-john-on-patmos-1523",
+      "source_image_url": "https://uploads4.wikiart.org/00380/images/correggio/r.jpg",
+      "candidate_sha256": "68535e31fe4cd95aed2564d126288f0dc6a4d3fc80fa259e8e5e755883d4cf3f",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          520
+        ],
+        "candidate_dimensions": [
+          553,
+          800
+        ],
+        "aspect_delta_fraction": 0.52073,
+        "thumbnail_rgb_rmse": 80.973,
+        "dhash_distance": 36,
+        "match": false
+      }
+    },
+    {
+      "id": "d0028a9421e30b95",
+      "accepted": true,
+      "candidate_dimensions": [
+        568,
+        367
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/lychee-fruit-1940",
+      "source_image_url": "https://uploads8.wikiart.org/00362/images/qi-baishi/lychee-fruit-1940.jpg",
+      "candidate_sha256": "e141e740c5da190b52366c14dce996d441071e4b5c0c4e0d37be01e7eefe3a63",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          311
+        ],
+        "candidate_dimensions": [
+          568,
+          367
+        ],
+        "aspect_delta_fraction": 0.20332,
+        "thumbnail_rgb_rmse": 78.977,
+        "dhash_distance": 26,
+        "match": false
+      }
+    },
+    {
+      "id": "d183396ce8547ae6",
+      "accepted": false,
+      "candidate_dimensions": [
+        696,
+        305
+      ],
+      "source_page_url": "https://www.wikiart.org/en/paolo-veronese/feast-in-the-house-of-levi-1573",
+      "source_image_url": "https://uploads0.wikiart.org/00392/images/paolo-veronese/captura-de-pantalla-2022-05-09-160653.png",
+      "candidate_sha256": "40d7373dee644a9c429fa06614eae0e857b49238e7da98905a256edf8cad104a",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          383
+        ],
+        "candidate_dimensions": [
+          696,
+          305
+        ],
+        "aspect_delta_fraction": 0.16532,
+        "thumbnail_rgb_rmse": 46.777,
+        "dhash_distance": 24,
+        "match": false
+      }
+    },
+    {
+      "id": "d32bd9a185446689",
+      "accepted": true,
+      "candidate_dimensions": [
+        882,
+        968
+      ],
+      "source_page_url": "https://www.wikiart.org/en/piet-mondrian/composition-no-10-1942",
+      "source_image_url": "https://uploads7.wikiart.org/images/piet-mondrian/composition-no-10-1942.jpg",
+      "candidate_sha256": "0e7cd9c8e2a933f78ee9ae045818d15b18f4520c1dbba8d69ac416df7a0dd926",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          547,
+          600
+        ],
+        "candidate_dimensions": [
+          882,
+          968
+        ],
+        "aspect_delta_fraction": 0.00056,
+        "thumbnail_rgb_rmse": 43.947,
+        "dhash_distance": 0,
+        "match": false
+      }
+    },
+    {
+      "id": "d367ff7bea0aaaf6",
+      "accepted": true,
+      "candidate_dimensions": [
+        580,
+        647
+      ],
+      "source_page_url": "https://www.wikiart.org/en/francisco-de-zurbaran/the-death-of-st-bonaventura-1629",
+      "source_image_url": "https://uploads2.wikiart.org/00340/images/francisco-de-zurbaran/the-death-of-st-bonaventura.jpg",
+      "candidate_sha256": "82ca6ab065d190ea44a713152fc900cd77daef588175831606a9bf68eef0aa7e",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          508,
+          600
+        ],
+        "candidate_dimensions": [
+          580,
+          647
+        ],
+        "aspect_delta_fraction": 0.05879,
+        "thumbnail_rgb_rmse": 38.318,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "d459320dbad84895",
+      "accepted": true,
+      "candidate_dimensions": [
+        1020,
+        1500
+      ],
+      "source_page_url": "https://www.wikiart.org/en/leonardo-da-vinci/mona-lisa",
+      "source_image_url": "https://uploads5.wikiart.org/00475/images/leonardo-da-vinci/0000136308-og.JPG",
+      "candidate_sha256": "236984f77e6feb8004ccd444ad1c16da78309599aa12f034c92fc9cd91f8178d",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          264,
+          400
+        ],
+        "candidate_dimensions": [
+          1020,
+          1500
+        ],
+        "aspect_delta_fraction": 0.0303,
+        "thumbnail_rgb_rmse": 31.736,
+        "dhash_distance": 17,
+        "match": false
+      }
+    },
+    {
+      "id": "d58bbca29d831fcc",
+      "accepted": true,
+      "candidate_dimensions": [
+        5000,
+        5017
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustav-klimt/le-baiser-1908",
+      "source_image_url": "https://uploads7.wikiart.org/00142/images/57726d7eedc2cb3880b47e13/the-kiss-gustav-klimt-google-cultural-institute.jpg",
+      "candidate_sha256": "7e357cf6b47ac867596ff061237780c67e4f563d6b1d66d99301a63963d5e02b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          390,
+          400
+        ],
+        "candidate_dimensions": [
+          5000,
+          5017
+        ],
+        "aspect_delta_fraction": 0.02217,
+        "thumbnail_rgb_rmse": 36.826,
+        "dhash_distance": 20,
+        "match": false
+      }
+    },
+    {
+      "id": "d5f7746978965bb1",
+      "accepted": true,
+      "candidate_dimensions": [
+        681,
+        850
+      ],
+      "source_page_url": "https://www.wikiart.org/en/claude-monet/femmes-au-jardin-1866",
+      "source_image_url": "https://uploads3.wikiart.org/00475/images/claude-monet/rf-2773.jpg",
+      "candidate_sha256": "d2a0e0086c463a79454ca671582b636611fc45a7064a24b48b2dc400d87b9d6e",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          314,
+          400
+        ],
+        "candidate_dimensions": [
+          681,
+          850
+        ],
+        "aspect_delta_fraction": 0.02061,
+        "thumbnail_rgb_rmse": 29.791,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "d62d2054b27cc4a8",
+      "accepted": true,
+      "candidate_dimensions": [
+        761,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jacques-louis-david/napoleoncrossing-the-alps-at-the-st-bernard-pass-20th-may-1800-1801",
+      "source_image_url": "https://uploads5.wikiart.org/00380/images/jacques-louis-david/napoleon-jacques-louis-david.jpg",
+      "candidate_sha256": "a3c7b5bbfb0578cf95e7bbb10d6a519f0fcbab93dfe77be5858c9dbafab91bb4",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          320,
+          400
+        ],
+        "candidate_dimensions": [
+          761,
+          900
+        ],
+        "aspect_delta_fraction": 0.05694,
+        "thumbnail_rgb_rmse": 51.167,
+        "dhash_distance": 13,
+        "match": false
+      }
+    },
+    {
+      "id": "dc523e781a1fa600",
+      "accepted": true,
+      "candidate_dimensions": [
+        974,
+        1161
+      ],
+      "source_page_url": "https://www.wikiart.org/en/nikolaos-gyzis/eros-and-the-painter-1868",
+      "source_image_url": "https://uploads8.wikiart.org/00396/images/nikolaos-gyzis/image-14.jpg",
+      "candidate_sha256": "5ad5e00931b48e80ba30cc834758f0d2daa00f4916c6897bbf7426c61f36f0f1",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          309,
+          400
+        ],
+        "candidate_dimensions": [
+          974,
+          1161
+        ],
+        "aspect_delta_fraction": 0.086,
+        "thumbnail_rgb_rmse": 20.374,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "dcdd84b162d7da45",
+      "accepted": true,
+      "candidate_dimensions": [
+        799,
+        565
+      ],
+      "source_page_url": "https://www.wikiart.org/en/paolo-veronese/do-not-touch-me",
+      "source_image_url": "https://uploads5.wikiart.org/00383/images/paolo-veronese/800px-paolo-veronese-015.jpg",
+      "candidate_sha256": "2de2b5718793e4a800768951eabe6b99f7b534d05ffa3c85be089833455b9698",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          286
+        ],
+        "candidate_dimensions": [
+          799,
+          565
+        ],
+        "aspect_delta_fraction": 0.01112,
+        "thumbnail_rgb_rmse": 36.083,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "e1052a8b05e13e79",
+      "accepted": false,
+      "candidate_dimensions": [
+        469,
+        482
+      ],
+      "source_page_url": "https://www.wikiart.org/en/zdislav-beksinski/untitled-1998",
+      "source_image_url": "https://uploads0.wikiart.org/images/zdislav-beksinski/untitled-471.jpg",
+      "candidate_sha256": "314d0e2849c5cc0252dcbf8e1e13132289678a35e27b9dcc73cb48d41171bd75",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          503,
+          600
+        ],
+        "candidate_dimensions": [
+          469,
+          482
+        ],
+        "aspect_delta_fraction": 0.16067,
+        "thumbnail_rgb_rmse": 95.579,
+        "dhash_distance": 30,
+        "match": false
+      }
+    },
+    {
+      "id": "e2297322b02efff1",
+      "accepted": true,
+      "candidate_dimensions": [
+        4545,
+        5799
+      ],
+      "source_page_url": "https://www.wikiart.org/en/diego-velasquez/innocent-x-1650",
+      "source_image_url": "https://uploads5.wikiart.org/00142/images/diego-velazquez/portrait-of-pope-innocent-x.jpg",
+      "candidate_sha256": "ead3bbdff8fc748590a164d0b10f3e4e953e6db1ece215a0cd87c3586ad53d25",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          323,
+          400
+        ],
+        "candidate_dimensions": [
+          4545,
+          5799
+        ],
+        "aspect_delta_fraction": 0.0294,
+        "thumbnail_rgb_rmse": 34.763,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "e5343e78193567c3",
+      "accepted": true,
+      "candidate_dimensions": [
+        800,
+        1016
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-baptiste-simeon-chardin/soap-bubbles-1735",
+      "source_image_url": "https://uploads4.wikiart.org/00363/images/jean-baptiste-simeon-chardin/soap-bubbles-jean-baptiste-simeon-chardin-oil-painting-4-800x1016.jpg",
+      "candidate_sha256": "c07a701611b7083265a26005a6e79238c51be1e3ba5d90ad98a78d987e3b4cfb",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          468,
+          600
+        ],
+        "candidate_dimensions": [
+          800,
+          1016
+        ],
+        "aspect_delta_fraction": 0.00949,
+        "thumbnail_rgb_rmse": 44.27,
+        "dhash_distance": 6,
+        "match": false
+      }
+    },
+    {
+      "id": "e68d31c56e3882ec",
+      "accepted": true,
+      "candidate_dimensions": [
+        900,
+        714
+      ],
+      "source_page_url": "https://www.wikiart.org/en/caspar-david-friedrich/not-detected-7",
+      "source_image_url": "https://uploads4.wikiart.org/00380/images/caspar-david-friedrich/the-tree-of-crows-caspar-david-friedrich-1.jpg",
+      "candidate_sha256": "c211acf05b16877ae9072e2ba0787ba06fa2cd587966bec62da977da826ad9d0",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          700,
+          564
+        ],
+        "candidate_dimensions": [
+          900,
+          714
+        ],
+        "aspect_delta_fraction": 0.01561,
+        "thumbnail_rgb_rmse": 38.808,
+        "dhash_distance": 8,
+        "match": false
+      }
+    },
+    {
+      "id": "ea62f9acd5007b0e",
+      "accepted": true,
+      "candidate_dimensions": [
+        886,
+        1199
+      ],
+      "source_page_url": "https://www.wikiart.org/en/caravaggio/john-the-baptist-1602",
+      "source_image_url": "https://uploads7.wikiart.org/00340/images/caravaggio/john-the-baptist.jpg",
+      "candidate_sha256": "2a8b969c698f608635ad8d3572569f0f9e6cc89d14d44833e7a970bbc80377cf",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          296,
+          400
+        ],
+        "candidate_dimensions": [
+          886,
+          1199
+        ],
+        "aspect_delta_fraction": 0.00142,
+        "thumbnail_rgb_rmse": 46.461,
+        "dhash_distance": 14,
+        "match": false
+      }
+    },
+    {
+      "id": "eacdadfc1453b61c",
+      "accepted": true,
+      "candidate_dimensions": [
+        2419,
+        2996
+      ],
+      "source_page_url": "https://www.wikiart.org/en/paul-gauguin/yellow-christ-1889",
+      "source_image_url": "https://uploads0.wikiart.org/00475/images/paul-gauguin/the-yellow-christ-1889.jpg",
+      "candidate_sha256": "4545e434e20c08aa68f0a5ed474e6ac2a3195d6b716aed6329fde71af0996309",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          473,
+          600
+        ],
+        "candidate_dimensions": [
+          2419,
+          2996
+        ],
+        "aspect_delta_fraction": 0.0242,
+        "thumbnail_rgb_rmse": 33.602,
+        "dhash_distance": 9,
+        "match": false
+      }
+    },
+    {
+      "id": "ec831a973a506bf8",
+      "accepted": true,
+      "candidate_dimensions": [
+        1795,
+        3936
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jan-van-eyck/la-vierge-dans-une-eglise-1439",
+      "source_image_url": "https://uploads8.wikiart.org/00475/images/jan-van-eyck/the-madonna-in-the-church-1438.jpg",
+      "candidate_sha256": "05d72f3f0edd5f2affaa0f16ddf6be4436911a3865d4f00f3959f2fda44bfa17",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          193,
+          400
+        ],
+        "candidate_dimensions": [
+          1795,
+          3936
+        ],
+        "aspect_delta_fraction": 0.05483,
+        "thumbnail_rgb_rmse": 46.853,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "ef5cb84680b04116",
+      "accepted": true,
+      "candidate_dimensions": [
+        639,
+        900
+      ],
+      "source_page_url": "https://www.wikiart.org/en/bartolome-esteban-murillo/two-children-eating-a-melon-and-grapes-1646",
+      "source_image_url": "https://uploads6.wikiart.org/00142/images/57726d81edc2cb3880b483a0/bartolom-esteban-perez-murillo-trauben-und-melonenesser.jpg",
+      "candidate_sha256": "168f4535ed55d12f3d42508f2afb606fb9e5207dfeabd02ef3411f43f1ae1e8c",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          427,
+          600
+        ],
+        "candidate_dimensions": [
+          639,
+          900
+        ],
+        "aspect_delta_fraction": 0.00234,
+        "thumbnail_rgb_rmse": 39.684,
+        "dhash_distance": 16,
+        "match": false
+      }
+    },
+    {
+      "id": "f0b4feb501d6152e",
+      "accepted": true,
+      "candidate_dimensions": [
+        3202,
+        2503
+      ],
+      "source_page_url": "https://www.wikiart.org/en/carl-spitzweg/the-poor-poet-1837",
+      "source_image_url": "https://uploads3.wikiart.org/00142/images/57726d98edc2cb3880b4b3f3/carl-spitzweg-der-arme-poet-neue-pinakothek.jpg",
+      "candidate_sha256": "8790819758667c1821d7adaf150b86d3b4e3f7220804b7a323a7c1331bb846bd",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          598
+        ],
+        "candidate_dimensions": [
+          3202,
+          2503
+        ],
+        "aspect_delta_fraction": 0.02,
+        "thumbnail_rgb_rmse": 35.299,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "f0c4e72da127cd4e",
+      "accepted": false,
+      "candidate_dimensions": [
+        1930,
+        2400
+      ],
+      "source_page_url": "https://www.wikiart.org/en/rembrandt/la-tempete-sur-la-mer-de-galilee-1633",
+      "source_image_url": "https://uploads0.wikiart.org/00142/images/rembrandt/christ-in-the-storm.jpg",
+      "candidate_sha256": "9b2a89bd9f14da797db57398c4596aab30da40c756ae9b53c85fcd0a3f9681c6",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          323,
+          400
+        ],
+        "candidate_dimensions": [
+          1930,
+          2400
+        ],
+        "aspect_delta_fraction": 0.00413,
+        "thumbnail_rgb_rmse": 47.921,
+        "dhash_distance": 9,
+        "match": false
+      }
+    },
+    {
+      "id": "f3de2b6148cf205b",
+      "accepted": true,
+      "candidate_dimensions": [
+        2286,
+        2952
+      ],
+      "source_page_url": "https://www.wikiart.org/en/titian/the-fall-of-man-1570",
+      "source_image_url": "https://uploads6.wikiart.org/00142/images/57726d84edc2cb3880b48c9b/tizian-091.jpg",
+      "candidate_sha256": "c4ae8ac58bd79074b0e5f9be064726c5bd10538c76fccec433670ebcc1053631",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          454,
+          600
+        ],
+        "candidate_dimensions": [
+          2286,
+          2952
+        ],
+        "aspect_delta_fraction": 0.02342,
+        "thumbnail_rgb_rmse": 33.129,
+        "dhash_distance": 7,
+        "match": false
+      }
+    },
+    {
+      "id": "f5a1b4b1934576c8",
+      "accepted": true,
+      "candidate_dimensions": [
+        2013,
+        1053
+      ],
+      "source_page_url": "https://www.wikiart.org/en/annibale-carracci/the-flight-into-egypt",
+      "source_image_url": "https://uploads1.wikiart.org/00142/images/annibale-carracci/the-flight-into-egypt.jpg",
+      "candidate_sha256": "eeb51ad8a46f951b1723144ec583aa41c1562508879c6e81223ad73b508ae4de",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          401
+        ],
+        "candidate_dimensions": [
+          2013,
+          1053
+        ],
+        "aspect_delta_fraction": 0.02211,
+        "thumbnail_rgb_rmse": 33.391,
+        "dhash_distance": 2,
+        "match": false
+      }
+    },
+    {
+      "id": "f669c2eb4123d9b7",
+      "accepted": true,
+      "candidate_dimensions": [
+        334,
+        521
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/grapes-1954",
+      "source_image_url": "https://uploads3.wikiart.org/00362/images/qi-baishi/grapes-1954-jpg-large.jpg",
+      "candidate_sha256": "e9255a0e0a2624fbddb0431755ba90b7055ee44cf47ed15fb3246394cf4abff9",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          253,
+          400
+        ],
+        "candidate_dimensions": [
+          334,
+          521
+        ],
+        "aspect_delta_fraction": 0.01356,
+        "thumbnail_rgb_rmse": 48.278,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "f67157e56ef3083f",
+      "accepted": true,
+      "candidate_dimensions": [
+        2369,
+        3000
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jan-steen/self-portrait-with-a-lute",
+      "source_image_url": "https://uploads2.wikiart.org/00383/images/jan-steen/1930-110-autorretrato-laud.jpg",
+      "candidate_sha256": "815dcbd18f5c33a32b6b00278a88978f7e593653c4fcd802b41ee34d239e6006",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          319,
+          400
+        ],
+        "candidate_dimensions": [
+          2369,
+          3000
+        ],
+        "aspect_delta_fraction": 0.00982,
+        "thumbnail_rgb_rmse": 44.911,
+        "dhash_distance": 8,
+        "match": false
+      }
+    },
+    {
+      "id": "f7903c41c2131635",
+      "accepted": true,
+      "candidate_dimensions": [
+        2659,
+        3991
+      ],
+      "source_page_url": "https://www.wikiart.org/en/michel-ange/sistine-chapel-ceiling-the-delphic-sibyl-1509",
+      "source_image_url": "https://uploads5.wikiart.org/00382/images/michelangelo/michelangelo-delphic-sibyl.jpg",
+      "candidate_sha256": "5bed84d55d3931f96ff67fc13d89c5b90b64ba1c0af713a64366f69cbc3ea9a9",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          392,
+          400
+        ],
+        "candidate_dimensions": [
+          2659,
+          3991
+        ],
+        "aspect_delta_fraction": 0.32015,
+        "thumbnail_rgb_rmse": 85.582,
+        "dhash_distance": 25,
+        "match": false
+      }
+    },
+    {
+      "id": "f839088c88048b8a",
+      "accepted": true,
+      "candidate_dimensions": [
+        6042,
+        2777
+      ],
+      "source_page_url": "https://www.wikiart.org/en/gustave-courbet/a-burial-at-ornans-1850-1",
+      "source_image_url": "https://uploads3.wikiart.org/00129/images/gustave-courbet/a-burial-at-ornans.jpg",
+      "candidate_sha256": "8cc93ca48e2a08560e2654f44ccf9d9c729771d91ce2205cff151ae73c9c352b",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          354
+        ],
+        "candidate_dimensions": [
+          6042,
+          2777
+        ],
+        "aspect_delta_fraction": 0.02694,
+        "thumbnail_rgb_rmse": 39.96,
+        "dhash_distance": 14,
+        "match": false
+      }
+    },
+    {
+      "id": "f8e5e6caef8c7b5e",
+      "accepted": true,
+      "candidate_dimensions": [
+        358,
+        517
+      ],
+      "source_page_url": "https://www.wikiart.org/en/qi-baishi/the-chickens-are-happy-sun-1949",
+      "source_image_url": "https://uploads5.wikiart.org/00362/images/qi-baishi/the-chickens-are-happy-sun-1949-jpg-large.jpg",
+      "candidate_sha256": "cfaef9bd53ca7ce80537d00671c2799ce33f51f1d4472af82c3765961796c858",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          273,
+          400
+        ],
+        "candidate_dimensions": [
+          358,
+          517
+        ],
+        "aspect_delta_fraction": 0.01459,
+        "thumbnail_rgb_rmse": 57.452,
+        "dhash_distance": 10,
+        "match": false
+      }
+    },
+    {
+      "id": "fa88028cf4908829",
+      "accepted": true,
+      "candidate_dimensions": [
+        2088,
+        2500
+      ],
+      "source_page_url": "https://www.wikiart.org/en/correggio/adoration-of-the-child-1520",
+      "source_image_url": "https://uploads1.wikiart.org/00367/images/correggio/1588092525509375-2.jpg",
+      "candidate_sha256": "dcc4cfa202fa9ca414dffd24b6113165828dc4a87e099b599414744d508205fd",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          324,
+          400
+        ],
+        "candidate_dimensions": [
+          2088,
+          2500
+        ],
+        "aspect_delta_fraction": 0.03111,
+        "thumbnail_rgb_rmse": 37.913,
+        "dhash_distance": 11,
+        "match": false
+      }
+    },
+    {
+      "id": "fcf820bafb68ba56",
+      "accepted": false,
+      "candidate_dimensions": [
+        1021,
+        1040
+      ],
+      "source_page_url": "https://www.wikiart.org/en/zdzislaw-beksinski/untitled-1978-1",
+      "source_image_url": "https://uploads2.wikiart.org/images/zdislav-beksinski/untitled-1978.jpg",
+      "candidate_sha256": "962ff72e7ef7033e6380bfc6bbe99007f734c8577c747c3944a0ab0d6942c7ce",
+      "method": "model visual review of reference and candidate",
+      "reason": "Visual comparison did not establish a confidently identical painting and composition, or the candidate was not larger in both dimensions; kept rejected.",
+      "visual_match": {
+        "reference_dimensions": [
+          400,
+          324
+        ],
+        "candidate_dimensions": [
+          1021,
+          1040
+        ],
+        "aspect_delta_fraction": 0.2048,
+        "thumbnail_rgb_rmse": 63.891,
+        "dhash_distance": 30,
+        "match": false
+      }
+    },
+    {
+      "id": "fd49875d32465faa",
+      "accepted": true,
+      "candidate_dimensions": [
+        1000,
+        747
+      ],
+      "source_page_url": "https://www.wikiart.org/en/ivan-shishkin/promenading-in-the-forest-1869",
+      "source_image_url": "https://uploads3.wikiart.org/00382/images/ivan-shishkin/872a8553c91ccf90ffba75703b2d4f35.jpg",
+      "candidate_sha256": "b8e0091dcfc18c4d821fe04190afaff9d33d25edefcd762a886c91aa4bff53df",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          750,
+          577
+        ],
+        "candidate_dimensions": [
+          1000,
+          747
+        ],
+        "aspect_delta_fraction": 0.0299,
+        "thumbnail_rgb_rmse": 46.665,
+        "dhash_distance": 5,
+        "match": false
+      }
+    },
+    {
+      "id": "fffad6f8cc2dafaa",
+      "accepted": true,
+      "candidate_dimensions": [
+        474,
+        642
+      ],
+      "source_page_url": "https://www.wikiart.org/en/jean-leon-gerome/lartiste-sculptant-tanagra-1890",
+      "source_image_url": "https://uploads5.wikiart.org/00339/images/jean-leon-gerome/working-in-marble-or-the-artist-sculpting-tanagra-1890.jpg",
+      "candidate_sha256": "722e96414dcbac9fdad4c12c97859c68c1ea608080583f10256926d3572b3676",
+      "method": "model visual review of reference and candidate; minor crop/color difference",
+      "reason": "Visual comparison shows the same painting and composition; differences are limited to reproduction, color, or a minor crop. Candidate is larger in both dimensions.",
+      "visual_match": {
+        "reference_dimensions": [
+          272,
+          400
+        ],
+        "candidate_dimensions": [
+          474,
+          642
+        ],
+        "aspect_delta_fraction": 0.08576,
+        "thumbnail_rgb_rmse": 40.144,
+        "dhash_distance": 11,
+        "match": false
+      }
+    }
+  ]
+}

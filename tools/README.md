@@ -76,6 +76,7 @@ Then run the sequential audit and resumable source passes:
     .venv/bin/python -m tools.source_upgrades
     .venv/bin/python -m tools.commons_upgrades --delay 1
     .venv/bin/python -m tools.curated_sources
+    .venv/bin/python -m tools.review_mismatches --apply-decisions catalog/reviewed-source-overrides.json
     .venv/bin/python -m tools.build_quality_pack
     .venv/bin/python -m tools.quality_review
 
@@ -93,6 +94,14 @@ Pixel/aspect/hash comparisons are automatic verification aids, not human
 approval or proof that a larger scan contains real additional detail. Known
 missing images use the explicitly cited `catalog/source-overrides.json` entries;
 their title/artist/date evidence is recorded separately from pixel matching.
+Strict visual mismatches can be inspected in paired contact sheets with
+`tools.review_mismatches`. Model-reviewed exceptions are kept separately in
+`catalog/reviewed-source-overrides.json` and `data/review-upgrades/state.json`;
+the merger only selects entries explicitly marked accepted. They retain their
+review reason and must not be described as human approval.
+Run the review module without `--apply-decisions` to prepare paired contact
+sheets for a new review. Replaying saved decisions checks both the recorded
+candidate checksum and the bytes on disk before promotion.
 
 `build_quality_pack` merges the available sources, chooses the strongest
 screen-fill resolution among verified candidates, keeps an original fallback,

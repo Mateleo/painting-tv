@@ -20,7 +20,7 @@ def state_records(path: Path) -> dict[str, Any]:
 
 
 def merge_sources(catalog_path: Path, wikiart_path: Path, commons_path: Path, output: Path,
-                  *, curated_path: Path | None = None) -> dict[str, Any]:
+                  *, curated_path: Path | None = None, reviewed_path: Path | None = None) -> dict[str, Any]:
     catalog = json.loads(catalog_path.read_text())
     wikiart = state_records(wikiart_path)
     commons = state_records(commons_path)
@@ -28,6 +28,9 @@ def merge_sources(catalog_path: Path, wikiart_path: Path, commons_path: Path, ou
     curated = state_records(curated_path) if curated_path else {}
     if curated_path:
         sources.append(("Wikimedia Commons (curated)", curated, curated_path))
+    reviewed = state_records(reviewed_path) if reviewed_path else {}
+    if reviewed_path:
+        sources.append(("WikiArt (visual review)", reviewed, reviewed_path))
     output.parent.mkdir(parents=True, exist_ok=True)
     paintings = []
     origins = collections.Counter()
@@ -72,7 +75,8 @@ def merge_sources(catalog_path: Path, wikiart_path: Path, commons_path: Path, ou
             item["originalImageUrl"] = os.path.relpath(original_path, output.parent)
         paintings.append(item)
     report = {"catalogRecords": len(paintings), "selectedSources": dict(origins),
-              "wikiartRecordsChecked": len(wikiart), "commonsRecordsChecked": len(commons), "curatedRecordsChecked": len(curated)}
+              "wikiartRecordsChecked": len(wikiart), "commonsRecordsChecked": len(commons),
+              "curatedRecordsChecked": len(curated), "modelVisualReviews": len(reviewed)}
     write_json(output, {"version": 1, "paintings": paintings, "sourceReport": report})
     return report
 
@@ -120,7 +124,7 @@ def report_every_record(base_catalog: Path, selected_catalog: Path, pack: Path, 
     value = {"summary": summary,
              "sourceCoverage": selected_document.get("sourceReport", {}),
              "compression": json.loads(compression_file.read_text()) if compression_file.exists() else {},
-             "note": "Every original record is accounted for. Similarity checks are automatic, not human visual approval. Pixel dimensions do not prove genuine fine detail.", "records": rows}
+             "note": "Every original record is accounted for. Technical comparisons and model visual review are not human approval. Pixel dimensions do not prove genuine fine detail.", "records": rows}
     write_json(output, value)
     csv_path = output.with_suffix(".csv")
     with csv_path.open("w", newline="", encoding="utf-8-sig") as stream:
@@ -137,12 +141,14 @@ def main() -> None:
     parser.add_argument("--wikiart", type=Path, default=ROOT / "data/upgrades/state.json")
     parser.add_argument("--commons", type=Path, default=ROOT / "data/commons-upgrades/state.json")
     parser.add_argument("--curated", type=Path, default=ROOT / "data/curated-upgrades/state.json")
+    parser.add_argument("--reviewed", type=Path, default=ROOT / "data/review-upgrades/state.json")
     parser.add_argument("--selected", type=Path, default=ROOT / "data/selected/catalog.json")
     parser.add_argument("--pack", type=Path, default=ROOT / "data/tv-quality-pack")
     parser.add_argument("--report", type=Path, default=ROOT / "catalog/quality-upgrade-report.json")
     parser.add_argument("--merge-only", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(merge_sources(args.catalog.resolve(), args.wikiart.resolve(), args.commons.resolve(), args.selected.resolve(), curated_path=args.curated.resolve())), flush=True)
+    print(json.dumps(merge_sources(args.catalog.resolve(), args.wikiart.resolve(), args.commons.resolve(), args.selected.resolve(),
+                                   curated_path=args.curated.resolve(), reviewed_path=args.reviewed.resolve())), flush=True)
     if args.merge_only:
         return
     print(json.dumps(build_pack(args.selected.resolve(), args.pack.resolve())), flush=True)

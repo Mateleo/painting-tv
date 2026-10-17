@@ -133,6 +133,7 @@ uv pip install -e '.[images]'
 .venv/bin/python -m tools.source_upgrades
 .venv/bin/python -m tools.commons_upgrades
 .venv/bin/python -m tools.curated_sources
+.venv/bin/python -m tools.review_mismatches --apply-decisions catalog/reviewed-source-overrides.json
 .venv/bin/python -m tools.build_quality_pack
 .venv/bin/python -m tools.quality_review
 ```
@@ -143,6 +144,12 @@ heuristic. The source passes save progress and compare downloaded reproductions
 against the deck image before accepting an upgrade. Automatic similarity checks
 can reject changed crops or colors and are not a substitute for a human review.
 Every source attempt is retained, including failures and unmatched paintings.
+Candidates rejected by strict comparison can receive a separate model visual
+review of the reference and candidate. Accepted exceptions preserve their review
+reason and separate provenance in
+[catalog/reviewed-source-overrides.json](catalog/reviewed-source-overrides.json);
+this does not imply human visual approval. Replaying these decisions requires
+the exact reviewed file checksum and larger source dimensions.
 
 Downloaded masters remain unchanged. TV exports use high-quality WebP only
 when it saves useful space and meets a conservative compression-error threshold;
