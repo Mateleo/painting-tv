@@ -19,7 +19,7 @@ from PIL import Image, ImageChops, ImageCms, ImageOps, ImageStat, features
 
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
-COMPRESSION_REVISION = 2
+COMPRESSION_REVISION = 3
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -73,8 +73,8 @@ def color_convert(image: Image.Image) -> tuple[Image.Image, str]:
 
 
 def optimize_one(source: Path, destination: Path, *, quality: int = 96,
-                 min_psnr: float = 43.0, max_edge: int = 7680,
-                 max_pixels: int = 16_600_000) -> dict[str, Any]:
+                 min_psnr: float = 43.0, max_edge: int = 0,
+                 max_pixels: int = 0) -> dict[str, Any]:
     """Use WebP only when it is smaller and passes the detail-patch error guard."""
     if not features.check("webp"):
         raise RuntimeError("Pillow was built without WebP support")
@@ -87,10 +87,22 @@ def optimize_one(source: Path, destination: Path, *, quality: int = 96,
         if source_format not in ANDROID_FORMATS:
             raise ValueError(f"Unsupported TV image format: {source_format}")
         pixels = source_size[0] * source_size[1]
-        ratio = min(1.0, max_edge / max(source_size), math.sqrt(max_pixels / pixels))
+        ratio = min(1.0, max_edge / max(source_size) if max_edge else 1.0,
+                    math.sqrt(max_pixels / pixels) if max_pixels else 1.0)
         size = tuple(max(1, int(value * ratio)) for value in source_size)
         resized = size != source_size
         orientation = opened.getexif().get(274, 1)
+        # Already compact JPEGs rarely benefit from another high-fidelity lossy
+        # generation. Retain their exact bytes before allocating decoded pixels.
+        if not resized and orientation in (None, 1) and source_format == "JPEG" and (
+                source.stat().st_size * 8 / pixels < 3.0 or max(source_size) > 16383):
+            output = destination.with_suffix(".jpg")
+            shutil.copyfile(source, output)
+            return {"path": str(output), "sourceWidth": source_size[0], "sourceHeight": source_size[1],
+                    "width": source_size[0], "height": source_size[1], "sourceBytes": source.stat().st_size,
+                    "outputBytes": output.stat().st_size, "formatDecision": "original-kept-efficient-jpeg",
+                    "samplePsnrDb": 100.0, "colorAction": "original color/profile bytes retained",
+                    "resizedForTV": False, "upscaled": False}
         # JPEG's draft decoder reduces memory before the full image is allocated.
         if resized and source_format == "JPEG":
             opened.draft("RGB", size)
@@ -103,7 +115,8 @@ def optimize_one(source: Path, destination: Path, *, quality: int = 96,
     try:
         if resized:
             # EXIF rotations can swap dimensions; scale using the oriented geometry.
-            limit = min(1.0, max_edge / max(rgb.size), math.sqrt(max_pixels / (rgb.width * rgb.height)))
+            limit = min(1.0, max_edge / max(rgb.size) if max_edge else 1.0,
+                        math.sqrt(max_pixels / (rgb.width * rgb.height)) if max_pixels else 1.0)
             rgb.thumbnail(tuple(max(1, int(value * limit)) for value in rgb.size), Image.Resampling.LANCZOS)
         width, height = rgb.size
         # Palette/flat images benefit from exact lossless WebP. Photographic scans
@@ -147,7 +160,7 @@ def optimize_one(source: Path, destination: Path, *, quality: int = 96,
 
 
 def build_pack(catalog_path: Path, output: Path, *, quality: int = 96, min_psnr: float = 43.0,
-               max_edge: int = 7680, max_pixels: int = 16_600_000) -> dict[str, Any]:
+               max_edge: int = 0, max_pixels: int = 0) -> dict[str, Any]:
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     items = catalog["paintings"]
     images = output / "images"
@@ -180,7 +193,11 @@ def build_pack(catalog_path: Path, output: Path, *, quality: int = 96, min_psnr:
             entry["stamp"] = stamp
             state[identity] = entry
             write_json(state_file, state)
-        item = dict(painting)
+        item = {key: painting.get(key, "") for key in (
+            "id", "title", "artist", "year", "movement", "imageUrl", "width", "height", "sourceUrl", "license")}
+        if "sourceSelection" in painting:
+            item["sourceSelection"] = {key: painting["sourceSelection"].get(key, "") for key in (
+                "source", "method", "downloadUrl", "sha256", "attribution", "credit", "licenseUrl")}
         item.update(imageUrl="images/" + Path(entry["path"]).name, width=entry["width"], height=entry["height"])
         item["compression"] = {key: value for key, value in entry.items() if key not in ("path", "stamp")}
         records.append(item)
@@ -193,7 +210,7 @@ def build_pack(catalog_path: Path, output: Path, *, quality: int = 96, min_psnr:
               "options": options, "sourceBytes": sum(row["sourceBytes"] for row in kept),
               "outputBytes": sum(row["outputBytes"] for row in kept),
               "webpImages": sum(row["formatDecision"].startswith("webp") for row in kept),
-              "originalsKept": sum(row["formatDecision"] == "original-kept" for row in kept),
+              "originalsKept": sum(row["formatDecision"].startswith("original-kept") for row in kept),
               "noUpscaling": True, "androidMinimum": 26,
               "guard": "Five native-resolution patches, PSNR >= min_psnr for lossy WebP; otherwise original or lossless."}
     write_json(output / "compression-report.json", report)
@@ -213,10 +230,10 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "data/tv-quality-pack")
     parser.add_argument("--quality", type=int, default=96)
     parser.add_argument("--min-psnr", type=float, default=43.0)
-    parser.add_argument("--max-edge", type=int, default=7680)
-    parser.add_argument("--max-pixels", type=int, default=16_600_000)
+    parser.add_argument("--max-edge", type=int, default=0, help="Optional export resize limit; 0 preserves source dimensions")
+    parser.add_argument("--max-pixels", type=int, default=0, help="Optional export pixel limit; 0 preserves source dimensions")
     args = parser.parse_args()
-    if not 1 <= args.quality <= 100 or args.min_psnr <= 0 or args.max_edge < 256 or args.max_pixels < 65_536:
+    if not 1 <= args.quality <= 100 or args.min_psnr <= 0 or (args.max_edge != 0 and args.max_edge < 256) or (args.max_pixels != 0 and args.max_pixels < 65_536):
         parser.error("Invalid compression limits")
     print(json.dumps(build_pack(args.catalog.resolve(), args.output.resolve(), quality=args.quality,
                                min_psnr=args.min_psnr, max_edge=args.max_edge, max_pixels=args.max_pixels), indent=2))

@@ -6,7 +6,8 @@ metadata, and package manually approved images for offline display. The
 resolver stores candidates and provenance in data/catalog.json; a similarity
 score is a review aid, never proof of identity.
 
-Python 3.10 or newer is required. The tools use only the standard library.
+Python 3.10 or newer is required. The original extraction/resolver commands use
+only the standard library; the full quality workflow below also uses Pillow.
 From the repository root:
 
     python3 -m tools.painting_catalog download
@@ -60,4 +61,59 @@ the repository while the source deck and image assets stay under ignored data/.
 
 Run the unit tests with:
 
-    python3 -m unittest discover -s tests
+    .venv/bin/python -m unittest discover -s tests
+
+## Audit and improve the complete collection
+
+Install the optional imaging dependency in a virtual environment:
+
+    uv venv
+    uv pip install -e '.[images]'
+
+Then run the sequential audit and resumable source passes:
+
+    .venv/bin/python -m tools.image_quality --no-starters
+    .venv/bin/python -m tools.source_upgrades
+    .venv/bin/python -m tools.commons_upgrades --delay 1
+    .venv/bin/python -m tools.curated_sources
+    .venv/bin/python -m tools.build_quality_pack
+    .venv/bin/python -m tools.quality_review
+
+`source_upgrades` checks WikiArt page routes derived from every original image
+filename, preserving year-bearing titles and public CDN revision names. It
+uses two paced network workers and one image decoder. The Commons pass checks
+candidate thumbnails before downloading a larger file and stops on access or
+rate-limit responses. A larger display derivative is requested for exceptionally
+large Commons scans to avoid loading hundreds of megabytes into RAM. Source
+responses, failed lookups, dimensions, checksums and comparison metrics are saved
+under `data/upgrades/` and `data/commons-upgrades/`. A completed WikiArt pass is
+summarized in `catalog/source-upgrades.json` with every attempted record.
+
+Pixel/aspect/hash comparisons are automatic verification aids, not human
+approval or proof that a larger scan contains real additional detail. Known
+missing images use the explicitly cited `catalog/source-overrides.json` entries;
+their title/artist/date evidence is recorded separately from pixel matching.
+
+`build_quality_pack` merges the available sources, chooses the strongest
+screen-fill resolution among verified candidates, keeps an original fallback,
+and produces `data/tv-quality-pack.zip`. It fully audits the selected exports
+and records every original note in `catalog/quality-upgrade-report.json` and CSV.
+`quality_review` generates the searchable, self-contained HTML review.
+
+The encoder preserves source dimensions by default. It copies already compact
+JPEGs unchanged, tries high-quality WebP where useful, and keeps the original
+unless the candidate saves at least 5% and passes a 43 dB PSNR guard measured
+on five full-resolution detail patches. PNGs can use exact lossless WebP.
+This sampled guard limits recompression error; it is not a whole-image
+perceptual guarantee. Original source masters stay unchanged in `data/masters/`
+and `data/commons-masters/`. No image is AI-upscaled or enlarged.
+
+For an explicitly smaller export, run the encoder separately:
+
+    .venv/bin/python -m tools.optimize_images --catalog data/selected/catalog.json --max-edge 7680 --max-pixels 16600000
+
+The app decodes JPEG, PNG and WebP. WebP works across its Android version range;
+AVIF is not selected by default because the TV's Android version is unknown.
+After a source pass is interrupted, rerun the same command to resume its saved
+progress, then rebuild the pack. The release report states the actual source
+coverage; incomplete network lookups must not be counted as checked replacements.

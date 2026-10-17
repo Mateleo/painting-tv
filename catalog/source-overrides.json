@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "paintings": [
+    {
+      "title": "The Consecration of the Emperor Napoleon and the Coronation of the Empress Josephine by Pope Pius VII, 2nd December 1804",
+      "artist": "Jacques-Louis David",
+      "fileTitle": "File:Jacques-Louis David - The Coronation of Napoleon (1805-1807).jpg",
+      "evidenceUrl": "https://commons.wikimedia.org/wiki/File:Jacques-Louis_David_-_The_Coronation_of_Napoleon_(1805-1807).jpg",
+      "reason": "The deck references a missing image. The cited file identifies the same painting, artist, and date; source is the Louvre version."
+    },
+    {
+      "title": "How Sir Galahad, Sir Bors and Sir Percival Were Fed with the Sanct Grael",
+      "artist": "Dante Gabriel Rossetti",
+      "fileTitle": "File:Dante Gabriel Rossetti - How Sir Galahad, Sir Bors and Sir Percival Were Fed with the Sanct Grael.jpg",
+      "evidenceUrl": "https://commons.wikimedia.org/wiki/File:Dante_Gabriel_Rossetti_-_How_Sir_Galahad,_Sir_Bors_and_Sir_Percival_Were_Fed_with_the_Sanct_Grael.jpg",
+      "reason": "The cited file identifies Rossetti's 1864 Tate watercolor N05234, matching the deck's title, artist, and date."
+    },
+    {
+      "title": "The first view of the altar: St. Sebastian (left), The Crucifixion (central), St. Anthony (right), Entombment (bottom)",
+      "artist": "Matthias Grünewald",
+      "fileTitle": "File:Isenheim Altarpiece — FIRST OPENING.jpg",
+      "evidenceUrl": "https://commons.wikimedia.org/wiki/File:Isenheim_Altarpiece_%E2%80%94_FIRST_OPENING.jpg",
+      "reason": "The file's object metadata identifies the closed Isenheim Altarpiece. The displayed panels were visually checked: Sebastian left, Crucifixion central, Anthony right, and Entombment below."
+    },
+    {
+      "title": "Electors of Saxony: Friedrich the Wise, Johann the Steadfast and Johann Friedrich the Magnanimous",
+      "artist": "Lucas Cranach l'Ancien",
+      "fileTitle": "File:1532 Cranach d.Ä. Die sächsischen Kurfürsten anagoria.JPG",
+      "evidenceUrl": "https://commons.wikimedia.org/wiki/File:1532_Cranach_d.%C3%84._Die_s%C3%A4chsischen_Kurf%C3%BCrsten_anagoria.JPG",
+      "reason": "The cited file identifies Cranach's 1532 triptych of all three named Saxon electors in the Germanisches Nationalmuseum. This restores a missing-image note from title/artist/date evidence rather than pixel comparison."
+    }
+  ]
+}

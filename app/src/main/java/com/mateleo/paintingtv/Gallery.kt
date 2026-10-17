@@ -79,7 +79,7 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
         try {
             val bitmap = withContext(Dispatchers.IO) {
                 vm.store.decode(collection, painting,
-                    (configuration.screenWidthDp * density).toInt(), (configuration.screenHeightDp * density).toInt())
+                    (configuration.screenWidthDp * density).toInt(), (configuration.screenHeightDp * density).toInt(), settings.crop)
             }
             frame = Frame(bitmap, painting, revision)
             vm.message = ""

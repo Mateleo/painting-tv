@@ -11,6 +11,18 @@ Download `painting-tv.apk` and `painting-pack.zip` from the private repository's
 your TV using your preferred Android TV installer, or use ADB below. The APK
 starts with two public-domain paintings from The Metropolitan Museum of Art.
 
+If a large collection is supplied as `painting-pack.zip.001`, `.002`, etc.,
+download every part plus `painting-pack.parts.json` and `join-pack.py` into one
+folder. Join and verify them on your computer before importing on the TV:
+
+```sh
+python join-pack.py painting-pack.parts.json --output painting-pack.zip
+```
+
+The join streams files and verifies their SHA-256 checksums. Do not import the
+individual parts on the TV. GitHub's per-file release limit is why large packs
+are split; splitting does not recompress or reduce image quality.
+
 Open **Settings → Import collection ZIP** and choose `painting-pack.zip` from
 USB or local storage. Keep the app open until the import starts. It continues
 in a background task and reports progress. Allow notifications if prompted so
@@ -73,17 +85,24 @@ decoding a 4K image is not a guarantee that a particular TV renders apps at 4K.
 Source: [Tableaux de maîtres : les 2000 plus vus](https://ankiweb.net/shared/info/171273480).
 The downloaded deck contains **2,160 notes and 2,156 embedded images**.
 [catalog/paintings.json](catalog/paintings.json) preserves all note metadata.
-Four notes without images are listed in the offline pack's `bundle-report.json`
-and omitted from playback. Titles, artists, dates, and movements are preserved
-as provided by the deck; they have not been independently fact-checked.
+Four notes reference missing images. The quality release restores those records
+using cited title/artist/date evidence in [catalog/source-overrides.json](catalog/source-overrides.json).
+Titles, artists, dates, and movements are preserved as provided by the deck;
+they have not been independently fact-checked.
 
-**The first complete offline pack uses the deck's small original images. It
-is not a 4K collection.** The Python pipeline searches Wikimedia Commons for
-larger originals, records dimensions and source/license information, and
-requires approval of a match before substituting it. Title matching can select
-a different version or an unrelated painting, so candidate scores are only
-ranking aids. Wikimedia may rate-limit searches; results are saved for resuming.
-Some paintings may have no available high resolution reproduction.
+**The original deck images are thumbnails, not 4K scans.** The quality release
+includes larger reproductions from WikiArt and Wikimedia Commons where they
+pass reference-image comparison, with original-image fallbacks for unresolved
+works. It remains a mixed-resolution collection. The complete
+[CSV audit](catalog/quality-upgrade-report.csv) records every painting's old and
+new dimensions, source, and remaining 4K enlargement requirement. The
+[JSON report](catalog/quality-upgrade-report.json) includes overall counts.
+Use the app's HD+/4K+ filters to restrict playback to suitable sources.
+
+The legacy text-based Commons resolver below still requires manual approval.
+Title similarity alone can select an unrelated painting or another version.
+Both source workflows save progress for resuming, including rate limits and
+unmatched records. Some works have no available high resolution reproduction.
 
 ```sh
 python3 -m tools.painting_catalog download
@@ -113,7 +132,9 @@ uv pip install -e '.[images]'
 .venv/bin/python -m tools.image_quality --no-starters
 .venv/bin/python -m tools.source_upgrades
 .venv/bin/python -m tools.commons_upgrades
-.venv/bin/python -m tools.optimize_images --catalog data/upgrades/catalog.json
+.venv/bin/python -m tools.curated_sources
+.venv/bin/python -m tools.build_quality_pack
+.venv/bin/python -m tools.quality_review
 ```
 
 The technical audit fully decodes each available source and records missing
@@ -125,14 +146,17 @@ Every source attempt is retained, including failures and unmatched paintings.
 
 Downloaded masters remain unchanged. TV exports use high-quality WebP only
 when it saves useful space and meets a conservative compression-error threshold;
-otherwise the original JPEG/PNG is retained. A required resize uses lossless
-WebP if the lossy version misses that threshold. Exports never enlarge an image.
-The default export limits are a 7,680-pixel edge and 16.6 megapixels; these bound
-file size and decoder workload while keeping masters available separately.
+otherwise the original JPEG/PNG is retained. Already efficient JPEGs are copied
+unchanged, avoiding an unnecessary lossy generation. Source dimensions are
+preserved by default; exports never enlarge an image. Optional `--max-edge`
+and `--max-pixels` limits can make a smaller TV pack. A requested resize uses
+lossless WebP if the lossy version misses the compression-error threshold.
 
-WebP is supported throughout this app's Android version range. AVIF is not used
-as the default because Android's documented AVIF support starts at Android 12
-and this TV's version is not yet known. Compression changes storage, not source
+WebP decoding is supported throughout this app's Android version range. AVIF is
+not used as the default because Android's documented AVIF support starts at
+Android 12 and this TV's version is not yet known. See Android's
+[image format support](https://developer.android.com/media/platform/supported-formats#image-formats).
+Compression changes storage, not source
 detail: the original deck thumbnails still need larger reproductions.
 
 Alternatively, host an app-compatible JSON catalog and its images over HTTPS

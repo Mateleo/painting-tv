@@ -5,13 +5,12 @@ import android.app.ActivityManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.graphics.Rect
+import android.graphics.ColorSpace
 import android.os.Build
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
-import kotlin.math.max
-import kotlin.math.sqrt
-import kotlin.math.roundToInt
 
 data class Painting(
     val id: String, val title: String, val artist: String,
@@ -43,7 +42,7 @@ class CollectionStore(private val context: Context) {
     }
 
     @Synchronized
-    fun decode(collection: ArtCollection, painting: Painting, screenWidth: Int, screenHeight: Int): Bitmap {
+    fun decode(collection: ArtCollection, painting: Painting, screenWidth: Int, screenHeight: Int, crop: Boolean): Bitmap {
         fun open(): InputStream = collection.directory?.let { safeFile(it, painting.imageUrl).inputStream() }
             ?: context.assets.open(painting.imageUrl)
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -51,18 +50,17 @@ class CollectionStore(private val context: Context) {
         require(bounds.outWidth > 0 && bounds.outHeight > 0) { "Unreadable image: ${painting.title}" }
         // Leave room for Compose and the outgoing frame on televisions with small heaps.
         val heapMb = context.getSystemService(ActivityManager::class.java).memoryClass
-        val maxPixels = minOf(8_300_000L, heapMb.toLong() * 1024 * 1024 / 48)
+        val maxPixels = minOf(8_300_000L, heapMb.toLong() * 1024 * 1024 / 32)
         val targetWidth = screenWidth.coerceIn(1280, 3840)
         val targetHeight = screenHeight.coerceIn(720, 2160)
         if (Build.VERSION.SDK_INT >= 28) {
             val source = collection.directory?.let { ImageDecoder.createSource(safeFile(it, painting.imageUrl)) }
                 ?: ImageDecoder.createSource(context.assets, painting.imageUrl)
             return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-                val width = info.size.width
-                val height = info.size.height
-                val scale = minOf(1.0, max(targetWidth.toDouble() / width, targetHeight.toDouble() / height),
-                    sqrt(maxPixels.toDouble() / (width.toLong() * height)))
-                decoder.setTargetSize(max(1, (width * scale).roundToInt()), max(1, (height * scale).roundToInt()))
+                val plan = decodePlan(info.size.width, info.size.height, targetWidth, targetHeight, maxPixels, crop)
+                decoder.setTargetSize(plan.width, plan.height)
+                if (crop) decoder.crop = Rect(plan.left, plan.top, plan.right, plan.bottom)
+                decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB))
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         }
