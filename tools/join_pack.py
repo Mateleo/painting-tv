@@ -3,6 +3,7 @@
 Usage: python join_pack.py painting-pack.parts.json --output painting-pack.zip
 Uses only the standard library; memory use stays below a few megabytes.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,15 +38,28 @@ def split_pack(source: Path, directory: Path, *, part_size: int = 1_900_000_000)
                     block = stream.read(min(1024 * 1024, part_size - size))
             parts.append({"name": name, "size": size, "sha256": digest.hexdigest()})
     manifest = directory / "painting-pack.parts.json"
-    manifest.write_text(json.dumps({"archiveName": source.name, "size": source.stat().st_size,
-                                    "sha256": full_hash.hexdigest(), "parts": parts}, indent=2) + "\n")
+    manifest.write_text(
+        json.dumps(
+            {
+                "archiveName": source.name,
+                "size": source.stat().st_size,
+                "sha256": full_hash.hexdigest(),
+                "parts": parts,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     return manifest
 
 
 def join_pack(manifest: Path, output: Path) -> None:
     value = json.loads(manifest.read_text())
     for part in value["parts"]:
-        if Path(part["name"]).name != part["name"] or not (manifest.parent / part["name"]).is_file():
+        if (
+            Path(part["name"]).name != part["name"]
+            or not (manifest.parent / part["name"]).is_file()
+        ):
             raise ValueError(f"Missing or unsafe part: {part['name']}")
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".partial")

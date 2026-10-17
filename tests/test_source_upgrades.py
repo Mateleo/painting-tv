@@ -21,22 +21,51 @@ def image_bytes(size, color="navy"):
 
 class SourceUpgradeTests(unittest.TestCase):
     def test_wikiart_slug_overrides_and_size_suffix(self):
-        self.assertEqual(upgrades.source_page_for("images/leonard-de-vinci_la-joconde-1504.jpg"), "https://www.wikiart.org/en/leonardo-da-vinci/mona-lisa")
-        self.assertEqual(upgrades.source_page_for("images/test-artist_sample-title-1900.jpg"), "https://www.wikiart.org/en/test-artist/sample-title-1900")
-        self.assertEqual(upgrades.source_page_candidates("images/test-artist_sample-title-1900.jpg")[1], "https://www.wikiart.org/en/test-artist/sample-title")
+        self.assertEqual(
+            upgrades.source_page_for("images/leonard-de-vinci_la-joconde-1504.jpg"),
+            "https://www.wikiart.org/en/leonardo-da-vinci/mona-lisa",
+        )
+        self.assertEqual(
+            upgrades.source_page_for("images/test-artist_sample-title-1900.jpg"),
+            "https://www.wikiart.org/en/test-artist/sample-title-1900",
+        )
+        self.assertEqual(
+            upgrades.source_page_candidates("images/test-artist_sample-title-1900.jpg")[1],
+            "https://www.wikiart.org/en/test-artist/sample-title",
+        )
         mucha_urls = upgrades.source_page_candidates("images/alfons-mucha_example-work-1900.jpg")
-        self.assertEqual(mucha_urls[1], "https://www.wikiart.org/en/alphonse-mucha/example-work-1900")
+        self.assertEqual(
+            mucha_urls[1], "https://www.wikiart.org/en/alphonse-mucha/example-work-1900"
+        )
         html = '<meta property="og:image" content="https://uploads0.wikiart.org/images/a/b(1).jpg!Large.jpg" />'
-        self.assertEqual(upgrades.extract_image_url(html), "https://uploads0.wikiart.org/images/a/b(1).jpg")
+        self.assertEqual(
+            upgrades.extract_image_url(html), "https://uploads0.wikiart.org/images/a/b(1).jpg"
+        )
 
     def test_visual_comparison_and_full_upgrade_pass(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             images = root / "images"
             images.mkdir()
-            Image.open(io.BytesIO(image_bytes((100, 100)))).save(images / "test-artist_sample-title-1900.jpg")
+            Image.open(io.BytesIO(image_bytes((100, 100)))).save(
+                images / "test-artist_sample-title-1900.jpg"
+            )
             catalog_path = root / "catalog.json"
-            catalog_path.write_text(json.dumps({"version": 1, "paintings": [{"id": "art-1", "artist": "Artist", "title": "Title", "imageUrl": "images/test-artist_sample-title-1900.jpg"}]}))
+            catalog_path.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "paintings": [
+                            {
+                                "id": "art-1",
+                                "artist": "Artist",
+                                "title": "Title",
+                                "imageUrl": "images/test-artist_sample-title-1900.jpg",
+                            }
+                        ],
+                    }
+                )
+            )
             candidate_url = "https://uploads0.wikiart.org/images/test-artist/sample-title.jpg"
             page = f'<meta property="og:image" content="{candidate_url}!Large.jpg" />'.encode()
             high_res = image_bytes((240, 240))
@@ -45,7 +74,9 @@ class SourceUpgradeTests(unittest.TestCase):
                 return page if "wikiart.org/en/" in url else high_res
 
             with patch.object(upgrades, "_request", side_effect=fake_request):
-                summary = upgrades.run_pass(catalog_path, root / "upgrades", workers=1, resume=False)
+                summary = upgrades.run_pass(
+                    catalog_path, root / "upgrades", workers=1, resume=False
+                )
             self.assertEqual(summary["accepted_count"], 1)
             output = json.loads((root / "upgrades/catalog.json").read_text())
             record = output["paintings"][0]
@@ -74,10 +105,17 @@ class SourceUpgradeTests(unittest.TestCase):
             def read(self, size=-1):
                 return b"ok"
 
-        with patch("tools.source_upgrades.urllib.request.urlopen", return_value=Response()) as open_url:
-            self.assertEqual(upgrades._request("https://uploads.wikiart.org/images/café/a%20b.jpg?x=a%2Fb"), b"ok")
+        with patch(
+            "tools.source_upgrades.urllib.request.urlopen", return_value=Response()
+        ) as open_url:
+            self.assertEqual(
+                upgrades._request("https://uploads.wikiart.org/images/café/a%20b.jpg?x=a%2Fb"),
+                b"ok",
+            )
         request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, "https://uploads.wikiart.org/images/caf%C3%A9/a%20b.jpg?x=a%2Fb")
+        self.assertEqual(
+            request.full_url, "https://uploads.wikiart.org/images/caf%C3%A9/a%20b.jpg?x=a%2Fb"
+        )
 
     def test_matched_png_candidate_is_preserved_under_master_contract_path(self):
         with tempfile.TemporaryDirectory() as td:
@@ -86,7 +124,15 @@ class SourceUpgradeTests(unittest.TestCase):
             images.mkdir()
             (images / "test-artist_sample-title-1900.jpg").write_bytes(image_bytes((100, 100)))
             catalog_path = root / "catalog.json"
-            catalog_path.write_text(json.dumps({"paintings": [{"id": "png-1", "imageUrl": "images/test-artist_sample-title-1900.jpg"}]}))
+            catalog_path.write_text(
+                json.dumps(
+                    {
+                        "paintings": [
+                            {"id": "png-1", "imageUrl": "images/test-artist_sample-title-1900.jpg"}
+                        ]
+                    }
+                )
+            )
             candidate_url = "https://uploads0.wikiart.org/images/test-artist/sample-title.png"
             page = f'<meta property="og:image" content="{candidate_url}!Large.jpg" />'.encode()
             candidate_out = io.BytesIO()
@@ -99,7 +145,9 @@ class SourceUpgradeTests(unittest.TestCase):
                 return page if "wikiart.org/en/" in url else candidate_out.getvalue()
 
             with patch.object(upgrades, "_request", side_effect=fake_request):
-                summary = upgrades.run_pass(catalog_path, root / "upgrades", workers=1, resume=False)
+                summary = upgrades.run_pass(
+                    catalog_path, root / "upgrades", workers=1, resume=False
+                )
             self.assertEqual(summary["accepted_count"], 1)
             master = root / "masters/png-1.jpg"
             self.assertTrue(master.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"))
@@ -113,6 +161,7 @@ class SourceUpgradeTests(unittest.TestCase):
             calls.append(url)
             if url == urls[0]:
                 import urllib.error
+
                 error = urllib.error.HTTPError(url, 404, "Not Found", {}, None)
                 error.close()
                 raise error
@@ -124,9 +173,21 @@ class SourceUpgradeTests(unittest.TestCase):
             root = Path(td)
             (root / "images").mkdir()
             (root / "images/sample.jpg").write_bytes(image_bytes((100, 100)))
-            record = {"id": "x", "artist": "artist", "title": "sample", "imageUrl": "images/sample.jpg"}
+            record = {
+                "id": "x",
+                "artist": "artist",
+                "title": "sample",
+                "imageUrl": "images/sample.jpg",
+            }
             # Use the source path stem for page variants, while the record's local image remains the reference.
-            with patch.object(upgrades, "_candidate_for", return_value=("\n".join(urls), root / "images/sample.jpg", "")), patch.object(upgrades, "_request", side_effect=fake_request):
+            with (
+                patch.object(
+                    upgrades,
+                    "_candidate_for",
+                    return_value=("\n".join(urls), root / "images/sample.jpg", ""),
+                ),
+                patch.object(upgrades, "_request", side_effect=fake_request),
+            ):
                 result = upgrades.process_record(record, root, root / "masters")
         self.assertEqual(calls[:2], urls)
         self.assertEqual(result["status"], "candidate-not-higher-resolution")

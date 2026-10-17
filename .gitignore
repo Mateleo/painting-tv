@@ -5,6 +5,9 @@ local.properties
 .idea/
 *.iml
 .venv/
+.pytest_cache/
+.ruff_cache/
+dist/
 __pycache__/
 *.pyc
 data/

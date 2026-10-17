@@ -29,7 +29,13 @@ def _sharpness(image: Image.Image) -> float:
 
 
 def audit_image(path: Path, *, entry_id: str, title: str = "", artist: str = "") -> dict[str, Any]:
-    result: dict[str, Any] = {"id": entry_id, "title": title, "artist": artist, "path": str(path), "status": "missing"}
+    result: dict[str, Any] = {
+        "id": entry_id,
+        "title": title,
+        "artist": artist,
+        "path": str(path),
+        "status": "missing",
+    }
     if not path.is_file():
         return result
     result.update(file_bytes=path.stat().st_size)
@@ -59,16 +65,26 @@ def audit_image(path: Path, *, entry_id: str, title: str = "", artist: str = "")
     if sharpness < 300:
         flags.append("low-edge-detail-heuristic")
     result.update(
-        status="ok", format=fmt, width=width, height=height, megapixels=round(width * height / 1_000_000, 3),
-        aspect_ratio=round(width / height, 4), crop_visible_width=crop_width, crop_visible_height=crop_height,
+        status="ok",
+        format=fmt,
+        width=width,
+        height=height,
+        megapixels=round(width * height / 1_000_000, 3),
+        aspect_ratio=round(width / height, 4),
+        crop_visible_width=crop_width,
+        crop_visible_height=crop_height,
         crop_visible_megapixels=round(crop_width * crop_height / 1_000_000, 3),
-        upscale_factor=round(scale, 3), tv_fit="upscale" if scale > 1.01 else "downscale-or-native",
-        sharpness_heuristic=sharpness, flags=flags,
+        upscale_factor=round(scale, 3),
+        tv_fit="upscale" if scale > 1.01 else "downscale-or-native",
+        sharpness_heuristic=sharpness,
+        flags=flags,
     )
     return result
 
 
-def run_audit(catalog_path: Path = DEFAULT_CATALOG, *, repo_root: Path = ROOT, include_starters: bool = True) -> dict[str, Any]:
+def run_audit(
+    catalog_path: Path = DEFAULT_CATALOG, *, repo_root: Path = ROOT, include_starters: bool = True
+) -> dict[str, Any]:
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     items = catalog.get("paintings", [])
     records = []
@@ -77,9 +93,18 @@ def run_audit(catalog_path: Path = DEFAULT_CATALOG, *, repo_root: Path = ROOT, i
         raw_path = painting.get("imageUrl", "")
         if not raw_path or raw_path.startswith("http"):
             raw_path = painting.get("originalImageUrl", "")
-        path = (catalog_path.parent / raw_path).resolve() if raw_path and not raw_path.startswith("http") else Path("/__unavailable__")
+        path = (
+            (catalog_path.parent / raw_path).resolve()
+            if raw_path and not raw_path.startswith("http")
+            else Path("/__unavailable__")
+        )
         # Catalog paths are normally data-relative; absolute and traversal paths are retained faithfully.
-        record = audit_image(path, entry_id=str(painting.get("id", "")), title=painting.get("title", ""), artist=painting.get("artist", ""))
+        record = audit_image(
+            path,
+            entry_id=str(painting.get("id", "")),
+            title=painting.get("title", ""),
+            artist=painting.get("artist", ""),
+        )
         record["catalog_image"] = raw_path
         if record.get("sha256"):
             seen.setdefault(record["sha256"], []).append(record["id"])
@@ -89,7 +114,12 @@ def run_audit(catalog_path: Path = DEFAULT_CATALOG, *, repo_root: Path = ROOT, i
     if include_starters and asset_catalog.exists():
         for painting in json.loads(asset_catalog.read_text(encoding="utf-8")).get("paintings", []):
             path = repo_root / "app/src/main/assets" / painting.get("imageUrl", "")
-            record = audit_image(path, entry_id=f"starter:{painting.get('id', '')}", title=painting.get("title", ""), artist=painting.get("artist", ""))
+            record = audit_image(
+                path,
+                entry_id=f"starter:{painting.get('id', '')}",
+                title=painting.get("title", ""),
+                artist=painting.get("artist", ""),
+            )
             record["catalog_image"] = painting.get("imageUrl", "")
             if record.get("sha256"):
                 seen.setdefault(record["sha256"], []).append(record["id"])
@@ -107,21 +137,55 @@ def run_audit(catalog_path: Path = DEFAULT_CATALOG, *, repo_root: Path = ROOT, i
         "schema_version": 1,
         "target": {"width": 3840, "height": 2160, "fit": "center-crop/fill"},
         "catalog_path": str(catalog_path),
-        "record_count": len(records), "ok_count": len(good),
+        "record_count": len(records),
+        "ok_count": len(good),
         "missing_count": sum(r["status"] == "missing" for r in records),
         "corrupt_count": sum(r["status"] == "corrupt" for r in records),
         "resolution_bins_by_required_upscale": dict(bins),
-        "below_4k_crop_fraction": round(sum(r["upscale_factor"] > 1.01 for r in good) / len(good), 4) if good else 0,
-        "duplicate_groups": [{"sha256": digest, "ids": ids} for digest, ids in seen.items() if len(ids) > 1],
+        "below_4k_crop_fraction": round(
+            sum(r["upscale_factor"] > 1.01 for r in good) / len(good), 4
+        )
+        if good
+        else 0,
+        "duplicate_groups": [
+            {"sha256": digest, "ids": ids} for digest, ids in seen.items() if len(ids) > 1
+        ],
         "heuristic_note": "Sharpness and upscale flags are technical review cues only; they are not judgments about artwork or composition.",
         "records": records,
     }
 
 
 def write_compact(report: dict[str, Any], path: Path) -> None:
-    rows = [{k: item.get(k) for k in ("id", "status", "format", "width", "height", "file_bytes", "upscale_factor", "crop_visible_width", "crop_visible_height", "sharpness_heuristic", "flags", "catalog_image")} for item in report["records"]]
+    rows = [
+        {
+            k: item.get(k)
+            for k in (
+                "id",
+                "status",
+                "format",
+                "width",
+                "height",
+                "file_bytes",
+                "upscale_factor",
+                "crop_visible_width",
+                "crop_visible_height",
+                "sharpness_heuristic",
+                "flags",
+                "catalog_image",
+            )
+        }
+        for item in report["records"]
+    ]
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"schema_version": 1, "record_count": len(rows), "records": rows}, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(
+            {"schema_version": 1, "record_count": len(rows), "records": rows},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -129,13 +193,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument("--output", type=Path, default=ROOT / "data/quality-audit.json")
     parser.add_argument("--compact", type=Path, default=ROOT / "catalog/image-quality-audit.json")
-    parser.add_argument("--no-starters", action="store_true", help="Audit only the selected collection, excluding bundled starter artwork")
+    parser.add_argument(
+        "--no-starters",
+        action="store_true",
+        help="Audit only the selected collection, excluding bundled starter artwork",
+    )
     args = parser.parse_args(argv)
     report = run_audit(args.catalog, include_starters=not args.no_starters)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     write_compact(report, args.compact)
-    print(f"Audited {report['record_count']} records: {report['ok_count']} readable, {report['missing_count']} missing, {report['corrupt_count']} corrupt")
+    print(
+        f"Audited {report['record_count']} records: {report['ok_count']} readable, {report['missing_count']} missing, {report['corrupt_count']} corrupt"
+    )
     return 0
 
 

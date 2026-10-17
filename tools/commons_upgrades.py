@@ -3,13 +3,13 @@
 This pass runs sequentially, saves every lookup, and stops on rate limiting.
 It records exact image-comparison metrics; matches are automatic, not human reviews.
 """
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import io
 import json
-import os
 import time
 import urllib.error
 import urllib.parse
@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from PIL import Image
+
 from tools.painting_catalog import strip_html
 from tools.source_upgrades import visual_match
 
@@ -48,7 +49,9 @@ class Client:
                 result = response.read(maximum + 1)
         except urllib.error.HTTPError as error:
             if error.code in (429, 403):
-                raise RateLimited(f"HTTP {error.code}; Retry-After: {error.headers.get('Retry-After', 'unspecified')}") from error
+                raise RateLimited(
+                    f"HTTP {error.code}; Retry-After: {error.headers.get('Retry-After', 'unspecified')}"
+                ) from error
             raise
         if len(result) > maximum:
             raise ValueError("Image exceeds configured download limit")
@@ -58,11 +61,19 @@ class Client:
         title = painting.get("title", "").replace('"', " ")
         artist = painting.get("artist", "").replace('"', " ")
         query = (title[:180] + " " + artist + " filetype:bitmap").strip()
-        params = urllib.parse.urlencode({
-            "action": "query", "format": "json", "generator": "search", "gsrsearch": query,
-            "gsrnamespace": 6, "gsrlimit": 5, "prop": "imageinfo",
-            "iiprop": "url|size|mime|extmetadata", "iiurlwidth": 480,
-        })
+        params = urllib.parse.urlencode(
+            {
+                "action": "query",
+                "format": "json",
+                "generator": "search",
+                "gsrsearch": query,
+                "gsrnamespace": 6,
+                "gsrlimit": 5,
+                "prop": "imageinfo",
+                "iiprop": "url|size|mime|extmetadata",
+                "iiurlwidth": 480,
+            }
+        )
         payload = json.loads(self.get(API + "?" + params))
         if "error" in payload:
             raise ValueError(str(payload["error"]))
@@ -72,24 +83,42 @@ class Client:
             if info.get("mime") not in ("image/jpeg", "image/png", "image/webp"):
                 continue
             meta = info.get("extmetadata", {})
-            rows.append({"fileTitle": page.get("title", ""), "imageUrl": info.get("url", ""),
-                         "thumbnailUrl": info.get("thumburl", info.get("url", "")),
-                         "width": info.get("width", 0), "height": info.get("height", 0),
-                         "bytes": info.get("size", 0), "sourceUrl": info.get("descriptionurl", ""),
-                         "license": strip_html(meta.get("LicenseShortName", {}).get("value", "")),
-                         "licenseUrl": meta.get("LicenseUrl", {}).get("value", ""),
-                         "attribution": strip_html(meta.get("Artist", {}).get("value", "")),
-                         "credit": strip_html(meta.get("Credit", {}).get("value", ""))})
+            rows.append(
+                {
+                    "fileTitle": page.get("title", ""),
+                    "imageUrl": info.get("url", ""),
+                    "thumbnailUrl": info.get("thumburl", info.get("url", "")),
+                    "width": info.get("width", 0),
+                    "height": info.get("height", 0),
+                    "bytes": info.get("size", 0),
+                    "sourceUrl": info.get("descriptionurl", ""),
+                    "license": strip_html(meta.get("LicenseShortName", {}).get("value", "")),
+                    "licenseUrl": meta.get("LicenseUrl", {}).get("value", ""),
+                    "attribution": strip_html(meta.get("Artist", {}).get("value", "")),
+                    "credit": strip_html(meta.get("Credit", {}).get("value", "")),
+                }
+            )
         return sorted(rows, key=lambda row: row["width"] * row["height"], reverse=True)
 
     def display_derivative(self, candidate: dict[str, Any]) -> str:
         # Some museum scans are hundreds of MB. Request a documented Commons
         # thumbnail derivative with enough pixels for a 4K TV instead of fetching
         # the entire scan into this machine's memory.
-        width = min(candidate["width"], 5000,
-                    max(1, int((32_000_000 * candidate["width"] / candidate["height"]) ** 0.5)))
-        params = urllib.parse.urlencode({"action": "query", "format": "json",
-            "titles": candidate["fileTitle"], "prop": "imageinfo", "iiprop": "url|size", "iiurlwidth": width})
+        width = min(
+            candidate["width"],
+            5000,
+            max(1, int((32_000_000 * candidate["width"] / candidate["height"]) ** 0.5)),
+        )
+        params = urllib.parse.urlencode(
+            {
+                "action": "query",
+                "format": "json",
+                "titles": candidate["fileTitle"],
+                "prop": "imageinfo",
+                "iiprop": "url|size",
+                "iiurlwidth": width,
+            }
+        )
         payload = json.loads(self.get(API + "?" + params))
         pages = payload.get("query", {}).get("pages", {}).values()
         info = next(iter(pages)).get("imageinfo", [{}])[0]
@@ -108,7 +137,9 @@ def atomic_json(path: Path, value: Any) -> None:
     temporary.replace(path)
 
 
-def run(catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | None = None) -> dict[str, Any]:
+def run(
+    catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | None = None
+) -> dict[str, Any]:
     catalog_path = catalog_path.resolve()
     paintings = json.loads(catalog_path.read_text())["paintings"]
     output.mkdir(parents=True, exist_ok=True)
@@ -118,13 +149,18 @@ def run(catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | No
     count = 0
     for painting in paintings:
         identity = painting["id"]
-        if identity in state and state[identity].get("status") not in ("lookup-error", "rate-limited"):
+        if identity in state and state[identity].get("status") not in (
+            "lookup-error",
+            "rate-limited",
+        ):
             continue
         if limit is not None and count >= limit:
             break
         count += 1
         result: dict[str, Any] = {"id": identity, "status": "no-verified-upgrade", "candidates": []}
-        reference = catalog_path.parent / painting.get("originalImageUrl", painting.get("imageUrl", ""))
+        reference = catalog_path.parent / painting.get(
+            "originalImageUrl", painting.get("imageUrl", "")
+        )
         try:
             candidates = client.candidates(painting)
             result["candidates"] = candidates
@@ -138,15 +174,24 @@ def run(catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | No
                         continue
                     try:
                         thumbnail = client.get(candidate["thumbnailUrl"], maximum=4_000_000)
-                        comparison = visual_match(reference, thumbnail, max_rmse=28.0, max_hash_distance=12)
+                        comparison = visual_match(
+                            reference, thumbnail, max_rmse=28.0, max_hash_distance=12
+                        )
                         candidate["visualMatch"] = comparison
                         if not comparison["match"]:
                             continue
-                        large = candidate.get("bytes", 0) > 64_000_000 or candidate["width"] * candidate["height"] > 32_000_000
-                        download_url = client.display_derivative(candidate) if large else candidate["imageUrl"]
+                        large = (
+                            candidate.get("bytes", 0) > 64_000_000
+                            or candidate["width"] * candidate["height"] > 32_000_000
+                        )
+                        download_url = (
+                            client.display_derivative(candidate) if large else candidate["imageUrl"]
+                        )
                         candidate["downloadUrl"] = download_url
                         raw = client.get(download_url, maximum=64_000_000)
-                        final_comparison = visual_match(reference, raw, max_rmse=28.0, max_hash_distance=12)
+                        final_comparison = visual_match(
+                            reference, raw, max_rmse=28.0, max_hash_distance=12
+                        )
                         if not final_comparison["match"]:
                             candidate["originalVisualMismatch"] = final_comparison
                             continue
@@ -161,9 +206,14 @@ def run(catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | No
                         temporary = master.with_suffix(suffix + ".partial")
                         temporary.write_bytes(raw)
                         temporary.replace(master)
-                        result.update(status="accepted", selected=candidate,
-                                      candidate_dimensions=[width, height], master_path=str(master.resolve()),
-                                      sha256=hashlib.sha256(raw).hexdigest(), visual_match=final_comparison)
+                        result.update(
+                            status="accepted",
+                            selected=candidate,
+                            candidate_dimensions=[width, height],
+                            master_path=str(master.resolve()),
+                            sha256=hashlib.sha256(raw).hexdigest(),
+                            visual_match=final_comparison,
+                        )
                         break
                     except RateLimited:
                         raise
@@ -173,17 +223,26 @@ def run(catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | No
             result.update(status="rate-limited", reason=str(error))
             state[identity] = result
             atomic_json(path, {"records": state})
-            print(f"Commons paused: {error}. Saved {len(state)}/{len(paintings)}; resume later.", flush=True)
+            print(
+                f"Commons paused: {error}. Saved {len(state)}/{len(paintings)}; resume later.",
+                flush=True,
+            )
             break
         except (OSError, ValueError, KeyError) as error:
             result.update(status="lookup-error", reason=str(error))
         state[identity] = result
         atomic_json(path, {"records": state})
         if len(state) % 10 == 0:
-            print(f"Commons {len(state)}/{len(paintings)}; accepted={sum(r.get('status') == 'accepted' for r in state.values())}", flush=True)
-    report = {"records": len(state), "total": len(paintings),
-              "accepted": sum(r.get("status") == "accepted" for r in state.values()),
-              "rateLimited": any(r.get("status") == "rate-limited" for r in state.values())}
+            print(
+                f"Commons {len(state)}/{len(paintings)}; accepted={sum(r.get('status') == 'accepted' for r in state.values())}",
+                flush=True,
+            )
+    report = {
+        "records": len(state),
+        "total": len(paintings),
+        "accepted": sum(r.get("status") == "accepted" for r in state.values()),
+        "rateLimited": any(r.get("status") == "rate-limited" for r in state.values()),
+    }
     print(json.dumps(report), flush=True)
     return report
 

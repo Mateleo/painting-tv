@@ -16,7 +16,9 @@ class ImageQualityTests(unittest.TestCase):
             result = audit_image(path, entry_id="x")
             self.assertEqual(result["status"], "ok")
             self.assertEqual((result["width"], result["height"]), (1920, 1080))
-            self.assertEqual((result["crop_visible_width"], result["crop_visible_height"]), (1920, 1080))
+            self.assertEqual(
+                (result["crop_visible_width"], result["crop_visible_height"]), (1920, 1080)
+            )
             self.assertEqual(result["upscale_factor"], 2.0)
             self.assertIn("upscale-for-4k-crop", result["flags"])
 
@@ -34,12 +36,20 @@ class ImageQualityTests(unittest.TestCase):
             (root / "images").mkdir()
             Image.new("RGB", (3840, 2160), "black").save(root / "images" / "one.jpg")
             catalog = root / "catalog.json"
-            catalog.write_text(json.dumps({"paintings": [
-                {"id": "one", "imageUrl": "images/one.jpg"},
-                {"id": "absent", "imageUrl": "images/absent.jpg"},
-            ]}))
+            catalog.write_text(
+                json.dumps(
+                    {
+                        "paintings": [
+                            {"id": "one", "imageUrl": "images/one.jpg"},
+                            {"id": "absent", "imageUrl": "images/absent.jpg"},
+                        ]
+                    }
+                )
+            )
             report = run_audit(catalog, repo_root=root)
-            self.assertEqual((report["record_count"], report["ok_count"], report["missing_count"]), (2, 1, 1))
+            self.assertEqual(
+                (report["record_count"], report["ok_count"], report["missing_count"]), (2, 1, 1)
+            )
             compact = root / "audit.json"
             write_compact(report, compact)
             self.assertEqual(json.loads(compact.read_text())["record_count"], 2)

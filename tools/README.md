@@ -6,14 +6,14 @@ metadata, and package manually approved images for offline display. The
 resolver stores candidates and provenance in data/catalog.json; a similarity
 score is a review aid, never proof of identity.
 
-Python 3.10 or newer is required. The original extraction/resolver commands use
+Python 3.15 is pinned in `.python-version` and installed automatically by uv. The original extraction/resolver commands use
 only the standard library; the full quality workflow below also uses Pillow.
 From the repository root:
 
-    python3 -m tools.painting_catalog download
-    python3 -m tools.painting_catalog extract
-    python3 -m tools.painting_catalog manifest
-    python3 -m tools.painting_catalog metadata
+    uv run --locked painting-catalog download
+    uv run --locked painting-catalog extract
+    uv run --locked painting-catalog manifest
+    uv run --locked painting-catalog metadata
 
 The confirmed shared deck is https://ankiweb.net/shared/info/171273480.
 The download command requests the current deck download key from AnkiWeb and
@@ -23,7 +23,7 @@ a ZIP containing an SQLite collection, media-name map, and image entries.
 
 To search Commons for possible matches, begin with a small batch:
 
-    python3 -m tools.painting_catalog resolve --limit 20
+    uv run --locked painting-catalog resolve --limit 20
 
 Commons is queried one item at a time with a one-second default delay. Each
 candidate records its source page, direct image URL, dimensions, license
@@ -32,7 +32,7 @@ needs-review state and never replace the embedded image automatically.
 Requests honor Retry-After and use bounded backoff after HTTP 429. Approve a
 candidate after checking it:
 
-    python3 -m tools.painting_catalog approve d459320dbad84895 --candidate 0
+    uv run --locked painting-catalog approve d459320dbad84895 --candidate 0
 
 The manifest command exports the app contract (version and paintings). By
 default it uses relative paths to embedded or downloaded images. Add --online
@@ -40,8 +40,8 @@ to use approved HTTPS source URLs while unresolved records retain their local
 images. Once candidates are approved, pack downloads them, skips existing
 files, and records resumable local paths for the app bundle:
 
-    python3 -m tools.painting_catalog pack --min-width 3840
-    python3 -m tools.painting_catalog bundle
+    uv run --locked painting-catalog pack --min-width 3840
+    uv run --locked painting-catalog bundle
 
 The pack command does not fetch unresolved or merely suggested results.
 Original scans vary in resolution and orientation; min-width filters by source
@@ -61,24 +61,23 @@ the repository while the source deck and image assets stay under ignored data/.
 
 Run the unit tests with:
 
-    .venv/bin/python -m unittest discover -s tests
+    uv run --locked --extra images pytest
 
 ## Audit and improve the complete collection
 
 Install the optional imaging dependency in a virtual environment:
 
-    uv venv
-    uv pip install -e '.[images]'
+    uv sync --locked --extra images
 
 Then run the sequential audit and resumable source passes:
 
-    .venv/bin/python -m tools.image_quality --no-starters
-    .venv/bin/python -m tools.source_upgrades
-    .venv/bin/python -m tools.commons_upgrades --delay 1
-    .venv/bin/python -m tools.curated_sources
-    .venv/bin/python -m tools.review_mismatches --apply-decisions catalog/reviewed-source-overrides.json
-    .venv/bin/python -m tools.build_quality_pack
-    .venv/bin/python -m tools.quality_review
+    uv run --locked --extra images python -m tools.image_quality --no-starters
+    uv run --locked --extra images python -m tools.source_upgrades
+    uv run --locked --extra images python -m tools.commons_upgrades --delay 1
+    uv run --locked --extra images python -m tools.curated_sources
+    uv run --locked --extra images python -m tools.review_mismatches --apply-decisions catalog/reviewed-source-overrides.json
+    uv run --locked --extra images python -m tools.build_quality_pack
+    uv run --locked --extra images python -m tools.quality_review
 
 `source_upgrades` checks WikiArt page routes derived from every original image
 filename, preserving year-bearing titles and public CDN revision names. It
@@ -119,7 +118,7 @@ and `data/commons-masters/`. No image is AI-upscaled or enlarged.
 
 For an explicitly smaller export, run the encoder separately:
 
-    .venv/bin/python -m tools.optimize_images --catalog data/selected/catalog.json --max-edge 7680 --max-pixels 16600000
+    uv run --locked --extra images python -m tools.optimize_images --catalog data/selected/catalog.json --max-edge 7680 --max-pixels 16600000
 
 The app decodes JPEG, PNG and WebP. WebP works across its Android version range;
 AVIF is not selected by default because the TV's Android version is unknown.

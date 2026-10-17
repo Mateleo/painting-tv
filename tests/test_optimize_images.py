@@ -5,7 +5,8 @@ import zipfile
 from pathlib import Path
 
 from PIL import Image
-from tools.optimize_images import build_pack, optimize_one, sample_psnr
+
+from tools.optimize_images import build_pack, optimize_one
 
 
 class CompressionTests(unittest.TestCase):
@@ -57,10 +58,22 @@ class CompressionTests(unittest.TestCase):
             with Image.new("RGB", (64, 64), "blue") as image:
                 image.save(root / "source.jpg")
             path = root / "catalog.json"
-            path.write_text(json.dumps({"version": 1, "paintings": [
-                {"id": "work", "title": "Work", "artist": "Artist", "imageUrl": "source.jpg"},
-                {"id": "missing", "title": "Absent", "imageUrl": ""},
-            ]}))
+            path.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "paintings": [
+                            {
+                                "id": "work",
+                                "title": "Work",
+                                "artist": "Artist",
+                                "imageUrl": "source.jpg",
+                            },
+                            {"id": "missing", "title": "Absent", "imageUrl": ""},
+                        ],
+                    }
+                )
+            )
             result = build_pack(path, root / "pack")
             result2 = build_pack(path, root / "pack")
             self.assertEqual(result["outputBytes"], result2["outputBytes"])

@@ -1,19 +1,47 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.13.1,<0.14"]
+build-backend = "uv_build"
 
 [project]
 name = "painting-tv-tools"
-version = "0.1.0"
+version = "0.2.0"
 description = "Anki painting catalog extraction and offline image pack tools"
-requires-python = ">=3.10"
+requires-python = ">=3.15"
 dependencies = []
 
 [project.optional-dependencies]
-images = ["Pillow>=11,<14"]
+images = ["pillow>=13,<14"]
+
+[dependency-groups]
+dev = ["pytest>=9.1.1,<10", "ruff>=0.17.1,<0.18", "ty>=0.0.89,<0.1"]
 
 [project.scripts]
 painting-catalog = "tools.painting_catalog:main"
 
-[tool.setuptools]
-packages = ["tools"]
+[tool.uv]
+required-version = ">=0.13.1"
+default-groups = ["dev"]
+concurrent-builds = 1
+concurrent-installs = 1
+concurrent-downloads = 2
+no-build-package = ["pillow"]
+
+[tool.uv.build-backend]
+module-name = "tools"
+module-root = ""
+source-exclude = ["__pycache__", "*.pyc"]
+
+[tool.ruff]
+target-version = "py315"
+line-length = 100
+include = ["tools/**/*.py", "tests/**/*.py", "pyproject.toml"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ty.src]
+include = ["tools"]

@@ -105,13 +105,13 @@ Both source workflows save progress for resuming, including rate limits and
 unmatched records. Some works have no available high resolution reproduction.
 
 ```sh
-python3 -m tools.painting_catalog download
-python3 -m tools.painting_catalog extract
-python3 -m tools.painting_catalog resolve --limit 20 --delay 2 --resume
+uv run --locked painting-catalog download
+uv run --locked painting-catalog extract
+uv run --locked painting-catalog resolve --limit 20 --delay 2 --resume
 # Inspect a candidate's source page and image, then approve it:
-python3 -m tools.painting_catalog approve PAINTING_ID --candidate 0
-python3 -m tools.painting_catalog pack --min-width 3840
-python3 -m tools.painting_catalog bundle
+uv run --locked painting-catalog approve PAINTING_ID --candidate 0
+uv run --locked painting-catalog pack --min-width 3840
+uv run --locked painting-catalog bundle
 ```
 
 See [tools/README.md](tools/README.md) for commands and catalog details. The
@@ -123,19 +123,29 @@ their source pages and credits are in `app/src/main/assets/catalog.json`.
 
 ## Audit and improve every image
 
-Install the optional image tools in a virtual environment (Pillow is the only
-extra dependency). With `uv` installed:
+The Python stack uses **uv** for Python installation, environments, dependencies,
+and package builds; **Ruff** for linting and formatting; **ty** for type checking;
+and **pytest** for tests. Python 3.15 is pinned in `.python-version`, and
+`uv.lock` pins the full dependency graph. The native `uv_build` backend packages
+the tools. Pillow is the only image-processing dependency.
+
+uv uses one build worker, one install worker, and two concurrent downloads.
+Pillow installs from prebuilt wheels to avoid compiling it on this machine.
+CI runs the same locked lint, format, type, test, and package checks. To update
+dependencies deliberately, run `uv lock --upgrade`, rerun the checks, and commit
+the resulting lockfile.
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run:
 
 ```sh
-uv venv
-uv pip install -e '.[images]'
-.venv/bin/python -m tools.image_quality --no-starters
-.venv/bin/python -m tools.source_upgrades
-.venv/bin/python -m tools.commons_upgrades
-.venv/bin/python -m tools.curated_sources
-.venv/bin/python -m tools.review_mismatches --apply-decisions catalog/reviewed-source-overrides.json
-.venv/bin/python -m tools.build_quality_pack
-.venv/bin/python -m tools.quality_review
+uv sync --locked --extra images
+uv run --locked --extra images python -m tools.image_quality --no-starters
+uv run --locked --extra images python -m tools.source_upgrades
+uv run --locked --extra images python -m tools.commons_upgrades
+uv run --locked --extra images python -m tools.curated_sources
+uv run --locked --extra images python -m tools.review_mismatches --apply-decisions catalog/reviewed-source-overrides.json
+uv run --locked --extra images python -m tools.build_quality_pack
+uv run --locked --extra images python -m tools.quality_review
 ```
 
 The technical audit fully decodes each available source and records missing
@@ -180,7 +190,11 @@ Android Studio, or set `ANDROID_HOME` to your SDK directory and run:
 
 ```sh
 ./gradlew assembleDebug testDebugUnitTest lintDebug --no-daemon
-.venv/bin/python -m unittest discover -s tests -v
+uv run --locked --extra images pytest
+uv run --locked --extra images ruff check tools tests
+uv run --locked --extra images ruff format --check tools tests
+uv run --locked --extra images ty check
+uv build --no-sources
 ```
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`. It is a debug-signed personal
