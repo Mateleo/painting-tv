@@ -212,7 +212,7 @@ class QualityPackTests(unittest.TestCase):
                 research_path=research,
             )
             row = json.loads(output.read_text())["paintings"][0]
-            self.assertEqual(row["sourceSelection"]["source"], "Wikimedia Commons (researched)")
+            self.assertEqual(row["sourceSelection"]["source"], "Researched source")
             self.assertEqual((row["width"], row["height"]), (6000, 4500))
             self.assertEqual(row["imageUrl"], "research.jpg")
             self.assertEqual(report["commonsRecordsChecked"], 1)

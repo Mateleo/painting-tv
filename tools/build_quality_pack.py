@@ -36,7 +36,7 @@ def merge_sources(
             ("Wikimedia Commons", "commonsRecordsChecked", commons_path),
             ("Wikimedia Commons (curated)", "curatedRecordsChecked", curated_path),
             ("WikiArt (visual review)", "modelVisualReviews", reviewed_path),
-            ("Wikimedia Commons (researched)", "researchRecordsChecked", research_path),
+            ("Researched source", "researchRecordsChecked", research_path),
         )
     ]
     paintings = []
