@@ -258,6 +258,11 @@ class QualityPackTests(unittest.TestCase):
         self.assertEqual(candidate["imageUrl"], "https://original.example/scan.jpg")
         self.assertTrue(candidate["downloadIsDerivative"])
 
+    def test_missing_derivative_page_is_a_candidate_error(self):
+        with patch.object(Client, "get", return_value=b'{"query": {"pages": {}}}'):
+            with self.assertRaises(ValueError):
+                Client().display_derivative({"fileTitle": "File:X.jpg", "width": 9, "height": 9})
+
     def test_very_tall_derivative_also_respects_pixel_memory_budget(self):
         from urllib.parse import parse_qs, urlsplit
 

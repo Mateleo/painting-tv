@@ -18,16 +18,11 @@ from typing import Any
 
 from PIL import Image, ImageChops, ImageCms, ImageOps, ImageStat, features
 
+from tools.common import read_json, write_json
+
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
 COMPRESSION_REVISION = 3
-
-
-def write_json(path: Path, value: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    temporary.replace(path)
 
 
 def sample_psnr(reference: Image.Image, encoded: Path) -> float:
@@ -183,7 +178,7 @@ def optimize_one(
         else:
             output = destination.with_suffix(ANDROID_FORMATS[source_format])
             shutil.copyfile(source, output)
-            width, height = source_size
+            (width, height), resized = source_size, False
             psnr = 100.0
             decision = "original-kept"
             if color_action.startswith("converted"):
@@ -216,12 +211,11 @@ def build_pack(
     max_edge: int = 0,
     max_pixels: int = 0,
 ) -> dict[str, Any]:
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-    items = catalog["paintings"]
+    items = read_json(catalog_path)["paintings"]
     images = output / "images"
     images.mkdir(parents=True, exist_ok=True)
     state_file = output / "compression-state.json"
-    state = json.loads(state_file.read_text()) if state_file.exists() else {}
+    state = read_json(state_file) if state_file.exists() else {}
     records, omitted = [], []
     options = {
         "quality": quality,
@@ -260,15 +254,10 @@ def build_pack(
                 }
             )
             continue
+        stat = source.stat()
         stamp = hashlib.sha256(
             json.dumps(
-                [
-                    COMPRESSION_REVISION,
-                    str(source),
-                    source.stat().st_mtime_ns,
-                    source.stat().st_size,
-                    options,
-                ],
+                [COMPRESSION_REVISION, str(source), stat.st_mtime_ns, stat.st_size, options],
                 sort_keys=True,
             ).encode()
         ).hexdigest()

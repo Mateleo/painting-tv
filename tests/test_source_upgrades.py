@@ -184,7 +184,7 @@ class SourceUpgradeTests(unittest.TestCase):
                 patch.object(
                     upgrades,
                     "_candidate_for",
-                    return_value=("\n".join(urls), root / "images/sample.jpg", ""),
+                    return_value=(urls, root / "images/sample.jpg", ""),
                 ),
                 patch.object(upgrades, "_request", side_effect=fake_request),
             ):

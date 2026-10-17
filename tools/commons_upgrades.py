@@ -19,6 +19,7 @@ from typing import Any
 
 from PIL import Image
 
+from tools.common import read_json, state_records, write_json
 from tools.painting_catalog import strip_html
 from tools.source_upgrades import visual_match
 
@@ -57,32 +58,33 @@ class Client:
             raise ValueError("Image exceeds configured download limit")
         return result
 
+    def query(self, **params: Any) -> dict[str, Any]:
+        query = {"action": "query", "format": "json", "prop": "imageinfo", **params}
+        payload = json.loads(self.get(API + "?" + urllib.parse.urlencode(query)))
+        if "error" in payload:
+            raise ValueError(str(payload["error"]))
+        return payload.get("query", {}).get("pages", {})
+
+    def file_info(self, title: str, **params: Any) -> dict[str, Any]:
+        page = next(iter(self.query(titles=title, **params).values()), {})
+        return (page.get("imageinfo") or [{}])[0]
+
     def candidates(self, painting: dict[str, Any]) -> list[dict[str, Any]]:
         title = painting.get("title", "").replace('"', " ")
         artist = painting.get("artist", "").replace('"', " ")
-        query = (title[:180] + " " + artist + " filetype:bitmap").strip()
-        params = urllib.parse.urlencode(
-            {
-                "action": "query",
-                "format": "json",
-                "generator": "search",
-                "gsrsearch": query,
-                "gsrnamespace": 6,
-                "gsrlimit": 5,
-                "prop": "imageinfo",
-                "iiprop": "url|size|mime|extmetadata",
-                "iiurlwidth": 480,
-            }
+        pages = self.query(
+            generator="search",
+            gsrsearch=(title[:180] + " " + artist + " filetype:bitmap").strip(),
+            gsrnamespace=6,
+            gsrlimit=5,
+            iiprop="url|size|mime|extmetadata",
+            iiurlwidth=480,
         )
-        payload = json.loads(self.get(API + "?" + params))
-        if "error" in payload:
-            raise ValueError(str(payload["error"]))
         rows = []
-        for page in payload.get("query", {}).get("pages", {}).values():
+        for page in pages.values():
             info = (page.get("imageinfo") or [{}])[0]
             if info.get("mime") not in ("image/jpeg", "image/png", "image/webp"):
                 continue
-            meta = info.get("extmetadata", {})
             rows.append(
                 {
                     "fileTitle": page.get("title", ""),
@@ -92,10 +94,7 @@ class Client:
                     "height": info.get("height", 0),
                     "bytes": info.get("size", 0),
                     "sourceUrl": info.get("descriptionurl", ""),
-                    "license": strip_html(meta.get("LicenseShortName", {}).get("value", "")),
-                    "licenseUrl": meta.get("LicenseUrl", {}).get("value", ""),
-                    "attribution": strip_html(meta.get("Artist", {}).get("value", "")),
-                    "credit": strip_html(meta.get("Credit", {}).get("value", "")),
+                    **license_fields(info),
                 }
             )
         return sorted(rows, key=lambda row: row["width"] * row["height"], reverse=True)
@@ -109,19 +108,7 @@ class Client:
             5000,
             max(1, int((32_000_000 * candidate["width"] / candidate["height"]) ** 0.5)),
         )
-        params = urllib.parse.urlencode(
-            {
-                "action": "query",
-                "format": "json",
-                "titles": candidate["fileTitle"],
-                "prop": "imageinfo",
-                "iiprop": "url|size",
-                "iiurlwidth": width,
-            }
-        )
-        payload = json.loads(self.get(API + "?" + params))
-        pages = payload.get("query", {}).get("pages", {}).values()
-        info = next(iter(pages)).get("imageinfo", [{}])[0]
+        info = self.file_info(candidate["fileTitle"], iiprop="url|size", iiurlwidth=width)
         if "thumburl" not in info:
             raise ValueError("No large display derivative available")
         candidate["downloadIsDerivative"] = True
@@ -130,21 +117,27 @@ class Client:
         return info["thumburl"]
 
 
-def atomic_json(path: Path, value: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n")
-    temporary.replace(path)
+def license_fields(info: dict[str, Any]) -> dict[str, str]:
+    meta = info.get("extmetadata", {})
+
+    def value(key: str) -> str:
+        return meta.get(key, {}).get("value", "")
+
+    return {
+        "license": strip_html(value("LicenseShortName")),
+        "licenseUrl": value("LicenseUrl"),
+        "attribution": strip_html(value("Artist")),
+        "credit": strip_html(value("Credit")),
+    }
 
 
 def run(
     catalog_path: Path, output: Path, *, delay: float = 1.0, limit: int | None = None
 ) -> dict[str, Any]:
     catalog_path = catalog_path.resolve()
-    paintings = json.loads(catalog_path.read_text())["paintings"]
-    output.mkdir(parents=True, exist_ok=True)
+    paintings = read_json(catalog_path)["paintings"]
     path = output / "state.json"
-    state = json.loads(path.read_text()).get("records", {}) if path.exists() else {}
+    state = state_records(path)
     client = Client(delay)
     count = 0
     for painting in paintings:
@@ -222,7 +215,7 @@ def run(
         except RateLimited as error:
             result.update(status="rate-limited", reason=str(error))
             state[identity] = result
-            atomic_json(path, {"records": state})
+            write_json(path, {"records": state}, compact=True)
             print(
                 f"Commons paused: {error}. Saved {len(state)}/{len(paintings)}; resume later.",
                 flush=True,
@@ -231,7 +224,7 @@ def run(
         except (OSError, ValueError, KeyError) as error:
             result.update(status="lookup-error", reason=str(error))
         state[identity] = result
-        atomic_json(path, {"records": state})
+        write_json(path, {"records": state}, compact=True)
         if len(state) % 10 == 0:
             print(
                 f"Commons {len(state)}/{len(paintings)}; accepted={sum(r.get('status') == 'accepted' for r in state.values())}",

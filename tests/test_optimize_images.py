@@ -36,9 +36,10 @@ class CompressionTests(unittest.TestCase):
             source = root / "alpha.png"
             with Image.new("RGBA", (128, 128), (250, 0, 0, 75)) as image:
                 image.save(source)
-            result = optimize_one(source, root / "out/image")
+            result = optimize_one(source, root / "out/image", max_edge=64)
             self.assertEqual(result["formatDecision"], "original-kept")
             self.assertEqual(Path(result["path"]).read_bytes(), source.read_bytes())
+            self.assertEqual((result["width"], result["resizedForTV"]), (128, False))
 
     def test_large_master_is_unchanged_and_tv_export_obeys_limits(self):
         with tempfile.TemporaryDirectory() as td:

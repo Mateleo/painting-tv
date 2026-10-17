@@ -11,6 +11,8 @@ import hashlib
 import json
 from pathlib import Path
 
+CHUNK = 1024 * 1024
+
 
 def split_pack(source: Path, directory: Path, *, part_size: int = 1_900_000_000) -> Path:
     if part_size <= 0:
@@ -19,23 +21,17 @@ def split_pack(source: Path, directory: Path, *, part_size: int = 1_900_000_000)
     full_hash = hashlib.sha256()
     parts = []
     with source.open("rb") as stream:
-        while True:
-            first = stream.read(min(1024 * 1024, part_size))
-            if not first:
-                break
+        while block := stream.read(min(CHUNK, part_size)):
             name = source.name + f".{len(parts) + 1:03}"
             digest = hashlib.sha256()
             size = 0
             with (directory / name).open("wb") as output:
-                block = first
                 while block:
                     output.write(block)
                     digest.update(block)
                     full_hash.update(block)
                     size += len(block)
-                    if size >= part_size:
-                        break
-                    block = stream.read(min(1024 * 1024, part_size - size))
+                    block = stream.read(min(CHUNK, part_size - size)) if size < part_size else b""
             parts.append({"name": name, "size": size, "sha256": digest.hexdigest()})
     manifest = directory / "painting-pack.parts.json"
     manifest.write_text(
@@ -71,7 +67,7 @@ def join_pack(manifest: Path, output: Path) -> None:
                 digest = hashlib.sha256()
                 size = 0
                 with (manifest.parent / part["name"]).open("rb") as source:
-                    for block in iter(lambda: source.read(1024 * 1024), b""):
+                    for block in iter(lambda: source.read(CHUNK), b""):
                         digest.update(block)
                         full.update(block)
                         size += len(block)

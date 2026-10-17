@@ -16,12 +16,15 @@ import re
 import shutil
 import sqlite3
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
 from typing import Any
+
+from tools.common import read_json, write_json
 
 DECK_ID = 171273480
 ANKI_INFO = "https://ankiweb.net/svc/shared/item-info"
@@ -199,18 +202,20 @@ def extract_apkg(apkg: Path, out_dir: Path) -> list[dict[str, Any]]:
     media_dir.mkdir(exist_ok=True)
     with zipfile.ZipFile(apkg) as archive:
         names = set(archive.namelist())
+        # Newer exports add a placeholder collection.anki2; the real notes are in anki21(b).
         collection_name = next(
             (
                 n
-                for n in ("collection.anki2", "collection.anki21", "collection.anki21b")
+                for n in ("collection.anki21", "collection.anki21b", "collection.anki2")
                 if n in names
             ),
             None,
         )
-        if collection_name is None:
-            raise ValueError("No supported Anki collection database found")
+        if collection_name is None or collection_name.endswith("b"):
+            raise ValueError("No supported Anki collection database found (anki21b is compressed)")
         db_path = out_dir / ".collection.sqlite"
-        db_path.write_bytes(archive.read(collection_name))
+        with archive.open(collection_name) as source, db_path.open("wb") as target:
+            shutil.copyfileobj(source, target)
         conn = sqlite3.connect(db_path)
         try:
             model_json = json.loads(conn.execute("SELECT models FROM col LIMIT 1").fetchone()[0])
@@ -222,13 +227,12 @@ def extract_apkg(apkg: Path, out_dir: Path) -> list[dict[str, Any]]:
 
         media_map = json.loads(archive.read("media")) if "media" in names else {}
         for archive_name, original_name in media_map.items():
-            if archive_name not in names:
-                continue
+            # Keep only the final name component so archive entries cannot escape media_dir.
             safe = Path(original_name).name
-            if safe and safe not in (".", ".."):
-                target = media_dir / safe
-                if not target.exists():
-                    target.write_bytes(archive.read(archive_name))
+            target = media_dir / safe
+            if archive_name in names and safe not in ("", ".", "..") and not target.exists():
+                with archive.open(archive_name) as source, target.open("wb") as stream:
+                    shutil.copyfileobj(source, stream)
 
     paintings = []
     for note_id, model_id, packed_fields, tags in rows:
@@ -265,17 +269,11 @@ def extract_apkg(apkg: Path, out_dir: Path) -> list[dict[str, Any]]:
                 "resolution": {"status": "unresolved", "confidence": 0.0, "candidates": []},
             }
         )
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "catalog.json").write_text(
-        json.dumps({"version": 1, "paintings": paintings}, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json(out_dir / "catalog.json", {"version": 1, "paintings": paintings})
     return paintings
 
 
 def normalize(text: str) -> str:
-    import unicodedata
-
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
     return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
@@ -326,7 +324,7 @@ def commons_candidates(painting: dict[str, Any], limit: int = 5) -> list[dict[st
 def resolve_catalog(
     catalog_path: Path, *, limit: int | None = None, delay: float = 1.0, resume: bool = True
 ) -> int:
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog = read_json(catalog_path)
     paintings = catalog["paintings"]
     pending = [
         painting
@@ -365,9 +363,7 @@ def resolve_catalog(
                 if isinstance(exc, urllib.error.HTTPError) and exc.code == 429
                 else 0
             )
-        catalog_path.write_text(
-            json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        write_json(catalog_path, catalog)
         if consecutive_throttles >= 3:
             print("Commons is rate-limiting requests. Progress saved; resume later.")
             break
@@ -379,7 +375,7 @@ def resolve_catalog(
 def export_manifest(
     catalog_path: Path, output: Path, *, online: bool = False, offline_pack: bool = False
 ) -> None:
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog = read_json(catalog_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     root = catalog_path.parent
     paintings = []
@@ -420,28 +416,19 @@ def export_manifest(
             entry["imageUrl"] = os.path.relpath(root / image, output.parent).replace("\\", "/")
         paintings.append(entry)
     if omitted:
-        report = output.with_suffix(output.suffix + ".report.json")
-        report.write_text(
-            json.dumps(
-                {
-                    "omittedWithoutImage": [
-                        {"id": p["id"], "title": p["title"], "artist": p["artist"]} for p in omitted
-                    ]
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-            + "\n",
-            encoding="utf-8",
+        write_json(
+            output.with_suffix(output.suffix + ".report.json"),
+            {
+                "omittedWithoutImage": [
+                    {"id": p["id"], "title": p["title"], "artist": p["artist"]} for p in omitted
+                ]
+            },
         )
-    output.write_text(
-        json.dumps({"version": 1, "paintings": paintings}, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json(output, {"version": 1, "paintings": paintings})
 
 
 def approve_candidate(catalog_path: Path, painting_id: str, candidate_index: int = 0) -> None:
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog = read_json(catalog_path)
     painting = next((p for p in catalog["paintings"] if p["id"] == painting_id), None)
     if painting is None:
         raise KeyError(f"Painting id not found: {painting_id}")
@@ -465,62 +452,50 @@ def approve_candidate(catalog_path: Path, painting_id: str, candidate_index: int
             "provenance": f"Manually approved candidate from {candidate.get('source', 'unknown source')}",
         }
     )
-    catalog_path.write_text(
-        json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    write_json(catalog_path, catalog)
 
 
 def download_pack(catalog_path: Path, pack_dir: Path, *, min_width: int = 0) -> int:
     """Download manually approved source images, resuming existing files."""
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog = read_json(catalog_path)
+    root = catalog_path.parent.resolve()
     pack_dir.mkdir(parents=True, exist_ok=True)
+    if not pack_dir.resolve().is_relative_to(root):
+        raise ValueError("Offline image directory must be inside the catalog data directory")
     downloaded = 0
     for painting in catalog["paintings"]:
         url = painting.get("imageUrl", "")
-        if (
-            not url.startswith("https://")
-            or painting.get("resolution", {}).get("status") != "approved"
-        ):
+        resolution = painting.get("resolution", {})
+        if not url.startswith("https://") or resolution.get("status") != "approved":
             continue
         if painting.get("width") and painting["width"] < min_width:
             continue
         suffix = Path(urllib.parse.urlparse(url).path).suffix or ".jpg"
-        target = pack_dir / f"{painting['id']}{suffix}"
-        root = catalog_path.parent.resolve()
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if not target.resolve().is_relative_to(root):
-            raise ValueError("Offline image directory must be inside the catalog data directory")
+        target = pack_dir.resolve() / f"{painting['id']}{suffix}"
+        relative = str(target.relative_to(root))
         if target.exists() and target.stat().st_size > 0:
-            painting.setdefault("resolution", {})["offlineImage"] = str(
-                target.relative_to(catalog_path.parent)
-            )
-            catalog_path.write_text(
-                json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-            )
-            continue
-        temp = target.with_suffix(target.suffix + ".partial")
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(req, timeout=90) as response, temp.open("wb") as handle:
-            shutil.copyfileobj(response, handle)
-        if image_dimensions(temp) == (None, None):
-            temp.unlink(missing_ok=True)
-            raise ValueError(
-                f"Downloaded file is not a supported raster image for {painting['title']}"
-            )
-        temp.replace(target)
-        painting.setdefault("resolution", {})["offlineImage"] = str(
-            target.relative_to(catalog_path.parent)
-        )
-        downloaded += 1
-        catalog_path.write_text(
-            json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+            if resolution.get("offlineImage") == relative:
+                continue
+        else:
+            temp = target.with_suffix(target.suffix + ".partial")
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=90) as response, temp.open("wb") as handle:
+                shutil.copyfileobj(response, handle)
+            if image_dimensions(temp) == (None, None):
+                temp.unlink(missing_ok=True)
+                raise ValueError(
+                    f"Downloaded file is not a supported raster image for {painting['title']}"
+                )
+            temp.replace(target)
+            downloaded += 1
+        resolution["offlineImage"] = relative
+        write_json(catalog_path, catalog)
     return downloaded
 
 
 def bundle_catalog(catalog_path: Path, output: Path) -> Path:
     """Create app import ZIP with root catalog.json and all referenced images."""
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog = read_json(catalog_path)
     root = catalog_path.parent
     packaged = []
     omitted = []
@@ -570,7 +545,7 @@ def bundle_catalog(catalog_path: Path, output: Path) -> Path:
         packaged.append(item)
     report = {"included": len(packaged), "omittedCount": len(omitted), "omitted": omitted}
     output.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
         archive.writestr(
             "catalog.json",
             json.dumps({"version": 1, "paintings": packaged}, ensure_ascii=False, indent=2) + "\n",
@@ -589,30 +564,16 @@ def bundle_catalog(catalog_path: Path, output: Path) -> Path:
                 continue
             target = f"images/highres-{original['id']}{(root / local).suffix or '.jpg'}"
             archive.write(root / local, target)
-    output.with_suffix(output.suffix + ".report.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    write_json(output.with_suffix(output.suffix + ".report.json"), report)
     return output
 
 
 def export_metadata(catalog_path: Path, output: Path) -> None:
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     fields = ("id", "title", "artist", "year", "movement", "medium", "tags")
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(
-            {
-                "version": 1,
-                "paintings": [
-                    {key: p.get(key, "") for key in fields} for p in catalog["paintings"]
-                ],
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
+    paintings = [
+        {key: p.get(key, "") for key in fields} for p in read_json(catalog_path)["paintings"]
+    ]
+    write_json(output, {"version": 1, "paintings": paintings})
 
 
 def main() -> None:
@@ -687,9 +648,7 @@ def main() -> None:
         print(f"Approved candidate {args.candidate} for {args.painting_id}")
     elif args.command == "bundle":
         result = bundle_catalog(args.catalog, args.output)
-        report = json.loads(
-            result.with_suffix(result.suffix + ".report.json").read_text(encoding="utf-8")
-        )
+        report = read_json(result.with_suffix(result.suffix + ".report.json"))
         print(
             f"{result}: included {report['included']}; omitted {report['omittedCount']} without images"
         )

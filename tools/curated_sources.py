@@ -5,14 +5,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
-import json
-import urllib.parse
 from pathlib import Path
 
 from PIL import Image
 
-from tools.commons_upgrades import API, Client, atomic_json
-from tools.painting_catalog import strip_html
+from tools.common import read_json, state_records, write_json
+from tools.commons_upgrades import Client, license_fields
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,45 +20,30 @@ def main() -> None:
     parser.add_argument("--catalog", type=Path, default=ROOT / "data/catalog.json")
     parser.add_argument("--overrides", type=Path, default=ROOT / "catalog/source-overrides.json")
     args = parser.parse_args()
-    catalog = json.loads(args.catalog.read_text())["paintings"]
-    overrides = json.loads(args.overrides.read_text())["paintings"]
+    # Reversed so the first note wins when a title/artist pair repeats.
+    paintings = reversed(read_json(args.catalog)["paintings"])
+    catalog = {(p["title"], p["artist"]): p for p in paintings}
     folder = ROOT / "data/curated-masters"
     folder.mkdir(parents=True, exist_ok=True)
     state_path = ROOT / "data/curated-upgrades/state.json"
-    state = json.loads(state_path.read_text()).get("records", {}) if state_path.exists() else {}
+    state = state_records(state_path)
     client = Client(delay=1)
-    for override in overrides:
-        painting = next(
-            p
-            for p in catalog
-            if p["title"] == override["title"] and p["artist"] == override["artist"]
-        )
+    for override in read_json(args.overrides)["paintings"]:
+        painting = catalog[override["title"], override["artist"]]
         identity = painting["id"]
         if state.get(identity, {}).get("status") == "accepted":
             continue
-        query = urllib.parse.urlencode(
-            {
-                "action": "query",
-                "format": "json",
-                "titles": override["fileTitle"],
-                "prop": "imageinfo",
-                "iiprop": "url|size|mime|extmetadata",
-            }
-        )
-        payload = json.loads(client.get(API + "?" + query))
-        page = next(iter(payload["query"]["pages"].values()))
-        info = page["imageinfo"][0]
+        info = client.file_info(override["fileTitle"], iiprop="url|size|mime|extmetadata")
         raw = client.get(info["url"], maximum=64_000_000)
         with Image.open(io.BytesIO(raw)) as image:
             width, height, fmt = image.width, image.height, image.format
             image.draft("RGB", (4096, 4096))
             image.load()
-        if fmt is None:
-            raise ValueError("Source image has no recognized format")
-        suffix = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}[fmt]
+        suffix = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}.get(fmt or "")
+        if suffix is None:
+            raise ValueError(f"Unsupported source image format: {fmt}")
         path = folder / (identity + suffix)
         path.write_bytes(raw)
-        meta = info.get("extmetadata", {})
         state[identity] = {
             "status": "accepted",
             "id": identity,
@@ -73,13 +56,10 @@ def main() -> None:
             "selected": {
                 "sourceUrl": info.get("descriptionurl", override["evidenceUrl"]),
                 "downloadUrl": info["url"],
-                "license": strip_html(meta.get("LicenseShortName", {}).get("value", "")),
-                "licenseUrl": meta.get("LicenseUrl", {}).get("value", ""),
-                "attribution": strip_html(meta.get("Artist", {}).get("value", "")),
-                "credit": strip_html(meta.get("Credit", {}).get("value", "")),
+                **license_fields(info),
             },
         }
-        atomic_json(state_path, {"records": state})
+        write_json(state_path, {"records": state}, compact=True)
         print(painting["title"], width, height, flush=True)
 
 

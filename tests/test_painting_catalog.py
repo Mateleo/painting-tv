@@ -111,7 +111,8 @@ class CatalogTests(unittest.TestCase):
             )
             conn.commit()
             with zipfile.ZipFile(apkg, "w") as z:
-                z.writestr("collection.anki2", conn.serialize())
+                z.writestr("collection.anki2", b"placeholder written by newer Anki exports")
+                z.writestr("collection.anki21", conn.serialize())
                 z.writestr("media", json.dumps({"0": "work.jpg"}))
                 z.writestr("0", b"image data")
             result = extract_apkg(apkg, base / "out")

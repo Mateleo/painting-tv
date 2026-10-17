@@ -10,14 +10,11 @@ import os
 from pathlib import Path
 from typing import Any
 
+from tools.common import read_json, state_records, write_json
 from tools.image_quality import run_audit
-from tools.optimize_images import build_pack, write_json
+from tools.optimize_images import build_pack
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def state_records(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text()).get("records", {}) if path.exists() else {}
 
 
 def merge_sources(
@@ -30,20 +27,18 @@ def merge_sources(
     reviewed_path: Path | None = None,
     research_path: Path | None = None,
 ) -> dict[str, Any]:
-    catalog = json.loads(catalog_path.read_text())
-    wikiart = state_records(wikiart_path)
-    commons = state_records(commons_path)
-    sources = [("WikiArt", wikiart, wikiart_path), ("Wikimedia Commons", commons, commons_path)]
-    curated = state_records(curated_path) if curated_path else {}
-    if curated_path:
-        sources.append(("Wikimedia Commons (curated)", curated, curated_path))
-    reviewed = state_records(reviewed_path) if reviewed_path else {}
-    if reviewed_path:
-        sources.append(("WikiArt (visual review)", reviewed, reviewed_path))
-    research = state_records(research_path) if research_path else {}
-    if research_path:
-        sources.append(("Wikimedia Commons (researched)", research, research_path))
-    output.parent.mkdir(parents=True, exist_ok=True)
+    catalog = read_json(catalog_path)
+    # (selection label, report key, base for relative masters, records); absent files add none.
+    sources = [
+        (kind, key, path.parent if path else ROOT, state_records(path))
+        for kind, key, path in (
+            ("WikiArt", "wikiartRecordsChecked", wikiart_path),
+            ("Wikimedia Commons", "commonsRecordsChecked", commons_path),
+            ("Wikimedia Commons (curated)", "curatedRecordsChecked", curated_path),
+            ("WikiArt (visual review)", "modelVisualReviews", reviewed_path),
+            ("Wikimedia Commons (researched)", "researchRecordsChecked", research_path),
+        )
+    ]
     paintings = []
     origins = collections.Counter()
     for painting in catalog["paintings"]:
@@ -56,13 +51,13 @@ def merge_sources(
             else None
         )
         candidates = []
-        for kind, records, state_path in sources:
+        for kind, _, base, records in sources:
             record = records.get(identity, {})
             if record.get("status") != "accepted":
                 continue
             master = Path(record.get("master_path", ""))
             if not master.is_absolute():
-                master = state_path.parent / master
+                master = base / master
             if not master.is_file():
                 continue
             width, height = record["candidate_dimensions"]
@@ -108,11 +103,7 @@ def merge_sources(
     report = {
         "catalogRecords": len(paintings),
         "selectedSources": dict(origins),
-        "wikiartRecordsChecked": len(wikiart),
-        "commonsRecordsChecked": len(commons),
-        "curatedRecordsChecked": len(curated),
-        "modelVisualReviews": len(reviewed),
-        "researchRecordsChecked": len(research),
+        **{key: len(records) for _, key, _, records in sources},
     }
     write_json(output, {"version": 1, "paintings": paintings, "sourceReport": report})
     return report
@@ -121,10 +112,10 @@ def merge_sources(
 def report_every_record(
     base_catalog: Path, selected_catalog: Path, pack: Path, output: Path
 ) -> dict[str, Any]:
-    originals = json.loads(base_catalog.read_text())["paintings"]
-    selected_document = json.loads(selected_catalog.read_text())
+    originals = read_json(base_catalog)["paintings"]
+    selected_document = read_json(selected_catalog)
     selected = {p["id"]: p for p in selected_document["paintings"]}
-    exported = {p["id"]: p for p in json.loads((pack / "catalog.json").read_text())["paintings"]}
+    exported = {p["id"]: p for p in read_json(pack / "catalog.json")["paintings"]}
     final_audit = run_audit(pack / "catalog.json", include_starters=False)
     checked = {r["id"]: r for r in final_audit["records"]}
     rows: list[dict[str, Any]] = []
@@ -179,9 +170,7 @@ def report_every_record(
     value = {
         "summary": summary,
         "sourceCoverage": selected_document.get("sourceReport", {}),
-        "compression": json.loads(compression_file.read_text())
-        if compression_file.exists()
-        else {},
+        "compression": read_json(compression_file) if compression_file.exists() else {},
         "note": "Every original record is accounted for. Technical comparisons and model visual review are not human approval. Pixel dimensions do not prove genuine fine detail.",
         "records": rows,
     }
@@ -208,34 +197,24 @@ def main() -> None:
     parser.add_argument("--report", type=Path, default=ROOT / "catalog/quality-upgrade-report.json")
     parser.add_argument("--merge-only", action="store_true")
     args = parser.parse_args()
-    print(
-        json.dumps(
-            merge_sources(
-                args.catalog.resolve(),
-                args.wikiart.resolve(),
-                args.commons.resolve(),
-                args.selected.resolve(),
-                curated_path=args.curated.resolve(),
-                reviewed_path=args.reviewed.resolve(),
-                research_path=args.research.resolve(),
-            )
-        ),
-        flush=True,
+    paths = {key: value.resolve() for key, value in vars(args).items() if isinstance(value, Path)}
+    merged = merge_sources(
+        paths["catalog"],
+        paths["wikiart"],
+        paths["commons"],
+        paths["selected"],
+        curated_path=paths["curated"],
+        reviewed_path=paths["reviewed"],
+        research_path=paths["research"],
     )
+    print(json.dumps(merged), flush=True)
     if args.merge_only:
         return
-    print(json.dumps(build_pack(args.selected.resolve(), args.pack.resolve())), flush=True)
-    print(
-        json.dumps(
-            report_every_record(
-                args.catalog.resolve(),
-                args.selected.resolve(),
-                args.pack.resolve(),
-                args.report.resolve(),
-            )
-        ),
-        flush=True,
+    print(json.dumps(build_pack(paths["selected"], paths["pack"])), flush=True)
+    summary = report_every_record(
+        paths["catalog"], paths["selected"], paths["pack"], paths["report"]
     )
+    print(json.dumps(summary), flush=True)
 
 
 if __name__ == "__main__":

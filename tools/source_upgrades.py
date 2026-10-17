@@ -8,14 +8,18 @@ state file is updated after every record so interrupted runs can resume.
 from __future__ import annotations
 
 import argparse
+import collections
 import concurrent.futures
+import functools
 import hashlib
 import html
+import io
 import json
 import os
 import re
 import threading
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -23,6 +27,8 @@ from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageChops, ImageStat
+
+from tools.common import read_json, state_records, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 USER_AGENT = "PaintingTV/0.2 (https://github.com/Mateleo/painting-tv)"
@@ -62,6 +68,11 @@ CANONICAL_OVERRIDES = {
 ARTIST_ALIASES = {"alfons-mucha": ("alphonse-mucha",)}
 
 
+def _page_url(artist: str, title: str) -> str:
+    quote = urllib.parse.quote
+    return f"https://www.wikiart.org/en/{quote(artist, safe='-')}/{quote(title, safe='-')}"
+
+
 def source_page_for(path: str | Path) -> str:
     return source_page_candidates(path)[0]
 
@@ -69,58 +80,39 @@ def source_page_for(path: str | Path) -> str:
 def source_page_candidates(path: str | Path) -> list[str]:
     filename = Path(path).name
     if filename in CANONICAL_OVERRIDES:
-        pairs = [CANONICAL_OVERRIDES[filename]]
-    else:
-        stem = Path(filename).stem
-        if "_" not in stem:
-            raise ValueError(f"Cannot derive artist/title slugs from {filename}")
-        artist, title = stem.split("_", 1)
-        yearless = re.sub(r"-\d{3,4}(?:-\d+)?$", "", title)
-        pairs = [(artist, title)]
-        if yearless != title:
-            pairs.append((artist, yearless))
-        # Try known WikiArt canonicals for artist-name variants after the
-        # source filename's artist slug, preserving exact-year-first order.
-        title_pairs = pairs
-        pairs = []
-        for title_artist, title_slug in title_pairs:
-            pairs.append((title_artist, title_slug))
-            pairs.extend((alias, title_slug) for alias in ARTIST_ALIASES.get(title_artist, ()))
-    return [
-        f"https://www.wikiart.org/en/{urllib.parse.quote(artist, safe='-')}/{urllib.parse.quote(title, safe='-')}"
-        for artist, title in pairs
-    ]
+        return [_page_url(*CANONICAL_OVERRIDES[filename])]
+    stem = Path(filename).stem
+    if "_" not in stem:
+        raise ValueError(f"Cannot derive artist/title slugs from {filename}")
+    artist, title = stem.split("_", 1)
+    yearless = re.sub(r"-\d{3,4}(?:-\d+)?$", "", title)
+    titles = [title] if yearless == title else [title, yearless]
+    # Exact-year slug first; known WikiArt artist-name variants follow each title.
+    artists = [artist, *ARTIST_ALIASES.get(artist, ())]
+    return [_page_url(a, t) for t in titles for a in artists]
 
 
 def extract_image_url(page: bytes | str) -> str | None:
     text = page.decode("utf-8", "replace") if isinstance(page, bytes) else page
     # og:image is the canonical high-resolution display URL. Strip only the
     # public size suffix (!Large.jpg), retaining revision markers such as (1).
-    match = re.search(r'<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']+)', text, re.I)
-    if not match:
-        match = re.search(
-            r'<meta\s+content=["\']([^"\']+)["\']\s+property=["\']og:image["\']', text, re.I
-        )
+    match = re.search(
+        r'<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']+)', text, re.I
+    ) or re.search(r'<meta\s+content=["\']([^"\']+)["\']\s+property=["\']og:image["\']', text, re.I)
     if not match:
         return None
-    url = html.unescape(match.group(1))
-    url = re.sub(r"!(?:Large|Medium|Small|[0-9]+)\.jpg(?=$|\?)", "", url, flags=re.I)
-    return url
+    return re.sub(
+        r"!(?:Large|Medium|Small|[0-9]+)\.jpg(?=$|\?)",
+        "",
+        html.unescape(match.group(1)),
+        flags=re.I,
+    )
 
 
-def _request(url: str, *, max_bytes: int = 2_000_000, timeout: int = 20) -> bytes:
-    global _last_request
-    if _blocked.is_set():
-        raise RuntimeError("WikiArt host paused after access was blocked")
-    with _request_lock:
-        if _blocked.is_set():
-            raise RuntimeError("WikiArt host paused after access was blocked")
-        delay = MIN_INTERVAL - (time.monotonic() - _last_request)
-        if delay > 0:
-            time.sleep(delay)
-        _last_request = time.monotonic()
+def encode_url(url: str) -> str:
+    """Percent-encode Unicode in a URL while keeping existing escapes."""
     parts = urllib.parse.urlsplit(url)
-    url = urllib.parse.urlunsplit(
+    return urllib.parse.urlunsplit(
         (
             parts.scheme,
             parts.netloc,
@@ -129,8 +121,19 @@ def _request(url: str, *, max_bytes: int = 2_000_000, timeout: int = 20) -> byte
             urllib.parse.quote(parts.fragment, safe="%:@/?"),
         )
     )
+
+
+def _request(url: str, *, max_bytes: int = 2_000_000, timeout: int = 20) -> bytes:
+    global _last_request
+    with _request_lock:
+        if _blocked.is_set():
+            raise RuntimeError("WikiArt host paused after access was blocked")
+        delay = MIN_INTERVAL - (time.monotonic() - _last_request)
+        if delay > 0:
+            time.sleep(delay)
+        _last_request = time.monotonic()
     request = urllib.request.Request(
-        url,
+        encode_url(url),
         headers={
             "User-Agent": USER_AGENT,
             "Accept": "text/html,image/avif,image/webp,image/*,*/*;q=0.8",
@@ -152,6 +155,25 @@ def _request(url: str, *, max_bytes: int = 2_000_000, timeout: int = 20) -> byte
     return data
 
 
+class OversizedImage(ValueError):
+    pass
+
+
+def check_image(data: bytes) -> tuple[tuple[int, int], str | None]:
+    """Verify, then decode (bounded JPEG draft) downloaded image bytes; return size and format."""
+    with _decode_lock:
+        with Image.open(io.BytesIO(data)) as image:
+            size, fmt = image.size, image.format
+            image.verify()
+        if fmt != "JPEG" and size[0] * size[1] > 32_000_000:
+            raise OversizedImage("non-JPEG candidate exceeds the 32-megapixel decode limit")
+        with Image.open(io.BytesIO(data)) as image:
+            if fmt == "JPEG":
+                image.draft("RGB", (4096, 4096))
+            image.load()
+    return size, fmt
+
+
 def visual_match(
     reference: Path,
     candidate: bytes,
@@ -162,22 +184,16 @@ def visual_match(
 ) -> dict[str, Any]:
     """Compare normalized thumbnails; results are cues, never art judgment."""
     with _decode_lock:
-        with Image.open(reference) as ref:
-            ref.load()
-            ref_size = ref.size
-            ref_thumb = _normalized_thumb(ref)
-        with Image.open(__import__("io").BytesIO(candidate)) as cand:
+        ref_size, ref_thumb = _reference_thumb(reference, reference.stat().st_mtime_ns)
+        with Image.open(io.BytesIO(candidate)) as cand:
             cand_size = cand.size
             cand.draft("RGB", (512, 512))
             cand.load()
             cand_thumb = _normalized_thumb(cand)
-        delta = ImageChops.difference(ref_thumb, cand_thumb)
-        rmse = sum(ImageStat.Stat(delta).rms) / 3
-        distance = _dhash(ref_thumb) ^ _dhash(cand_thumb)
-        distance = distance.bit_count()
-    aspect_delta = abs(ref_size[0] / ref_size[1] - cand_size[0] / cand_size[1]) / (
-        ref_size[0] / ref_size[1]
-    )
+        rmse = sum(ImageStat.Stat(ImageChops.difference(ref_thumb, cand_thumb)).rms) / 3
+        distance = (_dhash(ref_thumb) ^ _dhash(cand_thumb)).bit_count()
+    ref_aspect = ref_size[0] / ref_size[1]
+    aspect_delta = abs(ref_aspect - cand_size[0] / cand_size[1]) / ref_aspect
     return {
         "reference_dimensions": list(ref_size),
         "candidate_dimensions": list(cand_size),
@@ -190,17 +206,29 @@ def visual_match(
     }
 
 
-def _normalized_thumb(image: Image.Image) -> Image.Image:
+@functools.lru_cache(maxsize=8)
+def _reference_thumb(path: Path, _mtime_ns: int) -> tuple[tuple[int, int], Image.Image]:
+    """Decode a reference once per comparison batch (Commons checks up to ten candidates)."""
+    with Image.open(path) as ref:
+        ref.load()
+        return ref.size, _normalized_thumb(ref)
+
+
+def letterbox(image: Image.Image, size: tuple[int, int], fill: str) -> Image.Image:
+    """Fit ``image`` inside ``size`` without enlarging it, centred on a solid canvas."""
     image = image.convert("RGB")
-    image.thumbnail((96, 96), Image.Resampling.LANCZOS)
-    canvas = Image.new("RGB", (96, 96), "#202020")
-    canvas.paste(image, ((96 - image.width) // 2, (96 - image.height) // 2))
+    image.thumbnail(size, Image.Resampling.LANCZOS)
+    canvas = Image.new("RGB", size, fill)
+    canvas.paste(image, ((size[0] - image.width) // 2, (size[1] - image.height) // 2))
     return canvas
 
 
+def _normalized_thumb(image: Image.Image) -> Image.Image:
+    return letterbox(image, (96, 96), "#202020")
+
+
 def _dhash(image: Image.Image) -> int:
-    gray = image.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
-    values = gray.tobytes()
+    values = image.convert("L").resize((9, 8), Image.Resampling.LANCZOS).tobytes()
     bits = 0
     for y in range(8):
         for x in range(8):
@@ -208,7 +236,9 @@ def _dhash(image: Image.Image) -> int:
     return bits
 
 
-def _candidate_for(painting: dict[str, Any], catalog_root: Path) -> tuple[str, Path | None, str]:
+def _candidate_for(
+    painting: dict[str, Any], catalog_root: Path
+) -> tuple[list[str], Path | None, str]:
     image = painting.get("imageUrl") or painting.get("originalImageUrl") or ""
     ref = (
         (catalog_root / image).resolve()
@@ -219,20 +249,16 @@ def _candidate_for(painting: dict[str, Any], catalog_root: Path) -> tuple[str, P
         pages = (
             source_page_candidates(image)
             if image
-            else [
-                f"https://www.wikiart.org/en/{urllib.parse.quote(slug(painting.get('artist', '')), safe='-')}/{urllib.parse.quote(slug(painting.get('title', '')), safe='-')}"
-            ]
+            else [_page_url(slug(painting.get("artist", "")), slug(painting.get("title", "")))]
         )
     except ValueError as error:
-        return "", ref, str(error)
-    return "\n".join(pages), ref, ""
+        return [], ref, str(error)
+    return pages, ref, ""
 
 
 def slug(value: str) -> str:
     value = value.lower().replace("&", " and ")
-    value = (
-        __import__("unicodedata").normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    )
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     return re.sub(r"[^a-z0-9]+", "-", value).strip("-")
 
 
@@ -240,8 +266,7 @@ def process_record(
     painting: dict[str, Any], catalog_root: Path, masters_dir: Path
 ) -> dict[str, Any]:
     item_id = str(painting.get("id", ""))
-    pages_value, reference, error = _candidate_for(painting, catalog_root)
-    pages = pages_value.splitlines()
+    pages, reference, error = _candidate_for(painting, catalog_root)
     result: dict[str, Any] = {
         "id": item_id,
         "source_page_url": "",
@@ -249,11 +274,8 @@ def process_record(
         "status": "needs-review",
         "reason": "",
     }
-    if error:
-        result["reason"] = error
-        return result
-    if not pages:
-        result["reason"] = "no-source-page-slug"
+    if error or not pages:
+        result["reason"] = error or "no-source-page-slug"
         return result
     if reference is not None and not reference.is_file():
         reference = None
@@ -292,30 +314,19 @@ def process_record(
         candidate = _request(image_url, max_bytes=MAX_IMAGE_BYTES, timeout=35)
         result["candidate_bytes"] = len(candidate)
         result["candidate_sha256"] = hashlib.sha256(candidate).hexdigest()
-        with _decode_lock:
-            with Image.open(reference) as image:
-                image.load()
-                ref_size = image.size
-            with Image.open(__import__("io").BytesIO(candidate)) as image:
-                candidate_size, fmt = image.size, image.format
-                image.verify()
-            if fmt not in ("JPEG", "JPG") and candidate_size[0] * candidate_size[1] > 32_000_000:
-                result.update(
-                    status="needs-review",
-                    reason="non-JPEG candidate exceeds the 32-megapixel decode limit",
-                )
-                return result
-            with Image.open(__import__("io").BytesIO(candidate)) as image:
-                if fmt in ("JPEG", "JPG"):
-                    image.draft("RGB", (4096, 4096))
-                image.load()
+        try:
+            candidate_size, fmt = check_image(candidate)
+        except OversizedImage as oversized:
+            result.update(status="needs-review", reason=str(oversized))
+            return result
+        comparison = visual_match(reference, candidate)
+        ref_size = comparison["reference_dimensions"]
         result.update(
-            reference_dimensions=list(ref_size),
+            reference_dimensions=ref_size,
             candidate_dimensions=list(candidate_size),
             candidate_format=fmt,
+            visual_match=comparison,
         )
-        comparison = visual_match(reference, candidate)
-        result["visual_match"] = comparison
         if not comparison["match"]:
             result.update(
                 status="rejected-visual-mismatch",
@@ -328,7 +339,7 @@ def process_record(
                 reason="candidate dimensions do not exceed local reference",
             )
             return result
-        if fmt not in ("JPEG", "JPG", "PNG"):
+        if fmt not in ("JPEG", "PNG"):
             result.update(
                 status="needs-review",
                 reason=f"candidate format {fmt} is unsupported for source master promotion",
@@ -359,27 +370,22 @@ def process_record(
     return result
 
 
-def _load_state(path: Path) -> dict[str, dict[str, Any]]:
-    if not path.exists():
-        return {}
-    try:
-        loaded = json.loads(path.read_text(encoding="utf-8"))
-        return loaded.get("records", {})
-    except json.JSONDecodeError, AttributeError:
-        return {}
-
-
 def _save_state(path: Path, state: dict[str, dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix(path.suffix + ".tmp")
-    temp.write_text(
-        json.dumps(
-            {"schema_version": 1, "records": state}, ensure_ascii=False, separators=(",", ":")
+    write_json(path, {"schema_version": 1, "records": state}, compact=True)
+
+
+def _needs_attempt(previous: dict[str, Any] | None, retry_no_candidate: bool) -> bool:
+    if previous is None:
+        return True
+    status = previous.get("status")
+    return (
+        status in ("source-error", "source-page-error", "blocked", "not-attempted-host-blocked")
+        or (
+            status == "no-candidate"
+            and (retry_no_candidate or "source_page_candidates" not in previous)
         )
-        + "\n",
-        encoding="utf-8",
+        or (status == "needs-review" and "candidate is PNG" in previous.get("reason", ""))
     )
-    os.replace(temp, path)
 
 
 def run_pass(
@@ -396,35 +402,25 @@ def run_pass(
     output_dir.mkdir(parents=True, exist_ok=True)
     masters = output_dir.parent / "masters"
     state_path = output_dir / "state.json"
-    state = _load_state(state_path) if resume else {}
-    paintings = json.loads(catalog_path.read_text(encoding="utf-8")).get("paintings", [])
-    retryable = {"source-error", "source-page-error", "blocked", "not-attempted-host-blocked"}
+    state = state_records(state_path) if resume else {}
+    paintings = read_json(catalog_path).get("paintings", [])
     pending = [
-        p
-        for p in paintings
-        if str(p.get("id", "")) not in state
-        or state[str(p.get("id", ""))].get("status") in retryable
-        or (
-            state[str(p.get("id", ""))].get("status") == "no-candidate"
-            and (retry_no_candidate or "source_page_candidates" not in state[str(p.get("id", ""))])
-        )
-        or (
-            state[str(p.get("id", ""))].get("status") == "needs-review"
-            and "candidate is PNG" in state[str(p.get("id", ""))].get("reason", "")
-        )
+        p for p in paintings if _needs_attempt(state.get(str(p.get("id", ""))), retry_no_candidate)
     ]
-    catalog_root = catalog_path.parent
-    lock = threading.Lock()
     done = len(paintings) - len(pending)
     print(
         f"Source pass: {done}/{len(paintings)} already recorded; {len(pending)} pending; workers={workers}",
         flush=True,
     )
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = {executor.submit(process_record, p, catalog_root, masters): p for p in pending}
+        futures = {
+            executor.submit(process_record, p, catalog_path.parent, masters): str(p.get("id", ""))
+            for p in pending
+        }
         for future in concurrent.futures.as_completed(futures):
-            painting = futures[future]
-            record_id = str(painting.get("id", ""))
+            if future.cancelled():
+                continue
+            record_id = futures[future]
             try:
                 result = future.result()
             except Exception as error:
@@ -433,29 +429,30 @@ def run_pass(
                     "status": "source-error",
                     "reason": f"{type(error).__name__}: {error}",
                 }
-            with lock:
-                state[record_id] = result
-                _save_state(state_path, state)
-                done += 1
-                if done % 25 == 0 or done == len(paintings) or _blocked.is_set():
-                    print(
-                        f"Source pass progress: {done}/{len(paintings)}; accepted={sum(x.get('status') == 'accepted' for x in state.values())}; blocked={_blocked.is_set()}",
-                        flush=True,
-                    )
+            # Results still in flight after a block are saved too, so no finished download is lost.
+            state[record_id] = result
+            _save_state(state_path, state)
+            done += 1
+            if done % 25 == 0 or done == len(paintings) or _blocked.is_set():
+                print(
+                    f"Source pass progress: {done}/{len(paintings)}; accepted={sum(x.get('status') == 'accepted' for x in state.values())}; blocked={_blocked.is_set()}",
+                    flush=True,
+                )
             if _blocked.is_set():
                 for other in futures:
                     other.cancel()
-                break
     # Mark unstarted records explicitly when access has been blocked.
     if _blocked.is_set():
         for painting in paintings:
             record_id = str(painting.get("id", ""))
-            if record_id not in state:
-                state[record_id] = {
+            state.setdefault(
+                record_id,
+                {
                     "id": record_id,
                     "status": "not-attempted-host-blocked",
                     "reason": "host denied requests; rerun after access is available",
-                }
+                },
+            )
         _save_state(state_path, state)
     output_paintings = []
     for painting in paintings:
@@ -473,15 +470,8 @@ def run_pass(
             p["upgradedImageUrl"] = result["master_path"]
             p["upgradedWidth"], p["upgradedHeight"] = result["candidate_dimensions"]
         output_paintings.append(p)
-    (output_dir / "catalog.json").write_text(
-        json.dumps({"version": 1, "paintings": output_paintings}, ensure_ascii=False, indent=2)
-        + "\n",
-        encoding="utf-8",
-    )
-    counts: dict[str, int] = {}
-    for result in state.values():
-        status = result.get("status", "unknown")
-        counts[status] = counts.get(status, 0) + 1
+    write_json(output_dir / "catalog.json", {"version": 1, "paintings": output_paintings})
+    counts = collections.Counter(result.get("status", "unknown") for result in state.values())
     rows = []
     for painting in paintings:
         result = state.get(str(painting.get("id", "")), {})
@@ -517,7 +507,7 @@ def run_pass(
         "schema_version": 1,
         "record_count": len(paintings),
         "state_record_count": len(state),
-        "status_counts": counts,
+        "status_counts": dict(counts),
         "attempted_count": sum(n for k, n in counts.items() if not k.startswith("not-attempted")),
         "accepted_count": counts.get("accepted", 0),
         "source_host_blocked": _blocked.is_set(),
@@ -557,10 +547,7 @@ def main(argv: list[str] | None = None) -> int:
         resume=not args.no_resume,
         retry_no_candidate=args.retry_no_candidate,
     )
-    args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    write_json(args.report, summary)
     print(json.dumps(summary, ensure_ascii=False), flush=True)
     return 0 if not summary["source_host_blocked"] else 2
 

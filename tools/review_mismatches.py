@@ -10,95 +10,22 @@ import argparse
 import concurrent.futures
 import hashlib
 import json
+import math
 import os
-import threading
-import time
-import urllib.error
-import urllib.parse
-import urllib.request
 from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
+from tools import source_upgrades
+from tools.common import file_sha256, read_json, write_json
+from tools.source_upgrades import MAX_IMAGE_BYTES, check_image, letterbox
+
 ROOT = Path(__file__).resolve().parents[1]
-USER_AGENT = "PaintingTV/0.2 (https://github.com/Mateleo/painting-tv)"
-MAX_BYTES = 64 * 1024 * 1024
-_rate_lock = threading.Lock()
-_decode_lock = threading.Lock()
-_blocked = threading.Event()
-_last_request = 0.0
-
-
-def _encode_url(url: str) -> str:
-    parts = urllib.parse.urlsplit(url)
-    return urllib.parse.urlunsplit(
-        (
-            parts.scheme,
-            parts.netloc,
-            urllib.parse.quote(parts.path, safe="/%:@!$&'()*+,;=-._~"),
-            urllib.parse.quote(parts.query, safe="=&%/:@!$'()*+,;-._~?"),
-            urllib.parse.quote(parts.fragment, safe="%:@/?"),
-        )
-    )
-
-
-def _fetch(url: str) -> bytes:
-    global _last_request
-    if _blocked.is_set():
-        raise RuntimeError("review-host-paused-after-access-blocked")
-    with _rate_lock:
-        if _blocked.is_set():
-            raise RuntimeError("review-host-paused-after-access-blocked")
-        pause = 0.2 - (time.monotonic() - _last_request)
-        if pause > 0:
-            time.sleep(pause)
-        _last_request = time.monotonic()
-    request = urllib.request.Request(
-        _encode_url(url), headers={"User-Agent": USER_AGENT, "Accept": "image/*,*/*;q=0.8"}
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=35) as response:
-            data = response.read(MAX_BYTES + 1)
-    except urllib.error.HTTPError as error:
-        if error.code in (403, 429):
-            _blocked.set()
-        raise
-    if len(data) > MAX_BYTES:
-        raise ValueError(f"image exceeds {MAX_BYTES} bytes")
-    return data
-
-
-def _validate_image(data: bytes) -> tuple[int, int, str]:
-    import io
-
-    with _decode_lock:
-        with Image.open(io.BytesIO(data)) as image:
-            width, height = image.size
-            fmt = image.format or "unknown"
-            image.verify()
-        if fmt not in ("JPEG", "JPG") and width * height > 32_000_000:
-            raise ValueError("non-JPEG review candidate exceeds 32 megapixels")
-        with Image.open(io.BytesIO(data)) as image:
-            if fmt in ("JPEG", "JPG"):
-                image.draft("RGB", (4096, 4096))
-            image.load()
-    return width, height, fmt
 
 
 def _load_state(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {"schema_version": 1, "records": {}}
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _save_state(path: Path, state: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix(".tmp")
-    temp.write_text(
-        json.dumps(state, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8"
-    )
-    os.replace(temp, path)
+    return read_json(path) if path.exists() else {"schema_version": 1, "records": {}}
 
 
 def download_all(
@@ -106,10 +33,12 @@ def download_all(
 ) -> dict[str, Any]:
     if not 1 <= workers <= 2:
         raise ValueError("workers must be 1 or 2")
-    report = json.loads(report_path.read_text(encoding="utf-8"))
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-    source = {str(p["id"]): p for p in catalog.get("paintings", [])}
-    records = [x for x in report["records"] if x.get("status") == "rejected-visual-mismatch"]
+    records = [
+        x
+        for x in read_json(report_path)["records"]
+        if x.get("status") == "rejected-visual-mismatch"
+    ]
+    source = {str(p["id"]): p for p in read_json(catalog_path).get("paintings", [])}
     state = _load_state(state_path)
     entries = state.setdefault("records", {})
     masters_dir.mkdir(parents=True, exist_ok=True)
@@ -138,11 +67,14 @@ def download_all(
         try:
             if not item.get("source_image_url"):
                 raise ValueError("candidate URL missing")
-            data = _fetch(item["source_image_url"])
+            data = source_upgrades._request(
+                item["source_image_url"], max_bytes=MAX_IMAGE_BYTES, timeout=35
+            )
             digest = hashlib.sha256(data).hexdigest()
             if item.get("candidate_sha256") and digest != item["candidate_sha256"]:
                 raise ValueError("download SHA-256 differs from recorded source candidate")
-            width, height, fmt = _validate_image(data)
+            (width, height), fmt = check_image(data)
+            fmt = fmt or "unknown"
             if not ref_path.is_file():
                 raise FileNotFoundError(f"reference image missing: {ref_path}")
             suffix = ".png" if fmt == "PNG" else ".jpg"
@@ -177,16 +109,17 @@ def download_all(
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         futures = [executor.submit(do_one, item, ref) for item, ref in tasks]
         for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
+            if future.cancelled():
+                continue
             item_id, result = future.result()
             entries[item_id] = result
-            _save_state(state_path, state)
+            write_json(state_path, state, compact=True)
             if index % 12 == 0 or index == len(futures):
                 print(f"Downloaded {index}/{len(futures)} candidates", flush=True)
-            if _blocked.is_set():
+            if source_upgrades._blocked.is_set():
                 for pending in futures:
                     pending.cancel()
-                break
-    _save_state(state_path, state)
+    write_json(state_path, state, compact=True)
     return {
         "candidate_count": len(records),
         "downloaded_count": sum(x.get("download_status") == "ok" for x in entries.values()),
@@ -195,12 +128,10 @@ def download_all(
     }
 
 
-def _fit(image: Image.Image, size: tuple[int, int]) -> Image.Image:
-    image = image.convert("RGB")
-    image.thumbnail(size, Image.Resampling.LANCZOS)
-    canvas = Image.new("RGB", size, "#202124")
-    canvas.paste(image, ((size[0] - image.width) // 2, (size[1] - image.height) // 2))
-    return canvas
+def _thumb(path: Path) -> Image.Image:
+    with Image.open(path) as image:
+        image.draft("RGB", (560, 292))
+        return letterbox(image, (560, 292), "#202124")
 
 
 def create_contact_sheets(state_path: Path, output_dir: Path, *, per_sheet: int = 12) -> list[Path]:
@@ -213,7 +144,8 @@ def create_contact_sheets(state_path: Path, output_dir: Path, *, per_sheet: int 
     entries.sort(key=lambda pair: pair[0])
     output_dir.mkdir(parents=True, exist_ok=True)
     cell_w, cell_h = 1160, 360
-    columns, rows = 2, 6
+    columns = 2
+    rows = math.ceil(per_sheet / columns)
     font = ImageFont.load_default(size=21)
     output = []
     for start in range(0, len(entries), per_sheet):
@@ -235,17 +167,8 @@ def create_contact_sheets(state_path: Path, output_dir: Path, *, per_sheet: int 
                 fill="#c7c9ce",
                 font=font,
             )
-            ref_path = Path(entry["reference_path"])
-            cand_path = Path(entry["master_path"])
-            with Image.open(ref_path) as image:
-                image.load()
-                ref_thumb = _fit(image, (560, 292))
-            with Image.open(cand_path) as image:
-                image.draft("RGB", (512, 512))
-                image.load()
-                cand_thumb = _fit(image, (560, 292))
-            sheet.paste(ref_thumb, (x + 8, y + 60))
-            sheet.paste(cand_thumb, (x + 588, y + 60))
+            sheet.paste(_thumb(Path(entry["reference_path"])), (x + 8, y + 60))
+            sheet.paste(_thumb(Path(entry["master_path"])), (x + 588, y + 60))
             draw.text((x + 10, y + 338), "LOCAL REFERENCE", fill="#9bd49b", font=font)
             draw.text((x + 590, y + 338), "WIKIART CANDIDATE", fill="#9bd49b", font=font)
         target = output_dir / f"mismatch-review-{page:02d}.jpg"
@@ -256,7 +179,7 @@ def create_contact_sheets(state_path: Path, output_dir: Path, *, per_sheet: int 
 
 def apply_decisions(review_path: Path, state_path: Path, report_path: Path) -> dict[str, int]:
     """Apply recorded model decisions only to identical, locally verified downloads."""
-    review = json.loads(review_path.read_text(encoding="utf-8"))
+    review = read_json(review_path)
     state = _load_state(state_path)
     records = state.get("records", {})
     decisions = review.get("records", [])
@@ -284,11 +207,7 @@ def apply_decisions(review_path: Path, state_path: Path, report_path: Path) -> d
         if accepted and not master.is_file():
             raise ValueError(f"accepted candidate {item_id} master is missing")
         if accepted:
-            actual = hashlib.sha256()
-            with master.open("rb") as stream:
-                for block in iter(lambda: stream.read(1024 * 1024), b""):
-                    actual.update(block)
-            if actual.hexdigest() != digest:
+            if file_sha256(master) != digest:
                 entry["status"] = "needs-review"
                 entry.pop("accepted", None)
                 counts["stale"] += 1
@@ -310,23 +229,17 @@ def apply_decisions(review_path: Path, state_path: Path, report_path: Path) -> d
             counts["accepted"] += 1
         else:
             counts["rejected"] += 1
-    _save_state(state_path, state)
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(
-        json.dumps(
-            {
-                "schema_version": 1,
-                "method": "model visual review of paired reference and candidate thumbnails; accepted only when the same work/composition is clear and candidate dimensions are larger",
-                "reviewed_count": len(decisions),
-                "accepted_count": counts["accepted"],
-                "rejected_count": counts["rejected"],
-                "records": decisions,
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
+    write_json(state_path, state, compact=True)
+    write_json(
+        report_path,
+        {
+            "schema_version": 1,
+            "method": "model visual review of paired reference and candidate thumbnails; accepted only when the same work/composition is clear and candidate dimensions are larger",
+            "reviewed_count": len(decisions),
+            "accepted_count": counts["accepted"],
+            "rejected_count": counts["rejected"],
+            "records": decisions,
+        },
     )
     return counts
 

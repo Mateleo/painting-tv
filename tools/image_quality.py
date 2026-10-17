@@ -7,13 +7,13 @@ quality. Run with ``python -m tools.image_quality`` from the repository root.
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageFilter, ImageStat
+
+from tools.common import file_sha256, read_json, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CATALOG = ROOT / "data/catalog.json"
@@ -38,12 +38,7 @@ def audit_image(path: Path, *, entry_id: str, title: str = "", artist: str = "")
     }
     if not path.is_file():
         return result
-    result.update(file_bytes=path.stat().st_size)
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    result["sha256"] = digest.hexdigest()
+    result.update(file_bytes=path.stat().st_size, sha256=file_sha256(path))
     try:
         with Image.open(path) as image:
             fmt = image.format
@@ -85,23 +80,30 @@ def audit_image(path: Path, *, entry_id: str, title: str = "", artist: str = "")
 def run_audit(
     catalog_path: Path = DEFAULT_CATALOG, *, repo_root: Path = ROOT, include_starters: bool = True
 ) -> dict[str, Any]:
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-    items = catalog.get("paintings", [])
-    records = []
-    seen: dict[str, list[str]] = {}
-    for painting in items:
+    entries = []
+    for painting in read_json(catalog_path).get("paintings", []):
         raw_path = painting.get("imageUrl", "")
         if not raw_path or raw_path.startswith("http"):
             raw_path = painting.get("originalImageUrl", "")
+        # Catalog paths are normally data-relative; absolute and traversal paths are retained faithfully.
         path = (
             (catalog_path.parent / raw_path).resolve()
             if raw_path and not raw_path.startswith("http")
             else Path("/__unavailable__")
         )
-        # Catalog paths are normally data-relative; absolute and traversal paths are retained faithfully.
+        entries.append((path, str(painting.get("id", "")), raw_path, painting))
+    # Include the two sample assets shipped in the Android app.
+    assets = repo_root / "app/src/main/assets"
+    if include_starters and (assets / "catalog.json").exists():
+        for painting in read_json(assets / "catalog.json").get("paintings", []):
+            image = painting.get("imageUrl", "")
+            entries.append((assets / image, f"starter:{painting.get('id', '')}", image, painting))
+    records = []
+    seen: dict[str, list[str]] = {}
+    for path, entry_id, raw_path, painting in entries:
         record = audit_image(
             path,
-            entry_id=str(painting.get("id", "")),
+            entry_id=entry_id,
             title=painting.get("title", ""),
             artist=painting.get("artist", ""),
         )
@@ -109,21 +111,6 @@ def run_audit(
         if record.get("sha256"):
             seen.setdefault(record["sha256"], []).append(record["id"])
         records.append(record)
-    # Include the two sample assets shipped in the Android app.
-    asset_catalog = repo_root / "app/src/main/assets/catalog.json"
-    if include_starters and asset_catalog.exists():
-        for painting in json.loads(asset_catalog.read_text(encoding="utf-8")).get("paintings", []):
-            path = repo_root / "app/src/main/assets" / painting.get("imageUrl", "")
-            record = audit_image(
-                path,
-                entry_id=f"starter:{painting.get('id', '')}",
-                title=painting.get("title", ""),
-                artist=painting.get("artist", ""),
-            )
-            record["catalog_image"] = painting.get("imageUrl", "")
-            if record.get("sha256"):
-                seen.setdefault(record["sha256"], []).append(record["id"])
-            records.append(record)
 
     good = [record for record in records if record["status"] == "ok"]
     bins = Counter()
@@ -176,15 +163,8 @@ def write_compact(report: dict[str, Any], path: Path) -> None:
         }
         for item in report["records"]
     ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(
-            {"schema_version": 1, "record_count": len(rows), "records": rows},
-            ensure_ascii=False,
-            separators=(",", ":"),
-        )
-        + "\n",
-        encoding="utf-8",
+    write_json(
+        path, {"schema_version": 1, "record_count": len(rows), "records": rows}, compact=True
     )
 
 
@@ -200,10 +180,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     report = run_audit(args.catalog, include_starters=not args.no_starters)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    write_json(args.output, report)
     write_compact(report, args.compact)
     print(
         f"Audited {report['record_count']} records: {report['ok_count']} readable, {report['missing_count']} missing, {report['corrupt_count']} corrupt"
