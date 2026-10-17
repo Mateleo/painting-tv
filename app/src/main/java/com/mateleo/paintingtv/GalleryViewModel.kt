@@ -43,10 +43,10 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     var importMessage by mutableStateOf("")
         private set
     private var deck: ShuffleDeck? = null
-    private var playlist = emptyList<Painting>()
-    var availableCount by mutableStateOf(0)
-        private set
+    private var playlist by mutableStateOf(emptyList<Painting>())
+    val availableCount get() = playlist.size
     private val workManager = WorkManager.getInstance(application)
+    val inboxFile = File(application.getExternalFilesDir(null), "inbox/collection.zip")
 
     init {
         reload()
@@ -62,14 +62,11 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
-        val inbox = File(application.getExternalFilesDir(null), "inbox").apply { mkdirs() }
-        val zip = File(inbox, "collection.zip")
-        if (zip.isFile) {
-            val signature = "${zip.length()}:${zip.lastModified()}"
-            if (preferences.getString("inbox", null) != signature) {
-                preferences.edit().putString("inbox", signature).apply()
-                startImport("file:${zip.absolutePath}", "zip")
-            }
+        inboxFile.parentFile?.mkdirs()
+        val signature = "${inboxFile.length()}:${inboxFile.lastModified()}"
+        if (inboxFile.isFile && preferences.getString("inbox", null) != signature) {
+            preferences.edit().putString("inbox", signature).apply()
+            retryInbox()
         }
     }
 
@@ -84,40 +81,36 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     private fun rebuildPlaylist() {
         playlist = collection?.paintings.orEmpty().filter { it.meetsDisplayQuality(settings.minimumHeight, settings.crop) }
-        availableCount = playlist.size
         deck = if (playlist.isEmpty()) null else ShuffleDeck(playlist.size)
-        if (playlist.isEmpty()) {
-            painting = null
-            revision++
-            message = "No paintings meet this quality filter. Choose a lower threshold or whole-painting framing."
-            panel = true
-            interact()
-        } else next()
+        if (playlist.isNotEmpty()) return next()
+        painting = null
+        revision++
+        message = "No paintings meet this quality filter. Choose a lower threshold or whole-painting framing."
+        panel = true
+        interact()
     }
-    fun next() { deck?.let { painting = playlist[it.next()]; revision++ } }
-    fun previous() { deck?.let { painting = playlist[it.previous()]; revision++ } }
+    private fun show(index: Int?) { if (index != null) { painting = playlist[index]; revision++ } }
+    fun next() = show(deck?.next())
+    fun previous() = show(deck?.previous())
     fun interact() { controls = true; lastInteraction = android.os.SystemClock.elapsedRealtime() }
+
+    /** Media keys always act; other keys only reveal hidden controls, then pass through for focus navigation. */
     fun remoteKey(code: Int): Boolean {
-        when (code) {
-            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { playing = !playing; interact(); return true }
-            KeyEvent.KEYCODE_MEDIA_PLAY -> { playing = true; interact(); return true }
-            KeyEvent.KEYCODE_MEDIA_PAUSE -> { playing = false; interact(); return true }
-            KeyEvent.KEYCODE_MEDIA_NEXT -> { next(); interact(); return true }
-            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> { previous(); interact(); return true }
-            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER,
-            KeyEvent.KEYCODE_MENU -> {
-                val wasHidden = !controls
-                interact()
-                if (wasHidden) {
-                    if (code == KeyEvent.KEYCODE_DPAD_LEFT) previous()
-                    if (code == KeyEvent.KEYCODE_DPAD_RIGHT) next()
-                    return true
-                }
-                if (code == KeyEvent.KEYCODE_MENU) { panel = !panel; return true }
-            }
+        val hidden = !controls
+        val consumed = when (code) {
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { playing = !playing; true }
+            KeyEvent.KEYCODE_MEDIA_PLAY -> { playing = true; true }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> { playing = false; true }
+            KeyEvent.KEYCODE_MEDIA_NEXT -> { next(); true }
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> { previous(); true }
+            KeyEvent.KEYCODE_MENU -> { if (!hidden) panel = !panel; true }
+            KeyEvent.KEYCODE_DPAD_LEFT -> { if (hidden) previous(); hidden }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> { if (hidden) next(); hidden }
+            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> hidden
+            else -> return false
         }
-        return false
+        interact()
+        return consumed
     }
     fun update(value: GallerySettings) {
         val refilter = settings.minimumHeight != value.minimumHeight || settings.crop != value.crop
@@ -135,7 +128,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         interact()
     }
     fun cancelImport() { workManager.cancelUniqueWork("collection") }
-    fun inboxFile() = File(getApplication<Application>().getExternalFilesDir(null), "inbox/collection.zip")
-    fun retryInbox() { startImport("file:${inboxFile().absolutePath}", "zip") }
+    fun retryInbox() = startImport("file:${inboxFile.absolutePath}", "zip")
     fun freeSpace(): String = "%.1f GB available".format(store.root.usableSpace / 1_000_000_000.0)
 }

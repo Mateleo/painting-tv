@@ -26,5 +26,6 @@ class ShuffleDeck(private val count: Int, private val random: Random = Random.De
         return result
     }
 
-    fun previous(): Int = if (cursor > 0) history[--cursor] else history.first()
+    /** Null when there is no earlier painting to return to. */
+    fun previous(): Int? = if (cursor > 0) history[--cursor] else null
 }

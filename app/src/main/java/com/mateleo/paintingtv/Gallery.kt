@@ -41,7 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.MaterialTheme
@@ -53,29 +53,25 @@ import kotlinx.coroutines.withContext
 private val Ivory = Color(0xFFF0E7D4)
 private val Muted = Color(0xFFBDB9B0)
 private val Panel = Color(0xF5141916)
-private data class Frame(val bitmap: Bitmap, val painting: Painting, val revision: Int)
+/** Each frame owns its zoom/timer progress, so the outgoing painting keeps its scale during the dissolve. */
+private class Frame(val bitmap: Bitmap, val painting: Painting, val revision: Int) { val progress = Animatable(0f) }
 
 @Composable
 fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> Unit) {
-    val owner = LocalLifecycleOwner.current
-    val lifecycle by owner.lifecycle.currentStateFlow.collectAsStateWithLifecycle()
-    val active = lifecycle.isAtLeast(Lifecycle.State.RESUMED)
+    val active = LocalLifecycleOwner.current.lifecycle.currentStateAsState().value.isAtLeast(Lifecycle.State.RESUMED)
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current.density
     var frame by remember { mutableStateOf<Frame?>(null) }
-    var loading by remember { mutableStateOf(true) }
     val collection = vm.collection
     val painting = vm.painting
     val revision = vm.revision
     val settings = vm.settings
     val focus = remember { FocusRequester() }
     val rootFocus = remember { FocusRequester() }
-    val progress = remember(revision) { Animatable(0f) }
 
     LaunchedEffect(collection, revision) {
         if (collection == null) return@LaunchedEffect
-        if (painting == null) { frame = null; loading = false; return@LaunchedEffect }
-        loading = true
+        if (painting == null) { frame = null; return@LaunchedEffect }
         try {
             val bitmap = withContext(Dispatchers.IO) {
                 vm.store.decode(collection, painting,
@@ -85,14 +81,16 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
             vm.message = ""
         } catch (cancelled: kotlinx.coroutines.CancellationException) {
             throw cancelled
-        } catch (e: Exception) {
-            vm.message = "Cannot open ${painting.title}. Use Next to skip. ${e.message.orEmpty()}"
+        } catch (e: Throwable) { // Includes OutOfMemoryError from an oversized scan.
+            vm.message = "Cannot open ${painting.title}. ${e.message.orEmpty()}"
             vm.interact()
-        } finally { loading = false }
+            delay(5000)
+            if (vm.playing && !vm.panel) vm.next()
+        }
     }
 
     LaunchedEffect(revision, frame, settings.seconds, vm.playing, active, vm.panel) {
-        if (frame?.revision != revision || !vm.playing || !active || vm.panel) return@LaunchedEffect
+        val progress = frame?.takeIf { it.revision == revision && vm.playing && active && !vm.panel }?.progress ?: return@LaunchedEffect
         progress.animateTo(1f, tween(((1f - progress.value) * settings.seconds * 1000).toInt(), easing = LinearEasing))
         vm.next()
     }
@@ -111,12 +109,13 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
             AnimatedContent(frame, transitionSpec = { fadeIn(tween(1100)) togetherWith fadeOut(tween(1100)) },
                 label = "Painting dissolve", modifier = Modifier.fillMaxSize()) { shown ->
                 if (shown != null) {
-                    Box(Modifier.fillMaxSize().clipToBounds()) {
-                        val scale = if (shown.revision == revision && settings.zoom && settings.crop) 1f + progress.value * 0.045f else 1f
-                        Image(shown.bitmap.asImageBitmap(), contentDescription = "${shown.painting.title}, ${shown.painting.artist}",
-                            contentScale = if (settings.crop) ContentScale.Crop else ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale })
-                    }
+                    val zoom = settings.zoom && settings.crop
+                    Image(shown.bitmap.asImageBitmap(), contentDescription = "${shown.painting.title}, ${shown.painting.artist}",
+                        contentScale = if (settings.crop) ContentScale.Crop else ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize().clipToBounds().graphicsLayer {
+                            scaleX = if (zoom) 1f + shown.progress.value * 0.045f else 1f
+                            scaleY = scaleX
+                        })
                 }
             }
             val shown = frame?.painting
@@ -131,10 +130,9 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
                     }
                 }
             }
-            if (loading && frame == null) {
-                Text("Opening the gallery…", color = Ivory, modifier = Modifier.align(Alignment.Center))
-            } else if (frame == null) {
-                Text("No paintings match the selected quality filter.", color = Ivory, modifier = Modifier.align(Alignment.Center))
+            if (frame == null) {
+                Text(if (collection != null && painting == null) "No paintings match the selected quality filter." else "Opening the gallery…",
+                    color = Ivory, modifier = Modifier.align(Alignment.Center))
             }
             AnimatedVisibility(vm.controls && !vm.panel, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
                 Column(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.88f))))
@@ -149,7 +147,7 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
                         GalleryButton("Settings", onClick = { vm.panel = true; vm.interact() })
                     }
                     Box(Modifier.fillMaxWidth().height(2.dp).background(Color.White.copy(alpha = 0.15f))) {
-                        Box(Modifier.fillMaxWidth(progress.value.coerceIn(0f, 1f)).fillMaxHeight().background(Ivory))
+                        Box(Modifier.fillMaxWidth(frame?.progress?.value ?: 0f).fillMaxHeight().background(Ivory))
                     }
                 }
             }
@@ -211,7 +209,7 @@ private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload
             Text("Import a collection ZIP from USB, or download a prepared collection once. Playback uses local files.", color = Muted, fontSize = 13.sp)
             if (!vm.working) {
                 GalleryButton("Import collection ZIP", onClick = onImport)
-                if (vm.inboxFile().isFile) GalleryButton("Import inbox ZIP again", onClick = vm::retryInbox)
+                if (vm.inboxFile.isFile) GalleryButton("Import inbox ZIP again", onClick = vm::retryInbox)
                 Text("Collection manifest URL (HTTPS)", color = Ivory, fontSize = 13.sp)
                 BasicTextField(url, onValueChange = { url = it }, singleLine = true,
                     textStyle = TextStyle(color = Ivory, fontSize = 14.sp), cursorBrush = androidx.compose.ui.graphics.SolidColor(Ivory),

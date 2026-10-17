@@ -19,8 +19,19 @@ class ShuffleDeckTest {
         val deck = ShuffleDeck(10, Random(1))
         val a = deck.next()
         val b = deck.next()
+        val c = deck.next()
+        assertEquals(b, deck.previous())
         assertEquals(a, deck.previous())
+        assertNull(deck.previous())
         assertEquals(b, deck.next())
+        assertEquals(c, deck.next())
+        assertNotEquals(c, deck.next())
+    }
+    @Test fun twoPaintingsAlwaysAlternate() {
+        for (seed in 0..20) {
+            val deck = ShuffleDeck(2, Random(seed))
+            List(50) { deck.next() }.zipWithNext().forEach { (a, b) -> assertNotEquals(a, b) }
+        }
     }
     @Test fun singlePaintingKeepsPlaying() {
         val deck = ShuffleDeck(1)

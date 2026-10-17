@@ -19,6 +19,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.net.URL
 import java.security.MessageDigest
 import java.util.zip.ZipInputStream
@@ -27,18 +28,16 @@ import javax.net.ssl.HttpsURLConnection
 /** Builds a complete collection beside the live one; only a successful import replaces it. */
 class CollectionWorker(context: Context, parameters: WorkerParameters) : CoroutineWorker(context, parameters) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        setForeground(notification())
+        // Without foreground status (e.g. started from the background on Android 12+) the import still runs.
+        runCatching { setForeground(notification()) }
         val store = CollectionStore(applicationContext)
         val source = inputData.getString("source") ?: return@withContext Result.failure()
         val mode = inputData.getString("mode") ?: "zip"
         val hash = MessageDigest.getInstance("SHA-256").digest("$mode:$source".toByteArray())
             .take(12).joinToString("") { "%02x".format(it) }
-        val active = applicationContext.getSharedPreferences("gallery", Context.MODE_PRIVATE).getString("active", null)
-        val baseName = "collection-$hash"
-        val stage = File(store.root, if (active == baseName) "$baseName-next" else baseName)
+        // A retried download reuses verified files in its stage. Never mutate the active collection.
+        val stage = File(store.root, "collection-$hash".let { if (store.activeName == it) "$it-next" else it })
         try {
-            // A resumed download can reuse verified files. Never mutate the active collection.
-            require(stage.name != active) { "This collection is already installed" }
             stage.mkdirs()
             setProgress(workDataOf("message" to "Preparing collection…"))
             when (mode) {
@@ -47,7 +46,7 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
                 else -> error("Unknown import type")
             }
             val catalog = File(stage, "catalog.json")
-            require(catalog.length() <= 32L * 1024 * 1024) { "Catalog is too large" }
+            require(catalog.isFile && catalog.length() <= 32L * 1024 * 1024) { "Missing or oversized catalog.json" }
             val paintings = CollectionStore.parse(catalog.readText())
             paintings.forEachIndexed { index, painting ->
                 currentCoroutineContext().ensureActive()
@@ -67,7 +66,6 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
     private suspend fun importZip(source: String, stage: File) {
         // Restart a cancelled ZIP import cleanly; the original collection remains untouched.
         stage.deleteRecursively()
-        stage.mkdirs()
         val input = if (source.startsWith("file:")) {
             val file = File(requireNotNull(Uri.parse(source).path))
             val inbox = File(applicationContext.getExternalFilesDir(null), "inbox").canonicalFile
@@ -78,30 +76,15 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
             applicationContext.contentResolver.openInputStream(Uri.parse(source)) ?: error("Cannot open ZIP")
         }
         ZipInputStream(input.buffered()).use { zip ->
-            val buffer = ByteArray(128 * 1024)
             var files = 0
             var total = 0L
             while (true) {
-                currentCoroutineContext().ensureActive()
                 val entry = zip.nextEntry ?: break
                 val target = CollectionStore.safeFile(stage, entry.name)
                 if (entry.isDirectory) { target.mkdirs(); continue }
                 require(++files <= 40_001) { "Too many ZIP entries" }
-                target.parentFile?.mkdirs()
-                var size = 0L
-                target.outputStream().use { output ->
-                    while (true) {
-                        currentCoroutineContext().ensureActive()
-                        val read = zip.read(buffer)
-                        if (read < 0) break
-                        size += read
-                        total += read
-                        require(size <= 150L * 1024 * 1024) { "ZIP entry exceeds 150 MB" }
-                        require(total <= 100L * 1024 * 1024 * 1024) { "Collection exceeds 100 GB" }
-                        if (target.usableSpace < 32L * 1024 * 1024) throw IOException("Storage is full. Free space and retry.")
-                        output.write(buffer, 0, read)
-                    }
-                }
+                total += copy(zip, target, 150L * 1024 * 1024, "ZIP entry exceeds 150 MB")
+                require(total <= 100L * 1024 * 1024 * 1024) { "Collection exceeds 100 GB" }
                 if (files % 10 == 0) setProgress(workDataOf("message" to "Importing $files files · ${total / 1024 / 1024} MB"))
             }
         }
@@ -110,8 +93,9 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
     private suspend fun downloadCollection(source: String, stage: File) {
         val manifestFile = File(stage, "manifest.json")
         download(source, manifestFile, 32L * 1024 * 1024)
-        val json = JSONObject(manifestFile.readText())
-        val paintings = CollectionStore.parse(json.toString())
+        val text = manifestFile.readText()
+        val json = JSONObject(text)
+        val paintings = CollectionStore.parse(text)
         val entries = json.getJSONArray("paintings")
         paintings.forEachIndexed { index, painting ->
             currentCoroutineContext().ensureActive()
@@ -127,9 +111,8 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
 
     private suspend fun download(address: String, target: File, maxBytes: Long) {
         var url = URL(address)
-        target.parentFile?.mkdirs()
         val partial = File(target.path + ".partial")
-        repeat(6) { redirect ->
+        repeat(6) {
             require(url.protocol == "https") { "Download URLs must use HTTPS" }
             val connection = url.openConnection() as HttpsURLConnection
             connection.connectTimeout = 20_000
@@ -139,32 +122,36 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
             try {
                 val status = connection.responseCode
                 if (status in listOf(301, 302, 303, 307, 308)) {
-                    require(redirect < 5) { "Too many redirects" }
                     url = URL(url, connection.getHeaderField("Location") ?: error("Invalid redirect"))
                 } else {
                     require(status in 200..299) { "Download failed (HTTP $status)" }
                     require(connection.contentLengthLong <= maxBytes) { "Download is too large" }
-                    connection.inputStream.use { input ->
-                        partial.outputStream().use { output ->
-                            val buffer = ByteArray(128 * 1024)
-                            var bytes = 0L
-                            while (true) {
-                                currentCoroutineContext().ensureActive()
-                                val read = input.read(buffer)
-                                if (read < 0) break
-                                bytes += read
-                                require(bytes <= maxBytes) { "Download is too large" }
-                                if (partial.usableSpace < 32L * 1024 * 1024) throw IOException("Storage is full. Free space and retry.")
-                                output.write(buffer, 0, read)
-                            }
-                        }
-                    }
+                    connection.inputStream.use { copy(it, partial, maxBytes, "Download is too large") }
                     check(partial.renameTo(target)) { "Could not save download" }
                     return
                 }
             } finally { connection.disconnect() }
         }
         error("Too many redirects")
+    }
+
+    /** Streams [input] to [target] with cancellation, size, and free-space checks; returns the bytes written. */
+    private suspend fun copy(input: InputStream, target: File, maxBytes: Long, tooLarge: String): Long {
+        target.parentFile?.mkdirs()
+        val buffer = ByteArray(128 * 1024)
+        var size = 0L
+        target.outputStream().use { output ->
+            while (true) {
+                currentCoroutineContext().ensureActive()
+                val read = input.read(buffer)
+                if (read < 0) break
+                size += read
+                require(size <= maxBytes) { tooLarge }
+                if (target.usableSpace < 32L * 1024 * 1024) throw IOException("Storage is full. Free space and retry.")
+                output.write(buffer, 0, read)
+            }
+        }
+        return size
     }
 
     private fun notification(): ForegroundInfo {

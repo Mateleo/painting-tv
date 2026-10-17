@@ -24,38 +24,37 @@ class CollectionStore(private val context: Context) {
     private val preferences = context.getSharedPreferences("gallery", Context.MODE_PRIVATE)
     val root: File get() = File(context.getExternalFilesDir(null) ?: context.filesDir, "collections").apply { mkdirs() }
 
+    val activeName: String? get() = preferences.getString("active", null)
+
     fun load(): ArtCollection {
-        val active = preferences.getString("active", null)?.let { File(root, it) }
+        val active = activeName?.let { File(root, it) }
         if (active != null && File(active, "catalog.json").isFile) {
             return ArtCollection(parse(File(active, "catalog.json").readText()), active)
         }
         return ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
     }
 
+    /** Switches to [directory], then removes every other collection, including abandoned partial imports. */
     fun activate(directory: File, paintings: List<Painting>) {
         require(directory.parentFile?.canonicalFile == root.canonicalFile)
         require(paintings.isNotEmpty())
         paintings.forEach { require(safeFile(directory, it.imageUrl).isFile) { "Missing image: ${it.title}" } }
-        val previous = preferences.getString("active", null)
         check(preferences.edit().putString("active", directory.name).commit()) { "Could not save collection" }
-        if (previous != null && previous != directory.name) File(root, previous).deleteRecursively()
+        removeSiblings(directory)
+    }
+
+    // Leave room for Compose and the outgoing frame on televisions with small heaps.
+    private val maxPixels by lazy {
+        minOf(8_300_000L, context.getSystemService(ActivityManager::class.java).memoryClass.toLong() * 1024 * 1024 / 32)
     }
 
     @Synchronized
     fun decode(collection: ArtCollection, painting: Painting, screenWidth: Int, screenHeight: Int, crop: Boolean): Bitmap {
-        fun open(): InputStream = collection.directory?.let { safeFile(it, painting.imageUrl).inputStream() }
-            ?: context.assets.open(painting.imageUrl)
-        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        open().use { BitmapFactory.decodeStream(it, null, bounds) }
-        require(bounds.outWidth > 0 && bounds.outHeight > 0) { "Unreadable image: ${painting.title}" }
-        // Leave room for Compose and the outgoing frame on televisions with small heaps.
-        val heapMb = context.getSystemService(ActivityManager::class.java).memoryClass
-        val maxPixels = minOf(8_300_000L, heapMb.toLong() * 1024 * 1024 / 32)
+        val file = collection.directory?.let { safeFile(it, painting.imageUrl) }
         val targetWidth = screenWidth.coerceIn(1280, 3840)
         val targetHeight = screenHeight.coerceIn(720, 2160)
         if (Build.VERSION.SDK_INT >= 28) {
-            val source = collection.directory?.let { ImageDecoder.createSource(safeFile(it, painting.imageUrl)) }
-                ?: ImageDecoder.createSource(context.assets, painting.imageUrl)
+            val source = file?.let { ImageDecoder.createSource(it) } ?: ImageDecoder.createSource(context.assets, painting.imageUrl)
             return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
                 val plan = decodePlan(info.size.width, info.size.height, targetWidth, targetHeight, maxPixels, crop)
                 decoder.setTargetSize(plan.width, plan.height)
@@ -64,6 +63,10 @@ class CollectionStore(private val context: Context) {
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         }
+        fun open(): InputStream = file?.inputStream() ?: context.assets.open(painting.imageUrl)
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        open().use { BitmapFactory.decodeStream(it, null, bounds) }
+        require(bounds.outWidth > 0 && bounds.outHeight > 0) { "Unreadable image: ${painting.title}" }
         var sample = 1
         while ((bounds.outWidth / sample).toLong() * (bounds.outHeight / sample) > maxPixels ||
             (bounds.outWidth / (sample * 2) >= targetWidth && bounds.outHeight / (sample * 2) >= targetHeight)) sample *= 2
@@ -76,6 +79,10 @@ class CollectionStore(private val context: Context) {
     }
 
     companion object {
+        fun removeSiblings(directory: File) {
+            directory.parentFile?.listFiles()?.filter { it.name != directory.name }?.forEach { it.deleteRecursively() }
+        }
+
         fun safeFile(root: File, path: String): File {
             require(path.isNotBlank() && !path.startsWith("/") && !path.contains(":")) { "Expected relative image path" }
             val file = File(root, path).canonicalFile

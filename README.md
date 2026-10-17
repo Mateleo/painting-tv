@@ -67,7 +67,8 @@ Default display time is **10 seconds**. Choices are 5, 10, 30 seconds, 1, 5,
 artwork captions start enabled. Fill-screen cropping is the default; select
 **whole painting** for black margins. Whole-painting mode suppresses zoom to
 keep the edges visible. Each shuffle cycle includes every painting, with no
-immediate repeat at the boundary. The app keeps the TV awake while open.
+immediate repeat at the boundary. An image that cannot be opened is skipped
+after five seconds during playback. The app keeps the TV awake while open.
 
 Settings also offers **All / HD+ / 4K+** source-quality filters. The filter
 uses the actual source dimensions and selected framing: filling the screen
@@ -180,6 +181,8 @@ Alternatively, host an app-compatible JSON catalog and its images over HTTPS
 and enter its URL under Settings. The app downloads the entire collection,
 checks every image, and then activates it. Interrupted downloads can be retried;
 completed verified images are reused. URLs must remain stable between retries.
+A successful import deletes the previous collection and any abandoned partial
+imports.
 Private GitHub asset URLs require authentication and cannot be pasted directly
 into this unauthenticated downloader; use the downloaded ZIP for these releases.
 

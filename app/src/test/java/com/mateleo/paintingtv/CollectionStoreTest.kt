@@ -21,6 +21,16 @@ class CollectionStoreTest {
     @Test(expected = IllegalArgumentException::class) fun rejectsTraversal() { CollectionStore.safeFile(File("/tmp/gallery"), "../gallery-evil/image.jpg") }
     @Test(expected = IllegalArgumentException::class) fun rejectsAbsolutePaths() { CollectionStore.safeFile(File("/tmp/gallery"), "/etc/passwd") }
     @Test(expected = IllegalArgumentException::class) fun rejectsNetworkPathsInOfflineCollection() { CollectionStore.safeFile(File("/tmp/gallery"), "https://example.org/image.jpg") }
+    @Test fun activationCleanupKeepsOnlyTheNewCollection() {
+        val root = kotlin.io.path.createTempDirectory().toFile()
+        val keep = File(root, "collection-a").apply { mkdirs(); File(this, "catalog.json").writeText("{}") }
+        File(root, "collection-old/images").mkdirs()
+        File(root, "collection-abandoned.partial").writeText("x")
+        CollectionStore.removeSiblings(keep)
+        assertEquals(listOf("collection-a"), root.list()!!.toList())
+        assertTrue(File(keep, "catalog.json").isFile)
+        root.deleteRecursively()
+    }
     @Test fun acceptsNestedRelativePaths() {
         assertEquals(File("/tmp/gallery/images/image.jpg"), CollectionStore.safeFile(File("/tmp/gallery"), "images/image.jpg"))
     }
