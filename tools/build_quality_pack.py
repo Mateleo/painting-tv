@@ -191,7 +191,7 @@ def main() -> None:
     parser.add_argument("--commons", type=Path, default=ROOT / "data/commons-upgrades/state.json")
     parser.add_argument("--curated", type=Path, default=ROOT / "data/curated-upgrades/state.json")
     parser.add_argument("--reviewed", type=Path, default=ROOT / "data/review-upgrades/state.json")
-    parser.add_argument("--research", type=Path, default=ROOT / "data/research-upgrades/state.json")
+    parser.add_argument("--research", type=Path, default=ROOT / "catalog/research-sources.json")
     parser.add_argument("--selected", type=Path, default=ROOT / "data/selected/catalog.json")
     parser.add_argument("--pack", type=Path, default=ROOT / "data/tv-quality-pack")
     parser.add_argument("--report", type=Path, default=ROOT / "catalog/quality-upgrade-report.json")

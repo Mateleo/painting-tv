@@ -102,6 +102,15 @@ Run the review module without `--apply-decisions` to prepare paired contact
 sheets for a new review. Replaying saved decisions checks both the recorded
 candidate checksum and the bytes on disk before promotion.
 
+Researched sources (Wikidata, museum open-access APIs, artist sites) come from
+a separate manual research pass whose scripts are not part of this package.
+Its decisions, accepted and rejected, are committed in
+`catalog/research-sources.json`. Each record keeps its source page, licence,
+checksum, and pairwise review verdict. `build_quality_pack` reads it by default;
+the masters it points to stay in the ignored `data/research-masters/`.
+A missing master is skipped; re-download it from its recorded `downloadUrl` and
+compare the recorded `sha256`.
+
 `build_quality_pack` merges the available sources, chooses the strongest
 screen-fill resolution among verified candidates, keeps an original fallback,
 and produces `data/tv-quality-pack.zip`. It fully audits the selected exports
