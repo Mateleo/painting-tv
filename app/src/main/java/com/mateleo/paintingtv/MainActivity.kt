@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 when {
-                    gallery.panel -> { gallery.panel = false; gallery.interact() }
+                    gallery.panel -> gallery.closePanel()
                     gallery.controls -> gallery.controls = false
                     else -> finish()
                 }

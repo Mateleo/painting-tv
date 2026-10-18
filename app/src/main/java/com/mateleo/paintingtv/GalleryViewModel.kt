@@ -13,6 +13,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -20,14 +21,16 @@ import java.io.File
 /** The prepared collection, hosted publicly so the TV needs no account or file transfer. */
 const val COLLECTION_URL = "https://huggingface.co/datasets/Mateleo/painting-tv-collection/resolve/main/catalog.json"
 
-data class GallerySettings(val seconds: Int = 10, val zoom: Boolean = true, val captions: Boolean = true,
+val SLIDE_SECONDS = listOf(10, 30, 60, 300, 900, 3600)
+
+data class GallerySettings(val seconds: Int = 30, val zoom: Boolean = true, val captions: Boolean = true,
     val crop: Boolean = true, val minimumHeight: Int = 0)
 
 class GalleryViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences = application.getSharedPreferences("settings", 0)
     val store = CollectionStore(application)
     var settings by mutableStateOf(GallerySettings(
-        preferences.getInt("seconds", 10), preferences.getBoolean("zoom", true),
+        preferences.getInt("slideSeconds", 30).takeIf { it in SLIDE_SECONDS } ?: 30, preferences.getBoolean("zoom", true),
         preferences.getBoolean("captions", true), preferences.getBoolean("crop", true), preferences.getInt("minimumHeight", 0)))
         private set
     var collection by mutableStateOf<ArtCollection?>(null)
@@ -54,14 +57,22 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     init {
         reload()
         viewModelScope.launch {
+            var partial = 0
             workManager.getWorkInfosForUniqueWorkFlow("collection").collect { infos ->
                 val work = infos.maxByOrNull { it.generation }
                 working = infos.any { !it.state.isFinished }
                 work?.let {
+                    val download = "download" in it.tags
                     importMessage = if (it.state.isFinished) it.outputData.getString("message")
-                        ?: if (it.state == WorkInfo.State.CANCELLED) "Import cancelled. Your gallery is unchanged." else ""
+                        ?: if (it.state == WorkInfo.State.CANCELLED) {
+                            if (download) "Download paused. Downloaded paintings stay in the gallery." else "Import cancelled."
+                        } else ""
                     else it.progress.getString("message") ?: "Preparing collection…"
-                    if (it.state == WorkInfo.State.SUCCEEDED) reload()
+                    // Pick up paintings as they finish downloading, and whatever is kept after a stop.
+                    val published = it.progress.getInt("partial", 0)
+                    if (published != partial) { partial = published; reload() }
+                    // A cancelled worker saves its last paintings just after the state changes.
+                    if (it.state.isFinished) { reload(); launch { delay(2_000); reload() } }
                 }
             }
         }
@@ -76,9 +87,10 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     private fun reload() = viewModelScope.launch {
         try {
             val loaded = withContext(Dispatchers.IO) { store.load() }
-            if (collection?.directory == loaded.directory && collection != null) return@launch
+            val current = collection
+            if (current != null && current.directory == loaded.directory && current.paintings.size == loaded.paintings.size) return@launch
             collection = loaded
-            rebuildPlaylist()
+            rebuildPlaylist(keepCurrent = current != null)
             // Point a fresh install with only the starter paintings at the one-press download, once.
             if (loaded.directory == null && !preferences.getBoolean("offeredCollection", false)) {
                 preferences.edit().putBoolean("offeredCollection", true).apply()
@@ -89,9 +101,11 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         } catch (e: Exception) { message = e.message ?: "Could not open collection" }
     }
 
-    private fun rebuildPlaylist() {
+    /** With [keepCurrent], a growing collection lets the painting on screen finish its time. */
+    private fun rebuildPlaylist(keepCurrent: Boolean = false) {
         playlist = collection?.paintings.orEmpty().filter { it.meetsDisplayQuality(settings.minimumHeight, settings.crop) }
         deck = if (playlist.isEmpty()) null else ShuffleDeck(playlist.size)
+        if (keepCurrent && painting != null && playlist.isNotEmpty()) return
         if (playlist.isNotEmpty()) return next()
         painting = null
         revision++
@@ -125,19 +139,20 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     fun update(value: GallerySettings) {
         val refilter = settings.minimumHeight != value.minimumHeight || settings.crop != value.crop
         settings = value
-        preferences.edit().putInt("seconds", value.seconds).putBoolean("zoom", value.zoom)
+        preferences.edit().putInt("slideSeconds", value.seconds).putBoolean("zoom", value.zoom)
             .putBoolean("captions", value.captions).putBoolean("crop", value.crop).putInt("minimumHeight", value.minimumHeight).apply()
         if (refilter && collection != null) rebuildPlaylist()
         interact()
     }
     fun startImport(source: String, mode: String) {
         val request = OneTimeWorkRequestBuilder<CollectionWorker>()
-            .setInputData(workDataOf("source" to source, "mode" to mode)).build()
+            .setInputData(workDataOf("source" to source, "mode" to mode)).addTag(mode).build()
         workManager.enqueueUniqueWork("collection", ExistingWorkPolicy.KEEP, request)
         panel = true
         interact()
     }
     fun cancelImport() { workManager.cancelUniqueWork("collection") }
+    fun closePanel() { panel = false; controls = false }
     fun retryInbox() = startImport("file:${inboxFile.absolutePath}", "zip")
     fun freeSpace(): String = "%.1f GB available".format(store.root.usableSpace / 1_000_000_000.0)
 }

@@ -13,14 +13,10 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -32,9 +28,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
@@ -69,7 +65,8 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
     val focus = remember { FocusRequester() }
     val rootFocus = remember { FocusRequester() }
 
-    LaunchedEffect(collection, revision) {
+    // Keyed on the revision only: a collection that grows during a download keeps the painting on screen.
+    LaunchedEffect(revision) {
         if (collection == null) return@LaunchedEffect
         if (painting == null) { frame = null; return@LaunchedEffect }
         try {
@@ -157,77 +154,80 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
 }
 
 @Composable
-private fun GalleryButton(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(onClick, modifier, colors = ButtonDefaults.colors(containerColor = Color.White.copy(alpha = 0.09f),
+private fun GalleryButton(label: String, modifier: Modifier = Modifier, selected: Boolean = false, onClick: () -> Unit) {
+    Button(onClick, modifier, colors = ButtonDefaults.colors(
+        containerColor = if (selected) Ivory.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.09f),
         contentColor = Ivory, focusedContainerColor = Ivory, focusedContentColor = Color(0xFF171C18))) {
-        Text(label, fontSize = 14.sp)
+        Text(label, fontSize = 14.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
     }
 }
 
 @Composable
+private fun Heading(text: String) = Text(text, color = Muted, fontSize = 13.sp)
+
+@Composable
 private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> Unit) {
     val settings = vm.settings
+    val collection = vm.collection
     val focus = remember { FocusRequester() }
     val downloadFocus = remember { FocusRequester() }
-    // A starter-only install opens on the download button so one OK press fetches the collection.
-    val starter = vm.collection?.directory == null && !vm.working
-    var url by rememberSaveable { mutableStateOf("") }
-    LaunchedEffect(Unit) { delay(100); (if (starter) downloadFocus else focus).requestFocus() }
+    val cancelFocus = remember { FocusRequester() }
+    // Until the full collection is in, the panel opens on the download button so one OK press fetches it.
+    val incomplete = collection != null && (collection.directory == null || collection.partial)
+    val offerDownload = incomplete && !vm.working
+    // Also moves focus when the pressed download/cancel button is swapped for the other.
+    LaunchedEffect(vm.working) {
+        delay(100)
+        runCatching { (if (vm.working) cancelFocus else if (offerDownload) downloadFocus else focus).requestFocus() }
+    }
     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.CenterEnd) {
         Column(Modifier.width(560.dp).fillMaxHeight().background(Panel).verticalScroll(rememberScrollState()).padding(32.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text("Gallery settings", color = Ivory, fontSize = 27.sp, fontFamily = FontFamily.Serif, modifier = Modifier.weight(1f))
-                GalleryButton("Done", Modifier.focusRequester(focus), onClick = { vm.panel = false; vm.interact() })
+                Text("Settings", color = Ivory, fontSize = 27.sp, fontFamily = FontFamily.Serif, modifier = Modifier.weight(1f))
+                GalleryButton("Done", Modifier.focusRequester(focus), onClick = vm::closePanel)
             }
-            Text("Pause here. Your gallery resumes when you close settings.", color = Muted, fontSize = 13.sp)
-            Text("Time with each painting", color = Ivory, fontSize = 16.sp)
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                listOf(listOf(5, 10, 30), listOf(60, 300, 900, 3600)).forEach { group ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        group.forEach { seconds ->
-                            val label = if (seconds < 60) "${seconds}s" else if (seconds < 3600) "${seconds / 60}m" else "1h"
-                            GalleryButton((if (seconds == settings.seconds) "• " else "") + label,
-                                onClick = { vm.update(settings.copy(seconds = seconds)) })
-                        }
-                    }
+            Heading("Time per painting")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SLIDE_SECONDS.forEach { seconds ->
+                    val label = if (seconds < 60) "${seconds}s" else if (seconds < 3600) "${seconds / 60}m" else "1h"
+                    GalleryButton(label, selected = seconds == settings.seconds, onClick = { vm.update(settings.copy(seconds = seconds)) })
                 }
             }
-            GalleryButton("Gentle zoom: ${if (settings.zoom) "on" else "off"}", onClick = { vm.update(settings.copy(zoom = !settings.zoom)) })
-            GalleryButton("Artwork captions: ${if (settings.captions) "on" else "off"}", onClick = { vm.update(settings.copy(captions = !settings.captions)) })
-            GalleryButton("Framing: ${if (settings.crop) "fill screen" else "whole painting"}", onClick = { vm.update(settings.copy(crop = !settings.crop)) })
-            Text("Whole painting adds black margins and keeps the image still so its edges stay visible.", color = Muted, fontSize = 12.sp)
-            Text("Minimum source quality", color = Ivory, fontSize = 16.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Heading("Framing")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                GalleryButton("Fill screen", selected = settings.crop, onClick = { vm.update(settings.copy(crop = true)) })
+                GalleryButton("Whole painting", selected = !settings.crop, onClick = { vm.update(settings.copy(crop = false)) })
+            }
+            Heading("Display")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Zoom only applies when the painting fills the screen.
+                if (settings.crop) GalleryButton("Slow zoom", selected = settings.zoom, onClick = { vm.update(settings.copy(zoom = !settings.zoom)) })
+                GalleryButton("Captions", selected = settings.captions, onClick = { vm.update(settings.copy(captions = !settings.captions)) })
+            }
+            Heading("Image quality")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 listOf(0 to "All", 1080 to "HD+", 2160 to "4K+").forEach { (height, label) ->
-                    GalleryButton((if (settings.minimumHeight == height) "• " else "") + label,
-                        onClick = { vm.update(settings.copy(minimumHeight = height)) })
+                    GalleryButton(label, selected = settings.minimumHeight == height, onClick = { vm.update(settings.copy(minimumHeight = height)) })
+                }
+                Text("${vm.availableCount} paintings", color = Muted, fontSize = 13.sp, modifier = Modifier.padding(start = 8.dp))
+            }
+            Spacer(Modifier.height(4.dp))
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.12f)))
+            Heading("Collection · ${collection?.paintings?.size ?: 0} paintings · ${vm.freeSpace()}")
+            if (vm.working) {
+                if (vm.importMessage.isNotBlank()) Text(vm.importMessage, color = Ivory, fontSize = 14.sp)
+                GalleryButton("Cancel", Modifier.focusRequester(cancelFocus), onClick = vm::cancelImport)
+            } else {
+                if (vm.importMessage.isNotBlank()) Text(vm.importMessage, color = Ivory, fontSize = 13.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (incomplete) GalleryButton(if (collection?.partial == true) "Resume download" else "Download all · 2.9 GB",
+                        Modifier.focusRequester(downloadFocus), onClick = { onDownload(COLLECTION_URL) })
+                    GalleryButton("Import ZIP", onClick = onImport)
+                    if (vm.inboxFile.isFile) GalleryButton("Import inbox ZIP", onClick = vm::retryInbox)
                 }
             }
-            Text("${vm.availableCount} of ${vm.collection?.paintings?.size ?: 0} match this framing and quality. A larger file cannot restore detail missing from its source.", color = Muted, fontSize = 12.sp)
-            vm.painting?.let { Text("Current source: ${it.width} × ${it.height} pixels", color = Muted, fontSize = 12.sp) }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.12f)))
-            Text("Offline collection", color = Ivory, fontSize = 21.sp, fontFamily = FontFamily.Serif)
-            Text("${vm.collection?.paintings?.size ?: 0} paintings installed · ${vm.freeSpace()}", color = Muted, fontSize = 13.sp)
-            Text("Download the full collection once over the internet, or import a ZIP from USB. Playback uses local files.", color = Muted, fontSize = 13.sp)
-            if (!vm.working) {
-                GalleryButton("Download full collection (about 2.9 GB)", Modifier.focusRequester(downloadFocus), onClick = { onDownload(COLLECTION_URL) })
-                Text("Resumable: if it stops, choose it again and finished images are kept.", color = Muted, fontSize = 12.sp)
-                GalleryButton("Import collection ZIP", onClick = onImport)
-                if (vm.inboxFile.isFile) GalleryButton("Import inbox ZIP again", onClick = vm::retryInbox)
-                Text("Or another collection manifest URL (HTTPS)", color = Ivory, fontSize = 13.sp)
-                BasicTextField(url, onValueChange = { url = it }, singleLine = true,
-                    textStyle = TextStyle(color = Ivory, fontSize = 14.sp), cursorBrush = androidx.compose.ui.graphics.SolidColor(Ivory),
-                    modifier = Modifier.fillMaxWidth().border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(6.dp)).padding(14.dp),
-                    decorationBox = { inner -> if (url.isEmpty()) Text("https://…/catalog.json", color = Muted, fontSize = 14.sp); inner() })
-                GalleryButton("Download from this URL", onClick = {
-                    if (url.trim().startsWith("https://")) onDownload(url.trim())
-                    else vm.message = "Enter an HTTPS manifest URL, or import a ZIP."
-                })
-            } else GalleryButton("Cancel import", onClick = vm::cancelImport)
-            if (vm.importMessage.isNotBlank()) Text(vm.importMessage, color = Ivory, fontSize = 13.sp)
             if (vm.message.isNotBlank()) Text(vm.message, color = Color(0xFFFFD1A4), fontSize = 13.sp)
-            Text("Painting TV · Sources and image credits are preserved in the collection catalog.", color = Muted, fontSize = 11.sp)
         }
     }
 }

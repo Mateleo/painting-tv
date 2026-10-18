@@ -12,18 +12,30 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.zip.ZipInputStream
 import javax.net.ssl.HttpsURLConnection
+
+private const val PARALLEL_DOWNLOADS = 8
 
 /** Builds a complete collection beside the live one; only a successful import replaces it. */
 class CollectionWorker(context: Context, parameters: WorkerParameters) : CoroutineWorker(context, parameters) {
@@ -48,7 +60,7 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
             val catalog = File(stage, "catalog.json")
             require(catalog.isFile && catalog.length() <= 32L * 1024 * 1024) { "Missing or oversized catalog.json" }
             val paintings = CollectionStore.parse(catalog.readText())
-            paintings.forEachIndexed { index, painting ->
+            if (mode == "zip") paintings.forEachIndexed { index, painting ->
                 currentCoroutineContext().ensureActive()
                 val image = CollectionStore.safeFile(stage, painting.imageUrl)
                 require(isImage(image)) { "Missing or invalid image: ${painting.title}" }
@@ -91,25 +103,76 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
     }
 
     private suspend fun downloadCollection(source: String, stage: File) {
+        val store = CollectionStore(applicationContext)
         val manifestFile = File(stage, "manifest.json")
         download(source, manifestFile, 32L * 1024 * 1024)
         val text = manifestFile.readText()
         val json = JSONObject(text)
         val paintings = CollectionStore.parse(text)
         val entries = json.getJSONArray("paintings")
-        paintings.forEachIndexed { index, painting ->
-            currentCoroutineContext().ensureActive()
-            // Relative image paths are hosted beside the manifest; keep the file type for the decoder.
+        // Relative image paths are hosted beside the manifest; keep the file type for the decoder.
+        val addresses = paintings.mapIndexed { index, painting ->
             val address = URL(URL(source), painting.imageUrl)
             val extension = address.path.substringAfterLast('.', "").lowercase().takeIf { it in setOf("jpg", "jpeg", "png", "webp") } ?: "jpg"
             val path = "images/${painting.id}.$extension"
-            val target = CollectionStore.safeFile(stage, path)
-            setProgress(workDataOf("message" to "Downloading ${index + 1} / ${paintings.size} · ${painting.title}"))
-            if (!isImage(target)) download(address.toString(), target, 150L * 1024 * 1024)
-            require(isImage(target)) { "Invalid image from source: ${painting.title}" }
             entries.getJSONObject(index).put("imageUrl", path)
+            address.toString() to CollectionStore.safeFile(stage, path)
+        }
+        val done = BooleanArray(paintings.size)
+        val ready = AtomicInteger()
+        val next = AtomicInteger()
+        val publishing = Mutex()
+        var published = 0
+        var publishedAt = 0L
+        val reportedAt = AtomicLong()
+        // Lets the gallery play finished paintings while the rest download, and after a cancel.
+        suspend fun publish(force: Boolean) = publishing.withLock {
+            val count = ready.get()
+            val now = SystemClock.elapsedRealtime()
+            if (count == published || (!force && published > 0 && now - publishedAt < 20_000)) return@withLock
+            val finished = JSONArray()
+            synchronized(done) { for (index in done.indices) if (done[index]) finished.put(entries.getJSONObject(index)) }
+            store.publishPartial(stage, JSONObject().put("version", 1).put("paintings", finished).toString())
+            published = count
+            publishedAt = now
+            // A cancelled worker may no longer accept progress; the saved paintings are what matters.
+            runCatching { setProgress(workDataOf("message" to "Downloading $count / ${paintings.size}", "partial" to count)) }
+        }
+        try {
+            coroutineScope {
+                repeat(PARALLEL_DOWNLOADS) {
+                    launch {
+                        while (true) {
+                            val index = next.getAndIncrement()
+                            if (index >= paintings.size) break
+                            val (address, target) = addresses[index]
+                            if (!isImage(target)) downloadWithRetry(address, target)
+                            require(isImage(target)) { "Invalid image from source: ${paintings[index].title}" }
+                            synchronized(done) { done[index] = true }
+                            val count = ready.incrementAndGet()
+                            if (count >= 3) publish(force = false)
+                            val now = SystemClock.elapsedRealtime()
+                            val last = reportedAt.get()
+                            if (now - last > 500 && reportedAt.compareAndSet(last, now)) {
+                                setProgress(workDataOf("message" to "Downloading $count / ${paintings.size}", "partial" to published))
+                            }
+                        }
+                    }
+                }
+            }
+        } finally {
+            withContext(NonCancellable) { publish(force = true) }
         }
         File(stage, "catalog.json").writeText(json.toString())
+    }
+
+    /** Network hiccups on a long download should not stop the whole collection. */
+    private suspend fun downloadWithRetry(address: String, target: File) {
+        repeat(2) { attempt ->
+            try { return download(address, target, 150L * 1024 * 1024) }
+            catch (e: IOException) { delay(2_000L * (attempt + 1)) }
+        }
+        download(address, target, 150L * 1024 * 1024)
     }
 
     private suspend fun download(address: String, target: File, maxBytes: Long) {
@@ -122,18 +185,23 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
             connection.readTimeout = 30_000
             connection.instanceFollowRedirects = false
             connection.setRequestProperty("User-Agent", "PaintingTV/0.1 (personal art viewer)")
+            // Read each body to the end and close it, without disconnect(), so the connection is reused.
             try {
                 val status = connection.responseCode
                 if (status in listOf(301, 302, 303, 307, 308)) {
                     url = URL(url, connection.getHeaderField("Location") ?: error("Invalid redirect"))
+                    connection.inputStream.use { it.readBytes() }
                 } else {
-                    require(status in 200..299) { "Download failed (HTTP $status)" }
+                    if (status !in 200..299) throw IOException("Download failed (HTTP $status)")
                     require(connection.contentLengthLong <= maxBytes) { "Download is too large" }
                     connection.inputStream.use { copy(it, partial, maxBytes, "Download is too large") }
                     check(partial.renameTo(target)) { "Could not save download" }
                     return
                 }
-            } finally { connection.disconnect() }
+            } catch (e: Exception) {
+                connection.disconnect()
+                throw e
+            }
         }
         error("Too many redirects")
     }

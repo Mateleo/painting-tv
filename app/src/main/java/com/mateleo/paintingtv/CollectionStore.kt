@@ -18,7 +18,8 @@ data class Painting(
     val width: Int, val height: Int, val sourceUrl: String, val license: String,
 )
 
-data class ArtCollection(val paintings: List<Painting>, val directory: File? = null)
+/** [partial] marks a download still in progress (or paused): only its finished paintings are listed. */
+data class ArtCollection(val paintings: List<Painting>, val directory: File? = null, val partial: Boolean = false)
 
 class CollectionStore(private val context: Context) {
     private val preferences = context.getSharedPreferences("gallery", Context.MODE_PRIVATE)
@@ -28,10 +29,34 @@ class CollectionStore(private val context: Context) {
 
     fun load(): ArtCollection {
         val active = activeName?.let { File(root, it) }
-        if (active != null && File(active, "catalog.json").isFile) {
-            return ArtCollection(parse(File(active, "catalog.json").readText()), active)
-        }
-        return ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
+        val collection = if (active != null && File(active, "catalog.json").isFile) {
+            ArtCollection(parse(File(active, "catalog.json").readText()), active)
+        } else loadPartial() ?: ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
+        return collection.copy(paintings = collection.paintings.map { it.copy(title = frenchTitles[it.id] ?: it.title) })
+    }
+
+    private fun loadPartial(): ArtCollection? {
+        val directory = preferences.getString("partial", null)?.let { File(root, it) } ?: return null
+        val catalog = File(directory, PARTIAL_CATALOG)
+        if (!catalog.isFile) return null
+        return runCatching { ArtCollection(parse(catalog.readText()), directory, partial = true) }.getOrNull()
+    }
+
+    /** Records the paintings of an unfinished download so the gallery can already show them. */
+    fun publishPartial(directory: File, catalog: String) {
+        require(directory.parentFile?.canonicalFile == root.canonicalFile)
+        val temporary = File(directory, "$PARTIAL_CATALOG.tmp")
+        temporary.writeText(catalog)
+        check(temporary.renameTo(File(directory, PARTIAL_CATALOG))) { "Could not save download progress" }
+        preferences.edit().putString("partial", directory.name).apply()
+    }
+
+    // The source deck mixes English and French titles; show the French one where it is known.
+    private val frenchTitles: Map<String, String> by lazy {
+        runCatching {
+            val json = JSONObject(context.assets.open("titles-fr.json").bufferedReader().use { it.readText() })
+            json.keys().asSequence().associateWith { json.getString(it) }
+        }.getOrDefault(emptyMap())
     }
 
     /** Switches to [directory], then removes every other collection, including abandoned partial imports. */
@@ -39,7 +64,8 @@ class CollectionStore(private val context: Context) {
         require(directory.parentFile?.canonicalFile == root.canonicalFile)
         require(paintings.isNotEmpty())
         paintings.forEach { require(safeFile(directory, it.imageUrl).isFile) { "Missing image: ${it.title}" } }
-        check(preferences.edit().putString("active", directory.name).commit()) { "Could not save collection" }
+        check(preferences.edit().putString("active", directory.name).remove("partial").commit()) { "Could not save collection" }
+        File(directory, PARTIAL_CATALOG).delete()
         removeSiblings(directory)
     }
 
@@ -79,6 +105,8 @@ class CollectionStore(private val context: Context) {
     }
 
     companion object {
+        private const val PARTIAL_CATALOG = "partial.json"
+
         fun removeSiblings(directory: File) {
             directory.parentFile?.listFiles()?.filter { it.name != directory.name }?.forEach { it.deleteRecursively() }
         }
