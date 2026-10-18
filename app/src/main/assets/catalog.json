@@ -1,29 +1,29 @@
 {
-  "version": 1,
+  "version": 2,
   "paintings": [
     {
       "id": "met-436535",
       "title": "Champ de blé avec cyprès",
       "artist": "Vincent van Gogh",
       "year": "1889",
-      "movement": "",
+      "collection": "Metropolitan Museum of Art, New York",
       "imageUrl": "images/met-436535.jpg",
       "width": 3840,
       "height": 3057,
-      "sourceUrl": "https://www.metmuseum.org/art/collection/search/436535",
-      "license": "CC0 — The Metropolitan Museum of Art"
+      "license": "CC0 — The Metropolitan Museum of Art",
+      "sourceUrl": "https://www.metmuseum.org/art/collection/search/436535"
     },
     {
       "id": "met-435882",
       "title": "Nature morte aux pommes et pot de primevères",
       "artist": "Paul Cézanne",
       "year": "ca. 1890",
-      "movement": "",
+      "collection": "Metropolitan Museum of Art, New York",
       "imageUrl": "images/met-435882.jpg",
       "width": 3807,
       "height": 3021,
-      "sourceUrl": "https://www.metmuseum.org/art/collection/search/435882",
-      "license": "CC0 — The Metropolitan Museum of Art"
+      "license": "CC0 — The Metropolitan Museum of Art",
+      "sourceUrl": "https://www.metmuseum.org/art/collection/search/435882"
     }
   ]
 }

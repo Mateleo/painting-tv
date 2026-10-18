@@ -28,7 +28,7 @@ from typing import Any
 
 from PIL import Image, ImageChops, ImageStat
 
-from tools.common import read_json, state_records, write_json
+from tools.common import enrich_collection_metadata, read_json, state_records, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 USER_AGENT = "PaintingTV/0.2 (https://github.com/Mateleo/painting-tv)"
@@ -470,6 +470,7 @@ def run_pass(
             p["upgradedImageUrl"] = result["master_path"]
             p["upgradedWidth"], p["upgradedHeight"] = result["candidate_dimensions"]
         output_paintings.append(p)
+    output_paintings = enrich_collection_metadata(output_paintings)
     write_json(output_dir / "catalog.json", {"version": 1, "paintings": output_paintings})
     counts = collections.Counter(result.get("status", "unknown") for result in state.values())
     rows = []

@@ -4,7 +4,7 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class DisplayQualityTest {
-    private fun image(width: Int, height: Int) = Painting("id", "Title", "Artist", "", "", "images/a.jpg", width, height, "", "")
+    private fun image(width: Int, height: Int) = Painting("id", "Title", "Artist", "", "", "", "images/a.jpg", width, height, "", "")
 
     @Test fun portraitCanFitAtNativeResolutionButNeedsMoreWidthForFill() {
         val portrait = image(1800, 3000)

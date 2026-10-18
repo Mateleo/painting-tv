@@ -109,16 +109,35 @@ and its referenced images. No distribution archive is created. It fully audits t
 and records every original note in `catalog/quality-upgrade-report.json` and CSV.
 `quality_review` generates the searchable, self-contained HTML review.
 
+Two small committed maps feed every export, keyed by painting ID:
+`catalog/titles-fr.json` gives the French title where the deck has an English
+one, and `catalog/collections.json` gives the holding collection label. A
+painting missing from the label map has no collection. The holdings research
+that produces the label map is internal and kept out of the repository and the
+dataset, under the ignored `.research/collections/`; it writes only
+`catalog/collections.json` here.
+
 The app's built-in **Download full collection** reads
-`https://huggingface.co/datasets/Mateleo/painting-tv-collection`. To publish a
-rebuilt pack there, upload `catalog.json`, the dataset card `README.md`, and only
-the images that catalog references (the pack folder can hold stale exports):
+`https://huggingface.co/datasets/Mateleo/painting-collection`. Export the
+quality pack as that dataset, then upload it:
 
-    hf upload Mateleo/painting-tv-collection data/hf-upload . --repo-type dataset
+    uv run --locked --extra images python -m tools.export_dataset
+    hf upload Mateleo/painting-collection data/hf-upload . --repo-type dataset --delete "*"
 
-Downloading again on a TV that already has this collection fetches every image
-again into a separate stage; resuming reuses images only within an unfinished
-download.
+The export rebuilds `data/hf-upload/` with:
+
+- `catalog.json`: the app contract, version 2. Only the fields the app reads,
+  French titles applied, compact.
+- `images/`: hard links to the pack images the catalog references; stale files
+  are removed.
+- `metadata.jsonl`: one row per image (`file_name`, display fields, source,
+  licence, credit, bytes, SHA-256) for the Hub dataset viewer.
+- `README.md`: the dataset card from `tools/dataset-card.md`, whose `configs`
+  block points the viewer at `metadata.jsonl` and `images/`.
+
+`--delete "*"` removes remote files the new export no longer has. Downloading
+again on a TV that already has this collection fetches every image again into a
+separate stage; resuming reuses images only within an unfinished download.
 
 The encoder preserves source dimensions by default. It copies already compact
 JPEGs unchanged, tries high-quality WebP where useful, and keeps the original

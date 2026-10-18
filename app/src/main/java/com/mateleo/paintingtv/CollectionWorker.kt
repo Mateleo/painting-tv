@@ -91,7 +91,7 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
             if (count == published || (!force && published > 0 && now - publishedAt < 20_000)) return@withLock
             val finished = JSONArray()
             synchronized(done) { for (index in done.indices) if (done[index]) finished.put(entries.getJSONObject(index)) }
-            store.publishPartial(stage, JSONObject().put("version", 1).put("paintings", finished).toString())
+            store.publishPartial(stage, JSONObject().put("version", CollectionStore.CATALOG_VERSION).put("paintings", finished).toString())
             published = count
             publishedAt = now
             // A cancelled worker may no longer accept progress; the saved paintings are what matters.

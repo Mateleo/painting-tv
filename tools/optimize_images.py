@@ -17,7 +17,7 @@ from typing import Any
 
 from PIL import Image, ImageChops, ImageCms, ImageOps, ImageStat, features
 
-from tools.common import read_json, write_json
+from tools.common import enrich_collection_metadata, read_json, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
@@ -71,7 +71,7 @@ def color_convert(image: Image.Image) -> tuple[Image.Image, str]:
             if result is None:
                 raise ValueError("ICC conversion returned no image")
             return result, "converted to sRGB from embedded ICC profile"
-        except OSError, ValueError, ImageCms.PyCMSError:
+        except (OSError, ValueError, ImageCms.PyCMSError):
             # Preserve the profile in an untouched original rather than guessing its colors.
             return image.convert("RGB"), "unhandled ICC profile; keep original"
     return image.convert("RGB"), "assumed sRGB (no embedded ICC profile)"
@@ -311,7 +311,7 @@ def build_pack(
         records.append(item)
         if (index + 1) % 25 == 0:
             print(f"Compressed/checked {index + 1}/{len(items)}", flush=True)
-    manifest = {"version": 1, "paintings": records}
+    manifest = {"version": 1, "paintings": enrich_collection_metadata(records)}
     write_json(output / "catalog.json", manifest)
     kept = [state[item["id"]] for item in records]
     report = {

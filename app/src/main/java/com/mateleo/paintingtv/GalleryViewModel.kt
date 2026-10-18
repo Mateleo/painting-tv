@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The prepared collection, hosted publicly so the TV needs no account or file transfer. */
-const val COLLECTION_URL = "https://huggingface.co/datasets/Mateleo/painting-tv-collection/resolve/main/catalog.json"
+const val COLLECTION_URL = "https://huggingface.co/datasets/Mateleo/painting-collection/resolve/main/catalog.json"
 
 val SLIDE_SECONDS = listOf(10, 30, 60, 300, 900, 3600)
 

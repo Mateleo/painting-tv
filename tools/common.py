@@ -7,6 +7,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+COLLECTIONS = ROOT / "catalog" / "collections.json"
+
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -24,6 +27,25 @@ def write_json(path: Path, value: Any, *, compact: bool = False) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(value, ensure_ascii=False, **layout) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def enrich_collection_metadata(paintings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Set each painting's ``collection`` label from ``catalog/collections.json``.
+
+    The map is the only source of collection labels, so a painting it omits
+    has none. The research behind it stays outside the repository.
+    """
+    labels = read_json(COLLECTIONS) if COLLECTIONS.exists() else {}
+    result = []
+    for painting in paintings:
+        item = {key: value for key, value in painting.items() if key != "collectionResearch"}
+        label = labels.get(str(item.get("id", "")))
+        if label:
+            item["collection"] = label
+        else:
+            item.pop("collection", None)
+        result.append(item)
+    return result
 
 
 def file_sha256(path: Path) -> str:

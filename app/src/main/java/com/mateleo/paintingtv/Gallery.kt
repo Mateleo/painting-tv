@@ -122,7 +122,7 @@ fun Gallery(vm: GalleryViewModel, onDownload: () -> Unit) {
                     .padding(start = 42.dp, end = 42.dp, top = 60.dp, bottom = if (vm.controls) 116.dp else 34.dp)) {
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text(shown.title, color = Color.White, fontSize = 25.sp, fontStyle = FontStyle.Italic, fontFamily = FontFamily.Serif)
-                        Text(listOf(shown.artist, shown.year, shown.movement).filter { it.isNotBlank() }.joinToString("  ·  "),
+                        Text(listOf(shown.artist, shown.year, shown.movement, shown.collection).filter { it.isNotBlank() }.joinToString("  ·  "),
                             color = Color.White.copy(alpha = 0.86f), fontSize = 14.sp)
                     }
                 }

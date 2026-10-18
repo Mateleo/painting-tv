@@ -24,7 +24,7 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-from tools.common import read_json, write_json
+from tools.common import enrich_collection_metadata, read_json, write_json
 
 DECK_ID = 171273480
 ANKI_INFO = "https://ankiweb.net/svc/shared/item-info"
@@ -269,6 +269,7 @@ def extract_apkg(apkg: Path, out_dir: Path) -> list[dict[str, Any]]:
                 "resolution": {"status": "unresolved", "confidence": 0.0, "candidates": []},
             }
         )
+    paintings = enrich_collection_metadata(paintings)
     write_json(out_dir / "catalog.json", {"version": 1, "paintings": paintings})
     return paintings
 

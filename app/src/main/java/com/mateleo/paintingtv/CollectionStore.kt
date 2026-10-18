@@ -14,7 +14,7 @@ import java.io.InputStream
 
 data class Painting(
     val id: String, val title: String, val artist: String,
-    val year: String, val movement: String, val imageUrl: String,
+    val year: String, val movement: String, val collection: String, val imageUrl: String,
     val width: Int, val height: Int, val sourceUrl: String, val license: String,
 )
 
@@ -29,10 +29,9 @@ class CollectionStore(private val context: Context) {
 
     fun load(): ArtCollection {
         val active = activeName?.let { File(root, it) }
-        val collection = if (active != null && File(active, "catalog.json").isFile) {
+        return if (active != null && File(active, "catalog.json").isFile) {
             ArtCollection(parse(File(active, "catalog.json").readText()), active)
         } else loadPartial() ?: ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
-        return collection.copy(paintings = collection.paintings.map { it.copy(title = frenchTitles[it.id] ?: it.title) })
     }
 
     private fun loadPartial(): ArtCollection? {
@@ -49,14 +48,6 @@ class CollectionStore(private val context: Context) {
         temporary.writeText(catalog)
         check(temporary.renameTo(File(directory, PARTIAL_CATALOG))) { "Could not save download progress" }
         preferences.edit().putString("partial", directory.name).apply()
-    }
-
-    // The source deck mixes English and French titles; show the French one where it is known.
-    private val frenchTitles: Map<String, String> by lazy {
-        runCatching {
-            val json = JSONObject(context.assets.open("titles-fr.json").bufferedReader().use { it.readText() })
-            json.keys().asSequence().associateWith { json.getString(it) }
-        }.getOrDefault(emptyMap())
     }
 
     /** Switches to [directory], then removes every other collection, including abandoned partial downloads. */
@@ -106,6 +97,7 @@ class CollectionStore(private val context: Context) {
 
     companion object {
         private const val PARTIAL_CATALOG = "partial.json"
+        const val CATALOG_VERSION = 2
 
         fun removeSiblings(directory: File) {
             directory.parentFile?.listFiles()?.filter { it.name != directory.name }?.forEach { it.deleteRecursively() }
@@ -120,7 +112,7 @@ class CollectionStore(private val context: Context) {
 
         fun parse(text: String): List<Painting> {
             val json = JSONObject(text)
-            require(json.getInt("version") == 1) { "Unsupported catalog version" }
+            require(json.getInt("version") == CATALOG_VERSION) { "Unsupported catalog version" }
             val items = json.getJSONArray("paintings")
             require(items.length() in 1..20_000) { "Collection must contain 1–20,000 paintings" }
             val ids = hashSetOf<String>()
@@ -129,7 +121,7 @@ class CollectionStore(private val context: Context) {
                 val id = item.getString("id")
                 require(id.matches(Regex("[A-Za-z0-9_-]{1,120}")) && ids.add(id)) { "Invalid or duplicate painting ID" }
                 Painting(id, item.optString("title", "Untitled"), item.optString("artist"),
-                    item.optString("year"), item.optString("movement"), item.getString("imageUrl"),
+                    item.optString("year"), item.optString("movement"), item.optString("collection"), item.getString("imageUrl"),
                     item.optInt("width"), item.optInt("height"), item.optString("sourceUrl"), item.optString("license"))
             }
         }

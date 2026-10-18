@@ -5,7 +5,7 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class CollectionStoreTest {
-    private fun catalog(id: String = "abc") = """{"version":1,"paintings":[{"id":"$id","title":"La Joconde","artist":"Léonard de Vinci","year":"1519","movement":"","imageUrl":"images/a.jpg"}]}"""
+    private fun catalog(id: String = "abc") = """{"version":2,"paintings":[{"id":"$id","title":"La Joconde","artist":"Léonard de Vinci","year":"1519","movement":"","imageUrl":"images/a.jpg"}]}"""
 
     @Test fun acceptsUnicodeMetadataAndOptionalFields() {
         val painting = CollectionStore.parse(catalog()).single()
@@ -15,7 +15,10 @@ class CollectionStoreTest {
     }
     @Test(expected = IllegalArgumentException::class) fun rejectsDuplicateIds() {
         val item = """{"id":"abc","imageUrl":"images/a.jpg"}"""
-        CollectionStore.parse("""{"version":1,"paintings":[$item,$item]}""")
+        CollectionStore.parse("""{"version":2,"paintings":[$item,$item]}""")
+    }
+    @Test(expected = IllegalArgumentException::class) fun rejectsOtherCatalogVersions() {
+        CollectionStore.parse(catalog().replace("\"version\":2", "\"version\":1"))
     }
     @Test(expected = IllegalArgumentException::class) fun rejectsUnsafeIds() { CollectionStore.parse(catalog("../escape")) }
     @Test(expected = IllegalArgumentException::class) fun rejectsTraversal() { CollectionStore.safeFile(File("/tmp/gallery"), "../gallery-evil/image.jpg") }

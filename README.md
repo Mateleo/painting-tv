@@ -42,7 +42,7 @@ Menu names vary slightly between TV brands.
 **4. Download the collection.** Open **Painting TV**. On first launch, Settings
 opens on **Download all · 2.9 GB**. Press OK and allow notifications if asked.
 The paintings download from a public
-[Hugging Face dataset](https://huggingface.co/datasets/Mateleo/painting-tv-collection)
+[Hugging Face dataset](https://huggingface.co/datasets/Mateleo/painting-collection)
 in the background, several at a time; close Settings to keep watching
 meanwhile. Downloaded paintings join the slideshow as they arrive. **Cancel**
 pauses the download and keeps what is already downloaded; **Resume download**
@@ -75,7 +75,8 @@ resolution: 280 paintings fill a 4K screen natively, 583 fit in 4K with margins.
 [catalog/quality-upgrade-report.csv](catalog/quality-upgrade-report.csv) lists
 every painting's size and source. Dates are as given by the deck; titles too,
 except that titles the deck gives in English are shown in French
-(`app/src/main/assets/titles-fr.json`).
+([catalog/titles-fr.json](catalog/titles-fr.json)). Captions name the holding
+collection where one is known ([catalog/collections.json](catalog/collections.json)).
 
 Rights remain with their holders. Many works are public domain; some are under
 Creative Commons or still in copyright. This is a personal, non-commercial

@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from tools.common import read_json, state_records, write_json
+from tools.common import enrich_collection_metadata, read_json, state_records, write_json
 from tools.image_quality import run_audit
 from tools.optimize_images import build_pack
 
@@ -105,6 +105,7 @@ def merge_sources(
         "selectedSources": dict(origins),
         **{key: len(records) for _, key, _, records in sources},
     }
+    paintings = enrich_collection_metadata(paintings)
     write_json(output, {"version": 1, "paintings": paintings, "sourceReport": report})
     return report
 
