@@ -69,16 +69,16 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     private val workManager = WorkManager.getInstance(application)
     // The shuffle cycle is saved as it advances, so a restart continues it rather than starting over.
     private val deckFile = File(application.filesDir, "shuffle.json")
-    private val deckSaves = Channel<String>(Channel.CONFLATED)
+    private val deckSaves = Channel<ShuffleDeck.State>(Channel.CONFLATED)
     private var promptedOutdated = false
 
     init {
         reload()
         viewModelScope.launch(Dispatchers.IO) {
             // The screen saver has its own view model: unique temporary files keep their saves apart.
-            for (text in deckSaves) runCatching {
+            for (state in deckSaves) runCatching {
                 val temporary = File.createTempFile("shuffle", ".tmp", deckFile.parentFile)
-                temporary.writeText(text)
+                temporary.writeText(ShuffleDeck.encode(state))
                 if (!temporary.renameTo(deckFile)) temporary.delete()
             }
         }
@@ -159,7 +159,8 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     private fun show(id: String?) {
         painting = playlist[id ?: return] ?: return
         revision++
-        deck?.let { deckSaves.trySend(ShuffleDeck.encode(it.state)) }
+        // Encoded off the main thread: thousands of IDs would slow each press of Next or Previous.
+        deck?.let { deckSaves.trySend(it.state) }
     }
     fun next() = show(deck?.next())
     fun previous() = show(deck?.previous())
