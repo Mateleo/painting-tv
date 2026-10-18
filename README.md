@@ -114,10 +114,13 @@ same key to install updates over an existing install. See
 [tools/README.md](tools/README.md) for building and publishing the collection.
 
 Launcher assets follow the [Android TV icon guidelines](https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines):
-an adaptive framed-landscape icon, a 16:9 banner with the app name, and a separate
-single-color notification icon. Vector sources are in `app/src/main/res/drawable/`;
-the adaptive layers are wired in `app/src/main/res/mipmap-anydpi-v26/`. PNG copies in
-`mipmap-*dpi/` let file managers show an icon for the APK.
+the logo is a P built from rounded screen pixels, in white over Van Gogh's *Wheat
+Field with Cypresses* (1889, The Met, public domain) for the adaptive icon and the 16:9
+banner; the same vector is the monochrome and notification icon.
+`uv run --locked --extra images python -m tools.app_icons` regenerates them all from the
+bundled painting. The banner's name is set in Inter Display
+([SIL Open Font License](tools/fonts/OFL.txt)). PNG copies in `mipmap-*dpi/` let file
+managers show an icon for the APK.
 
 ## Releases
 
