@@ -11,8 +11,8 @@ android {
         applicationId = "com.mateleo.paintingtv"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.4.1"
+        versionCode = 6
+        versionName = "0.4.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true }
