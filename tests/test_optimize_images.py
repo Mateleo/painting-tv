@@ -83,7 +83,6 @@ class CompressionTests(unittest.TestCase):
             self.assertEqual(len(catalog["paintings"]), 1)
             with Image.open(root / "pack" / catalog["paintings"][0]["imageUrl"]) as image:
                 self.assertEqual(image.size, (64, 64))
-            self.assertFalse((root / "pack.zip").exists())
 
 
 if __name__ == "__main__":

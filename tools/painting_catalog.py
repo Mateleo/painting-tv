@@ -1,8 +1,6 @@
-"""Download, extract, resolve, and package the Tableaux de maîtres Anki deck.
+"""Download the Tableaux de maîtres Anki deck and extract its notes and images.
 
-The module intentionally uses the Python standard library. Network work is
-limited to metadata and image-header requests until the explicit ``pack``
-command is used.
+The module intentionally uses the Python standard library.
 """
 
 from __future__ import annotations
@@ -11,12 +9,10 @@ import argparse
 import hashlib
 import html
 import json
-import os
 import re
 import shutil
 import sqlite3
 import time
-import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -29,7 +25,6 @@ from tools.common import enrich_collection_metadata, read_json, write_json
 DECK_ID = 171273480
 ANKI_INFO = "https://ankiweb.net/svc/shared/item-info"
 ANKI_DOWNLOAD = "https://ankiweb.net/svc/shared/download-deck/{deck_id}"
-COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 USER_AGENT = "PaintingTV/0.1 (https://github.com/Mateleo/painting-tv; personal art catalog)"
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
@@ -266,232 +261,11 @@ def extract_apkg(apkg: Path, out_dir: Path) -> list[dict[str, Any]]:
                 "license": "",
                 "medium": strip_html(mapping.get("Medium", "")),
                 "tags": strip_html(tags),
-                "resolution": {"status": "unresolved", "confidence": 0.0, "candidates": []},
             }
         )
     paintings = enrich_collection_metadata(paintings)
     write_json(out_dir / "catalog.json", {"version": 1, "paintings": paintings})
     return paintings
-
-
-def normalize(text: str) -> str:
-    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
-    return re.sub(r"[^a-z0-9]+", " ", text).strip()
-
-
-def commons_candidates(painting: dict[str, Any], limit: int = 5) -> list[dict[str, Any]]:
-    query = f"{painting['title']} {painting['artist']}".strip()
-    params = urllib.parse.urlencode(
-        {
-            "action": "query",
-            "format": "json",
-            "generator": "search",
-            "gsrsearch": query,
-            "gsrnamespace": 6,
-            "gsrlimit": limit,
-            "prop": "imageinfo",
-            "iiprop": "url|size|mime|extmetadata",
-        }
-    )
-    payload = json.loads(request(f"{COMMONS_API}?{params}"))
-    pages = payload.get("query", {}).get("pages", {}).values()
-    target = normalize(painting["title"] + " " + painting["artist"])
-    result = []
-    for page in pages:
-        info = (page.get("imageinfo") or [{}])[0]
-        if info.get("mime") not in (None, "image/jpeg", "image/png", "image/webp"):
-            continue
-        title = page.get("title", "")
-        text = normalize(title.replace("File:", "") + " " + page.get("snippet", ""))
-        overlap = len(set(target.split()) & set(text.split())) / max(1, len(set(target.split())))
-        result.append(
-            {
-                "source": "Wikimedia Commons",
-                "title": title,
-                "imageUrl": info.get("url", ""),
-                "sourceUrl": "https://commons.wikimedia.org/wiki/"
-                + urllib.parse.quote(title.replace(" ", "_")),
-                "width": info.get("width"),
-                "height": info.get("height"),
-                "license": (
-                    info.get("extmetadata", {}).get("LicenseShortName", {}).get("value", "")
-                ),
-                "score": round(overlap, 3),
-            }
-        )
-    return sorted(result, key=lambda c: c["score"], reverse=True)
-
-
-def resolve_catalog(
-    catalog_path: Path, *, limit: int | None = None, delay: float = 1.0, resume: bool = True
-) -> int:
-    catalog = read_json(catalog_path)
-    paintings = catalog["paintings"]
-    pending = [
-        painting
-        for painting in paintings
-        if painting.get("resolution", {}).get("status") != "approved"
-        and not (
-            resume
-            and painting.get("resolution", {}).get("status") in ("needs-review", "no-candidates")
-        )
-    ]
-    if limit is not None:
-        pending = pending[: max(0, limit)]
-    processed = 0
-    consecutive_throttles = 0
-    for i, painting in enumerate(pending):
-        processed += 1
-        try:
-            candidates = commons_candidates(painting)
-            consecutive_throttles = 0
-            score = candidates[0]["score"] if candidates else 0.0
-            painting["resolution"] = {
-                "status": "needs-review" if candidates else "no-candidates",
-                "confidence": score,
-                "confidenceBasis": "Approximate title and artist token overlap; score is a ranking hint, not a probability. Manual image review is required.",
-                "candidates": candidates,
-            }
-        except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as exc:
-            painting["resolution"] = {
-                "status": "lookup-error",
-                "confidence": 0.0,
-                "candidates": [],
-                "error": str(exc),
-            }
-            consecutive_throttles = (
-                consecutive_throttles + 1
-                if isinstance(exc, urllib.error.HTTPError) and exc.code == 429
-                else 0
-            )
-        write_json(catalog_path, catalog)
-        if consecutive_throttles >= 3:
-            print("Commons is rate-limiting requests. Progress saved; resume later.")
-            break
-        if i + 1 < len(pending):
-            time.sleep(delay)
-    return processed
-
-
-def export_manifest(
-    catalog_path: Path, output: Path, *, online: bool = False, offline_pack: bool = False
-) -> None:
-    catalog = read_json(catalog_path)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    root = catalog_path.parent
-    paintings = []
-    omitted = []
-    for source in catalog["paintings"]:
-        remote = source.get("imageUrl", "")
-        original = source.get("originalImageUrl", remote)
-        local = source.get("resolution", {}).get("offlineImage")
-        use_local = (not online) or offline_pack
-        image = remote if online and not offline_pack else original
-        if use_local and local and (root / local).is_file():
-            image = local
-        if not image or (not image.startswith("https://") and not (root / image).is_file()):
-            omitted.append(source)
-            continue
-        entry = {
-            k: source.get(k, "")
-            for k in (
-                "id",
-                "title",
-                "artist",
-                "year",
-                "movement",
-                "imageUrl",
-                "width",
-                "height",
-                "sourceUrl",
-                "license",
-            )
-        }
-        entry["imageUrl"] = image
-        if image == original and remote != original:
-            entry["width"] = source.get("originalWidth", entry["width"])
-            entry["height"] = source.get("originalHeight", entry["height"])
-            entry["sourceUrl"] = source.get("originalSourceUrl", "")
-            entry["license"] = source.get("originalLicense", "")
-        if not image.startswith("https://"):
-            entry["imageUrl"] = os.path.relpath(root / image, output.parent).replace("\\", "/")
-        paintings.append(entry)
-    if omitted:
-        write_json(
-            output.with_suffix(output.suffix + ".report.json"),
-            {
-                "omittedWithoutImage": [
-                    {"id": p["id"], "title": p["title"], "artist": p["artist"]} for p in omitted
-                ]
-            },
-        )
-    write_json(output, {"version": 1, "paintings": paintings})
-
-
-def approve_candidate(catalog_path: Path, painting_id: str, candidate_index: int = 0) -> None:
-    catalog = read_json(catalog_path)
-    painting = next((p for p in catalog["paintings"] if p["id"] == painting_id), None)
-    if painting is None:
-        raise KeyError(f"Painting id not found: {painting_id}")
-    candidates = painting.get("resolution", {}).get("candidates", [])
-    if candidate_index < 0 or candidate_index >= len(candidates):
-        raise IndexError(f"Candidate {candidate_index} is not available for {painting_id}")
-    candidate = candidates[candidate_index]
-    if "originalImageUrl" not in painting:
-        painting["originalImageUrl"] = painting.get("imageUrl", "")
-        painting["originalWidth"] = painting.get("width", "")
-        painting["originalHeight"] = painting.get("height", "")
-        painting["originalSourceUrl"] = painting.get("sourceUrl", "")
-        painting["originalLicense"] = painting.get("license", "")
-    for key in ("imageUrl", "width", "height", "sourceUrl", "license"):
-        painting[key] = candidate.get(key, "")
-    painting["resolution"].pop("offlineImage", None)
-    painting["resolution"].update(
-        {
-            "status": "approved",
-            "approvedCandidate": candidate_index,
-            "provenance": f"Manually approved candidate from {candidate.get('source', 'unknown source')}",
-        }
-    )
-    write_json(catalog_path, catalog)
-
-
-def download_pack(catalog_path: Path, pack_dir: Path, *, min_width: int = 0) -> int:
-    """Download manually approved source images, resuming existing files."""
-    catalog = read_json(catalog_path)
-    root = catalog_path.parent.resolve()
-    pack_dir.mkdir(parents=True, exist_ok=True)
-    if not pack_dir.resolve().is_relative_to(root):
-        raise ValueError("Offline image directory must be inside the catalog data directory")
-    downloaded = 0
-    for painting in catalog["paintings"]:
-        url = painting.get("imageUrl", "")
-        resolution = painting.get("resolution", {})
-        if not url.startswith("https://") or resolution.get("status") != "approved":
-            continue
-        if painting.get("width") and painting["width"] < min_width:
-            continue
-        suffix = Path(urllib.parse.urlparse(url).path).suffix or ".jpg"
-        target = pack_dir.resolve() / f"{painting['id']}{suffix}"
-        relative = str(target.relative_to(root))
-        if target.exists() and target.stat().st_size > 0:
-            if resolution.get("offlineImage") == relative:
-                continue
-        else:
-            temp = target.with_suffix(target.suffix + ".partial")
-            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-            with urllib.request.urlopen(req, timeout=90) as response, temp.open("wb") as handle:
-                shutil.copyfileobj(response, handle)
-            if image_dimensions(temp) == (None, None):
-                temp.unlink(missing_ok=True)
-                raise ValueError(
-                    f"Downloaded file is not a supported raster image for {painting['title']}"
-                )
-            temp.replace(target)
-            downloaded += 1
-        resolution["offlineImage"] = relative
-        write_json(catalog_path, catalog)
-    return downloaded
 
 
 def export_metadata(catalog_path: Path, output: Path) -> None:
@@ -511,38 +285,6 @@ def main() -> None:
     p_extract = sub.add_parser("extract", help="Extract note fields and original deck images")
     p_extract.add_argument("--apkg", type=Path, default=DATA / "tableaux-de-maitres.apkg")
     p_extract.add_argument("--output", type=Path, default=DATA)
-    p_resolve = sub.add_parser("resolve", help="Query Commons for reviewable image candidates")
-    p_resolve.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
-    p_resolve.add_argument("--limit", type=int)
-    p_resolve.add_argument("--delay", type=float, default=1.0)
-    p_resolve.add_argument(
-        "--resume",
-        action="store_true",
-        default=True,
-        help="Reuse existing candidates and only retry unresolved records (default)",
-    )
-    p_resolve.add_argument(
-        "--refresh", action="store_false", dest="resume", help="Replace existing candidates"
-    )
-    p_export = sub.add_parser("manifest", help="Export app contract JSON")
-    p_export.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
-    p_export.add_argument("--output", type=Path, default=DATA / "paintings.json")
-    p_export.add_argument(
-        "--online", action="store_true", help="Keep HTTPS image URLs and resolution metadata"
-    )
-    p_export.add_argument(
-        "--offline-pack",
-        action="store_true",
-        help="Point at local pack files and embedded-deck fallback images",
-    )
-    p_pack = sub.add_parser("pack", help="Download only suggested/approved images for offline use")
-    p_pack.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
-    p_pack.add_argument("--directory", type=Path, default=DATA / "offline-pack" / "images")
-    p_pack.add_argument("--min-width", type=int, default=0)
-    p_approve = sub.add_parser("approve", help="Approve a reviewed resolver candidate")
-    p_approve.add_argument("painting_id")
-    p_approve.add_argument("--candidate", type=int, default=0)
-    p_approve.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
     p_metadata = sub.add_parser("metadata", help="Export all note metadata without image data")
     p_metadata.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
     p_metadata.add_argument("--output", type=Path, default=ROOT / "catalog" / "paintings.json")
@@ -551,22 +293,6 @@ def main() -> None:
         print(download_deck(args.output, args.deck_id))
     elif args.command == "extract":
         print(f"Extracted {len(extract_apkg(args.apkg, args.output))} notes")
-    elif args.command == "resolve":
-        print(
-            f"Processed {resolve_catalog(args.catalog, limit=args.limit, delay=args.delay, resume=args.resume)} paintings"
-        )
-    elif args.command == "manifest":
-        export_manifest(
-            args.catalog, args.output, online=args.online, offline_pack=args.offline_pack
-        )
-        print(args.output)
-    elif args.command == "pack":
-        print(
-            f"Downloaded {download_pack(args.catalog, args.directory, min_width=args.min_width)} images"
-        )
-    elif args.command == "approve":
-        approve_candidate(args.catalog, args.painting_id, args.candidate)
-        print(f"Approved candidate {args.candidate} for {args.painting_id}")
     elif args.command == "metadata":
         export_metadata(args.catalog, args.output)
         print(args.output)

@@ -71,7 +71,7 @@ def color_convert(image: Image.Image) -> tuple[Image.Image, str]:
             if result is None:
                 raise ValueError("ICC conversion returned no image")
             return result, "converted to sRGB from embedded ICC profile"
-        except (OSError, ValueError, ImageCms.PyCMSError):
+        except OSError, ValueError, ImageCms.PyCMSError:
             # Preserve the profile in an untouched original rather than guessing its colors.
             return image.convert("RGB"), "unhandled ICC profile; keep original"
     return image.convert("RGB"), "assumed sRGB (no embedded ICC profile)"

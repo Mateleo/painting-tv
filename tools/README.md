@@ -1,18 +1,15 @@
 # Painting catalog tools
 
 These tools fetch the shared Anki deck, extract the note fields and embedded
-images, suggest Wikimedia Commons matches with image dimensions and license
-metadata, and export reviewed images for the Hugging Face dataset. The
-resolver stores candidates and provenance in data/catalog.json; a similarity
-score is a review aid, never proof of identity.
+images, find larger matching reproductions, and export the Hugging Face dataset
+the app downloads.
 
-Python 3.15 is pinned in `.python-version` and installed automatically by uv. The original extraction/resolver commands use
-only the standard library; the full quality workflow below also uses Pillow.
-From the repository root:
+Python 3.15 is pinned in `.python-version` and installed automatically by uv.
+The deck commands use only the standard library; the quality workflow below
+also uses Pillow. From the repository root:
 
     uv run --locked painting-catalog download
     uv run --locked painting-catalog extract
-    uv run --locked painting-catalog manifest
     uv run --locked painting-catalog metadata
 
 The confirmed shared deck is https://ankiweb.net/shared/info/171273480.
@@ -21,34 +18,9 @@ writes data/tableaux-de-maitres.apkg. The extract command creates
 data/catalog.json and copies original images to data/images/. The package is
 a ZIP containing an SQLite collection, media-name map, and image entries.
 
-To search Commons for possible matches, begin with a small batch:
-
-    uv run --locked painting-catalog resolve --limit 20
-
-Commons is queried one item at a time with a one-second default delay. Each
-candidate records its source page, direct image URL, dimensions, license
-label, and title/artist token-overlap score. Results remain in a resumable
-needs-review state and never replace the embedded image automatically.
-Requests honor Retry-After and use bounded backoff after HTTP 429. Approve a
-candidate after checking it:
-
-    uv run --locked painting-catalog approve d459320dbad84895 --candidate 0
-
-The manifest command exports the app contract (version and paintings). By
-default it uses relative paths to embedded or downloaded images. Add --online
-to use approved HTTPS source URLs while unresolved records retain their local
-images. Once candidates are approved, pack downloads them, skips existing
-files, and records resumable local paths for dataset preparation:
-
-    uv run --locked painting-catalog pack --min-width 3840
-
-The pack command does not fetch unresolved or merely suggested results.
-Original scans vary in resolution and orientation; min-width filters by source
-width but cannot ensure a vertical work fills a 4K screen.
-
-The metadata command exports all 2,160 notes, without images or resolver
-details, to catalog/paintings.json. This compact catalog can be checked into
-the repository while the source deck and image assets stay under ignored data/.
+The metadata command exports all 2,160 notes, without images, to
+catalog/paintings.json. This compact catalog is checked into the repository
+while the source deck and image assets stay under ignored data/.
 
 Run the unit tests with:
 
@@ -105,7 +77,7 @@ compare the recorded `sha256`.
 `build_quality_pack` merges the available sources, chooses the strongest
 screen-fill resolution among verified candidates, keeps an original fallback,
 and produces a dataset folder at `data/tv-quality-pack/` containing `catalog.json`
-and its referenced images. No distribution archive is created. It fully audits the selected exports
+and its referenced images. It fully audits the selected exports
 and records every original note in `catalog/quality-upgrade-report.json` and CSV.
 `quality_review` generates the searchable, self-contained HTML review.
 

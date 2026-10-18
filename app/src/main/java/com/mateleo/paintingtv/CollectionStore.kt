@@ -28,10 +28,11 @@ class CollectionStore(private val context: Context) {
     val activeName: String? get() = preferences.getString("active", null)
 
     fun load(): ArtCollection {
-        val active = activeName?.let { File(root, it) }
-        return if (active != null && File(active, "catalog.json").isFile) {
-            ArtCollection(parse(File(active, "catalog.json").readText()), active)
-        } else loadPartial() ?: ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
+        // An unreadable collection counts as not installed, so Settings offers the download again.
+        val active = activeName?.let { File(root, it) }?.let { directory ->
+            runCatching { ArtCollection(parse(File(directory, "catalog.json").readText()), directory) }.getOrNull()
+        }
+        return active ?: loadPartial() ?: ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
     }
 
     private fun loadPartial(): ArtCollection? {

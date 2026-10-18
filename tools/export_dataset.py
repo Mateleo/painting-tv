@@ -18,8 +18,19 @@ from tools.common import enrich_collection_metadata, file_sha256, read_json, wri
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_VERSION = 2
-APP_FIELDS = ("id", "title", "artist", "year", "movement", "collection", "imageUrl", "width",
-              "height", "license", "sourceUrl")
+APP_FIELDS = (
+    "id",
+    "title",
+    "artist",
+    "year",
+    "movement",
+    "collection",
+    "imageUrl",
+    "width",
+    "height",
+    "license",
+    "sourceUrl",
+)
 
 
 def app_entry(painting: dict[str, Any], french_titles: dict[str, str]) -> dict[str, Any]:
@@ -33,7 +44,10 @@ def viewer_row(entry: dict[str, Any], painting: dict[str, Any], image: Path) -> 
     selection = painting.get("sourceSelection", {})
     return {
         "file_name": entry["imageUrl"],
-        **{key: entry.get(key, "") for key in ("id", "title", "artist", "year", "movement", "collection")},
+        **{
+            key: entry.get(key, "")
+            for key in ("id", "title", "artist", "year", "movement", "collection")
+        },
         "width": entry.get("width", 0),
         "height": entry.get("height", 0),
         "source": selection.get("source", ""),
@@ -77,13 +91,17 @@ def export_dataset(pack: Path, output: Path, titles: Path, card: Path) -> dict[s
     for stale in (output / "images").rglob("*"):
         if stale.is_file() and stale.resolve() not in kept:
             stale.unlink()
-    write_json(output / "catalog.json", {"version": CATALOG_VERSION, "paintings": entries},
-               compact=True)
+    write_json(
+        output / "catalog.json", {"version": CATALOG_VERSION, "paintings": entries}, compact=True
+    )
     lines = "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows)
     (output / "metadata.jsonl").write_text(lines, encoding="utf-8")
     shutil.copyfile(card, output / "README.md")
-    return {"paintings": len(entries), "frenchTitles": sum(e["id"] in french_titles for e in entries),
-            "withCollection": sum("collection" in e for e in entries)}
+    return {
+        "paintings": len(entries),
+        "frenchTitles": sum(e["id"] in french_titles for e in entries),
+        "withCollection": sum("collection" in e for e in entries),
+    }
 
 
 def main() -> None:
