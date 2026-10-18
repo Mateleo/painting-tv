@@ -38,13 +38,14 @@ Menu names vary slightly between TV brands.
   ```
 
 **4. Download the collection.** Open **Painting TV**. On first launch, Settings
-opens on **Download full collection (about 2.9 GB)**. Press OK and allow
-notifications if asked. The paintings download from a public
+opens on **Download all · 2.9 GB**. Press OK and allow notifications if asked.
+The paintings download from a public
 [Hugging Face dataset](https://huggingface.co/datasets/Mateleo/painting-tv-collection)
-in the background; close Settings to keep watching meanwhile. If the download
-stops, press the button again; finished images are kept. Once every image has
-been checked, the gallery switches over and works fully offline. Keep about
-3 GB free.
+in the background, several at a time; close Settings to keep watching
+meanwhile. Downloaded paintings join the slideshow as they arrive. **Cancel**
+pauses the download and keeps what is already downloaded; **Resume download**
+continues it. Once every image is in, the gallery works fully offline. Keep
+about 3 GB free.
 
 **Updating:** install a newer `painting-tv.apk` the same way. Settings and the
 collection are kept.
@@ -59,7 +60,7 @@ and `join-pack.py` into one folder, then join and verify them:
 python join-pack.py painting-pack.parts.json --output painting-pack.zip
 ```
 
-Copy `painting-pack.zip` to a USB stick and choose **Settings → Import collection
+Copy `painting-pack.zip` to a USB stick and choose **Settings → Import
 ZIP** (needs about 6 GB free while importing). If the TV has no file picker,
 push it with ADB instead:
 
@@ -75,9 +76,9 @@ adb shell am start -n com.mateleo.paintingtv/.MainActivity   # imports it
 - **Left / Right:** previous / next painting.
 - **OK or any direction:** show the controls (they hide after five seconds).
 - **Play/Pause, Next, Previous, Menu** remote keys work too.
-- **Back:** close settings, then hide controls, then exit.
+- **Back:** close settings or hide the controls, then exit.
 
-Settings: time per painting (5 s to 1 h, default 10 s), gentle zoom, captions,
+Settings: time per painting (10 s to 1 h, default 30 s), slow zoom, captions,
 **fill screen** or **whole painting** framing, and an **All / HD+ / 4K+** filter
 by source resolution. Playback shuffles through every painting before repeating
 and keeps the TV awake.
@@ -91,7 +92,9 @@ Wikimedia Commons, and museum open-access sources wherever one passed image
 comparison and review. Nothing is upscaled or AI-generated. It is still mixed
 resolution: 280 paintings fill a 4K screen natively, 583 fit in 4K with margins.
 [catalog/quality-upgrade-report.csv](catalog/quality-upgrade-report.csv) lists
-every painting's size and source. Titles and dates are as given by the deck.
+every painting's size and source. Dates are as given by the deck; titles too,
+except that titles the deck gives in English are shown in French
+(`app/src/main/assets/titles-fr.json`).
 
 Rights remain with their holders. Many works are public domain; some are under
 Creative Commons or still in copyright. This is a personal, non-commercial

@@ -17,10 +17,26 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew assembleDebug testDebugUnitTest lintDebug --no-daemon
+      - name: Name APK with app version
+        id: apk
+        shell: python
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          output_dir = Path("app/build/outputs/apk/debug")
+          metadata = json.loads((output_dir / "output-metadata.json").read_text())
+          apk = metadata["elements"][0]
+          name = f"painting-tv-{apk['versionName']}"
+          path = output_dir / f"{name}.apk"
+          (output_dir / apk["outputFile"]).rename(path)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"name={name}\npath={path}\n")
       - uses: actions/upload-artifact@v7
         with:
-          name: painting-tv-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: ${{ steps.apk.outputs.name }}
+          path: ${{ steps.apk.outputs.path }}
   python:
     runs-on: ubuntu-26.04
     steps:
