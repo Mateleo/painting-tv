@@ -4,7 +4,7 @@ Install only the APK; the app now fetches the collection itself.
 
 - On first launch, Settings opens on **Download full collection (about 2.9 GB)**.
   One OK press downloads all 2,160 paintings from the public Hugging Face dataset
-  `Mateleo/painting-tv-collection`, checks every image, and then plays offline.
+  `Mateleo/painting-collection`, checks every image, and then plays offline.
   An interrupted download resumes and keeps finished images.
 - 143 more paintings have larger, eye-reviewed reproductions from a research pass
   over Wikidata, museum open-access collections, and artist sites.
@@ -13,7 +13,7 @@ Install only the APK; the app now fetches the collection itself.
   The collection remains mixed resolution; the **All / HD+ / 4K+** filters still apply.
 - Includes the gentle-zoom jump and stuck-slideshow fixes made after 0.2.0.
 
-The collection is hosted on [Hugging Face](https://huggingface.co/datasets/Mateleo/painting-tv-collection).
+The collection is hosted on [Hugging Face](https://huggingface.co/datasets/Mateleo/painting-collection).
 Use the latest app release to download it. Collection archives are no longer distributed.
 
 The research decisions, with source page, licence, checksum, and review verdict

@@ -22,5 +22,5 @@ Remote focus, downloads, and 4K output still need verification
 on the Philips TV. See the README for USB and ADB installation instructions.
 
 Install the latest app release to download the collection from
-[Hugging Face](https://huggingface.co/datasets/Mateleo/painting-tv-collection).
+[Hugging Face](https://huggingface.co/datasets/Mateleo/painting-collection).
 Collection archives are no longer distributed.

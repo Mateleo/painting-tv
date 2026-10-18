@@ -12,7 +12,7 @@ collection. On a new install, open Settings and choose **Download all · 2.9 GB*
 The collection is unchanged from 0.3.0: 2,160 paintings, available offline after
 all images finish downloading.
 
-The collection is hosted on [Hugging Face](https://huggingface.co/datasets/Mateleo/painting-tv-collection).
+The collection is hosted on [Hugging Face](https://huggingface.co/datasets/Mateleo/painting-collection).
 Use the latest app release to download it. Collection archives are no longer distributed.
 
 This remains a debug-signed personal preview. Built and checked with Android

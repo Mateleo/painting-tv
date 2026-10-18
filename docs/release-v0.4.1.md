@@ -9,7 +9,7 @@ can still resume.
 - Removed archive packaging and joining tools from the codebase.
 - Removed collection archives and their joining helpers from all GitHub releases.
 
-The [Hugging Face dataset](https://huggingface.co/datasets/Mateleo/painting-tv-collection)
+The [Hugging Face dataset](https://huggingface.co/datasets/Mateleo/painting-collection)
 is unchanged. Install this APK over the previous version to keep your settings
 and downloaded paintings. `SHA256SUMS.txt` verifies the APK download.
 

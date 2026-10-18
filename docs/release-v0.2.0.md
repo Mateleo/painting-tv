@@ -9,7 +9,7 @@ Replaces most original deck thumbnails with larger matching reproductions and im
 - Portrait crops now spend the decode budget on the visible painting area. Decoding remains sequential with a memory budget suited to TV heaps.
 
 Install the latest app release to download the collection from
-[Hugging Face](https://huggingface.co/datasets/Mateleo/painting-tv-collection).
+[Hugging Face](https://huggingface.co/datasets/Mateleo/painting-collection).
 Collection archives are no longer distributed.
 
 `quality-review.html` is a searchable offline review of every painting. The CSV/JSON audits include old/new dimensions, selected source, format choice, and remaining 4K enlargement. `reviewed-source-overrides.json` records all 141 paired model-review decisions. `SHA256SUMS.txt` verifies all downloads. Source URLs, available license metadata, and credits remain in the dataset catalog.
