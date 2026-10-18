@@ -50,7 +50,8 @@ continues it. Once every image is in, the gallery works fully offline. Keep
 about 3 GB free.
 
 **Updating:** install the APK from a newer release the same way. Settings and the
-collection are kept.
+collection are kept. When the published collection changes, Settings offers
+**Download update**; only new or changed paintings are downloaded.
 
 ## Using it
 
@@ -61,8 +62,22 @@ collection are kept.
 
 Settings: time per painting (10 s to 1 h, default 30 s), slow zoom, captions,
 **fill screen** or **whole painting** framing, and an **All / HD+ / 4K+** filter
-by source resolution. Playback shuffles through every painting before repeating
-and keeps the TV awake.
+by source resolution. Playback shuffles through every painting before repeating,
+even across restarts, and keeps the TV awake. The interface follows the TV's
+language (English or French).
+
+### As a screen saver
+
+Painting TV can also play when the TV is idle. Choose it in **Settings → System
+→ Ambient mode** (or **Screen saver**, depending on the TV). It uses the app's
+settings and continues the same shuffle; any key press wakes the TV.
+
+Google TV hides third-party screen savers from its settings. Set it with ADB
+instead (see step 3 above to connect):
+
+```sh
+adb shell settings put secure screensaver_components com.mateleo.paintingtv/.PaintingDream
+```
 
 ## The collection
 
@@ -73,7 +88,8 @@ Wikimedia Commons, and museum open-access sources wherever one passed image
 comparison and review. Nothing is upscaled or AI-generated. It is still mixed
 resolution: 280 paintings fill a 4K screen natively, 583 fit in 4K with margins.
 [catalog/quality-upgrade-report.csv](catalog/quality-upgrade-report.csv) lists
-every painting's size and source. Dates are as given by the deck; titles too,
+every painting's size and source. The app checks each downloaded image against
+the SHA-256 in the published catalog. Dates are as given by the deck; titles too,
 except that titles the deck gives in English are shown in French
 ([catalog/titles-fr.json](catalog/titles-fr.json)). Captions name the holding
 collection where one is known ([catalog/collections.json](catalog/collections.json)).

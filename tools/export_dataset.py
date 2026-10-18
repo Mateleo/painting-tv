@@ -33,10 +33,16 @@ APP_FIELDS = (
 )
 
 
-def app_entry(painting: dict[str, Any], french_titles: dict[str, str]) -> dict[str, Any]:
-    """Keep only what the app reads, with the French title where the deck has an English one."""
+def app_entry(
+    painting: dict[str, Any], french_titles: dict[str, str], image: Path
+) -> dict[str, Any]:
+    """Keep only what the app reads, with the French title where the deck has an English one.
+
+    ``sha256`` lets the TV verify each download and keep unchanged images on update.
+    """
     item = {key: painting[key] for key in APP_FIELDS if painting.get(key) not in (None, "")}
     item["title"] = french_titles.get(painting["id"], painting.get("title", ""))
+    item["sha256"] = file_sha256(image)
     return item
 
 
@@ -57,7 +63,7 @@ def viewer_row(entry: dict[str, Any], painting: dict[str, Any], image: Path) -> 
         "attribution": selection.get("attribution", ""),
         "credit": selection.get("credit", ""),
         "bytes": image.stat().st_size,
-        "sha256": file_sha256(image),
+        "sha256": entry["sha256"],
     }
 
 
@@ -79,10 +85,10 @@ def export_dataset(pack: Path, output: Path, titles: Path, card: Path) -> dict[s
     french_titles = read_json(titles) if titles.exists() else {}
     entries, rows, kept = [], [], set()
     for painting in paintings:
-        entry = app_entry(painting, french_titles)
-        source = pack / entry["imageUrl"]
+        source = pack / painting["imageUrl"]
         if not source.is_file():
-            raise FileNotFoundError(f"Missing pack image for {entry['id']}: {source}")
+            raise FileNotFoundError(f"Missing pack image for {painting['id']}: {source}")
+        entry = app_entry(painting, french_titles, source)
         target = output / entry["imageUrl"]
         place(source, target)
         kept.add(target.resolve())

@@ -1,4 +1,5 @@
 import json
+from hashlib import sha256
 from pathlib import Path
 from unittest.mock import patch
 
@@ -56,10 +57,12 @@ def test_export_keeps_app_fields_and_publishes_no_research(tmp_path):
             "height": 3041,
             "license": "Public domain",
             "sourceUrl": "https://example.org/a",
+            "sha256": sha256(b"image a").hexdigest(),
         }
     ]
     (row,) = [json.loads(line) for line in (output / "metadata.jsonl").read_text().splitlines()]
     assert row["file_name"] == "images/a.jpg" and row["source"] == "WikiArt" and row["bytes"] == 7
+    assert row["sha256"] == catalog["paintings"][0]["sha256"]
     published = (output / "catalog.json").read_text() + (output / "metadata.jsonl").read_text()
     assert "research" not in published.lower()
     assert sorted(p.name for p in (output / "images").iterdir()) == ["a.jpg"]

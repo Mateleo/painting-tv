@@ -15,24 +15,34 @@ import java.io.InputStream
 data class Painting(
     val id: String, val title: String, val artist: String,
     val year: String, val movement: String, val collection: String, val imageUrl: String,
-    val width: Int, val height: Int, val sourceUrl: String, val license: String,
+    val width: Int, val height: Int, val sourceUrl: String, val license: String, val sha256: String = "",
 )
 
-/** [partial] marks a download still in progress (or paused): only its finished paintings are listed. */
-data class ArtCollection(val paintings: List<Painting>, val directory: File? = null, val partial: Boolean = false)
+/**
+ * [partial] marks a download still in progress (or paused): only its finished paintings are listed.
+ * [outdated] marks the starter paintings shown because the installed collection can no longer be read,
+ * typically after an app update changed the catalog format.
+ */
+data class ArtCollection(val paintings: List<Painting>, val directory: File? = null, val partial: Boolean = false,
+    val outdated: Boolean = false)
 
 class CollectionStore(private val context: Context) {
     private val preferences = context.getSharedPreferences("gallery", Context.MODE_PRIVATE)
     val root: File get() = File(context.getExternalFilesDir(null) ?: context.filesDir, "collections").apply { mkdirs() }
 
     val activeName: String? get() = preferences.getString("active", null)
+    val activeDirectory: File? get() = activeName?.let { File(root, it) }
+
+    /** The catalog exactly as published, kept to tell whether a newer one is available. */
+    val installedManifest: File? get() = activeDirectory?.let { File(it, MANIFEST) }?.takeIf { it.isFile }
 
     fun load(): ArtCollection {
         // An unreadable collection counts as not installed, so Settings offers the download again.
-        val active = activeName?.let { File(root, it) }?.let { directory ->
+        val active = activeDirectory?.let { directory ->
             runCatching { ArtCollection(parse(File(directory, "catalog.json").readText()), directory) }.getOrNull()
         }
-        return active ?: loadPartial() ?: ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }))
+        return active ?: loadPartial() ?: ArtCollection(parse(context.assets.open("catalog.json").bufferedReader().use { it.readText() }),
+            outdated = activeName != null)
     }
 
     private fun loadPartial(): ArtCollection? {
@@ -98,6 +108,7 @@ class CollectionStore(private val context: Context) {
 
     companion object {
         private const val PARTIAL_CATALOG = "partial.json"
+        const val MANIFEST = "manifest.json"
         const val CATALOG_VERSION = 2
 
         fun removeSiblings(directory: File) {
@@ -121,9 +132,11 @@ class CollectionStore(private val context: Context) {
                 val item = items.getJSONObject(i)
                 val id = item.getString("id")
                 require(id.matches(Regex("[A-Za-z0-9_-]{1,120}")) && ids.add(id)) { "Invalid or duplicate painting ID" }
+                val sha256 = item.optString("sha256")
+                require(sha256.isEmpty() || sha256.matches(Regex("[0-9a-f]{64}"))) { "Invalid image checksum" }
                 Painting(id, item.optString("title", "Untitled"), item.optString("artist"),
                     item.optString("year"), item.optString("movement"), item.optString("collection"), item.getString("imageUrl"),
-                    item.optInt("width"), item.optInt("height"), item.optString("sourceUrl"), item.optString("license"))
+                    item.optInt("width"), item.optInt("height"), item.optString("sourceUrl"), item.optString("license"), sha256)
             }
         }
     }

@@ -34,7 +34,8 @@ browsing and study.
   artist, year, movement, collection, pixel size, file size and SHA-256, the
   reproduction's source and source page, licence and credit.
 - `catalog.json`: the compact catalog the Painting TV app downloads. Its
-  `imageUrl` paths are relative to this folder.
+  `imageUrl` paths are relative to this folder, and each image's `sha256` lets
+  the app verify it.
 
 ## Rights
 
