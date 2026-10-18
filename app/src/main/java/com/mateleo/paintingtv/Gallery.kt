@@ -53,7 +53,7 @@ private val Panel = Color(0xF5141916)
 private class Frame(val bitmap: Bitmap, val painting: Painting, val revision: Int) { val progress = Animatable(0f) }
 
 @Composable
-fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> Unit) {
+fun Gallery(vm: GalleryViewModel, onDownload: () -> Unit) {
     val active = LocalLifecycleOwner.current.lifecycle.currentStateAsState().value.isAtLeast(Lifecycle.State.RESUMED)
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current.density
@@ -148,7 +148,7 @@ fun Gallery(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> 
                     }
                 }
             }
-            if (vm.panel) SettingsPanel(vm, onImport, onDownload)
+            if (vm.panel) SettingsPanel(vm, onDownload)
         }
     }
 }
@@ -166,7 +166,7 @@ private fun GalleryButton(label: String, modifier: Modifier = Modifier, selected
 private fun Heading(text: String) = Text(text, color = Muted, fontSize = 13.sp)
 
 @Composable
-private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> Unit) {
+private fun SettingsPanel(vm: GalleryViewModel, onDownload: () -> Unit) {
     val settings = vm.settings
     val collection = vm.collection
     val focus = remember { FocusRequester() }
@@ -216,15 +216,13 @@ private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.12f)))
             Heading("Collection · ${collection?.paintings?.size ?: 0} paintings · ${vm.freeSpace()}")
             if (vm.working) {
-                if (vm.importMessage.isNotBlank()) Text(vm.importMessage, color = Ivory, fontSize = 14.sp)
-                GalleryButton("Cancel", Modifier.focusRequester(cancelFocus), onClick = vm::cancelImport)
+                if (vm.downloadMessage.isNotBlank()) Text(vm.downloadMessage, color = Ivory, fontSize = 14.sp)
+                GalleryButton("Cancel", Modifier.focusRequester(cancelFocus), onClick = vm::cancelDownload)
             } else {
-                if (vm.importMessage.isNotBlank()) Text(vm.importMessage, color = Ivory, fontSize = 13.sp)
+                if (vm.downloadMessage.isNotBlank()) Text(vm.downloadMessage, color = Ivory, fontSize = 13.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (incomplete) GalleryButton(if (collection?.partial == true) "Resume download" else "Download all · 2.9 GB",
-                        Modifier.focusRequester(downloadFocus), onClick = { onDownload(COLLECTION_URL) })
-                    GalleryButton("Import ZIP", onClick = onImport)
-                    if (vm.inboxFile.isFile) GalleryButton("Import inbox ZIP", onClick = vm::retryInbox)
+                        Modifier.focusRequester(downloadFocus), onClick = onDownload)
                 }
             }
             if (vm.message.isNotBlank()) Text(vm.message, color = Color(0xFFFFD1A4), fontSize = 13.sp)

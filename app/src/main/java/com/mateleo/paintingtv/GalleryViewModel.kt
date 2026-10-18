@@ -11,12 +11,10 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /** The prepared collection, hosted publicly so the TV needs no account or file transfer. */
 const val COLLECTION_URL = "https://huggingface.co/datasets/Mateleo/painting-tv-collection/resolve/main/catalog.json"
@@ -46,13 +44,12 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     var message by mutableStateOf("")
     var working by mutableStateOf(false)
         private set
-    var importMessage by mutableStateOf("")
+    var downloadMessage by mutableStateOf("")
         private set
     private var deck: ShuffleDeck? = null
     private var playlist by mutableStateOf(emptyList<Painting>())
     val availableCount get() = playlist.size
     private val workManager = WorkManager.getInstance(application)
-    val inboxFile = File(application.getExternalFilesDir(null), "inbox/collection.zip")
 
     init {
         reload()
@@ -62,11 +59,8 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 val work = infos.maxByOrNull { it.generation }
                 working = infos.any { !it.state.isFinished }
                 work?.let {
-                    val download = "download" in it.tags
-                    importMessage = if (it.state.isFinished) it.outputData.getString("message")
-                        ?: if (it.state == WorkInfo.State.CANCELLED) {
-                            if (download) "Download paused. Downloaded paintings stay in the gallery." else "Import cancelled."
-                        } else ""
+                    downloadMessage = if (it.state.isFinished) it.outputData.getString("message")
+                        ?: if (it.state == WorkInfo.State.CANCELLED) "Download paused. Downloaded paintings stay in the gallery." else ""
                     else it.progress.getString("message") ?: "Preparing collection…"
                     // Pick up paintings as they finish downloading, and whatever is kept after a stop.
                     val published = it.progress.getInt("partial", 0)
@@ -75,12 +69,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                     if (it.state.isFinished) { reload(); launch { delay(2_000); reload() } }
                 }
             }
-        }
-        inboxFile.parentFile?.mkdirs()
-        val signature = "${inboxFile.length()}:${inboxFile.lastModified()}"
-        if (inboxFile.isFile && preferences.getString("inbox", null) != signature) {
-            preferences.edit().putString("inbox", signature).apply()
-            retryInbox()
         }
     }
 
@@ -144,15 +132,13 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         if (refilter && collection != null) rebuildPlaylist()
         interact()
     }
-    fun startImport(source: String, mode: String) {
-        val request = OneTimeWorkRequestBuilder<CollectionWorker>()
-            .setInputData(workDataOf("source" to source, "mode" to mode)).addTag(mode).build()
+    fun startDownload() {
+        val request = OneTimeWorkRequestBuilder<CollectionWorker>().build()
         workManager.enqueueUniqueWork("collection", ExistingWorkPolicy.KEEP, request)
         panel = true
         interact()
     }
-    fun cancelImport() { workManager.cancelUniqueWork("collection") }
+    fun cancelDownload() { workManager.cancelUniqueWork("collection") }
     fun closePanel() { panel = false; controls = false }
-    fun retryInbox() = startImport("file:${inboxFile.absolutePath}", "zip")
     fun freeSpace(): String = "%.1f GB available".format(store.root.usableSpace / 1_000_000_000.0)
 }

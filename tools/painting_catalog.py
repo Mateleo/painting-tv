@@ -493,81 +493,6 @@ def download_pack(catalog_path: Path, pack_dir: Path, *, min_width: int = 0) -> 
     return downloaded
 
 
-def bundle_catalog(catalog_path: Path, output: Path) -> Path:
-    """Create app import ZIP with root catalog.json and all referenced images."""
-    catalog = read_json(catalog_path)
-    root = catalog_path.parent
-    packaged = []
-    omitted = []
-    for original in catalog["paintings"]:
-        local = original.get("resolution", {}).get("offlineImage")
-        remote = original.get("imageUrl", "")
-        deck_image = original.get("originalImageUrl", remote)
-        has_highres = bool(local and (root / local).is_file())
-        image = local if has_highres else deck_image
-        if not image or image.startswith("https://") or not (root / image).is_file():
-            omitted.append(
-                {
-                    "id": original["id"],
-                    "title": original["title"],
-                    "artist": original["artist"],
-                    "reason": "no embedded image available",
-                }
-            )
-            continue
-        item = {
-            k: original.get(k, "")
-            for k in (
-                "id",
-                "title",
-                "artist",
-                "year",
-                "movement",
-                "imageUrl",
-                "width",
-                "height",
-                "sourceUrl",
-                "license",
-            )
-        }
-        if has_highres:
-            suffix = (root / local).suffix or ".jpg"
-            item["imageUrl"] = f"images/highres-{original['id']}{suffix}"
-            item["width"] = original.get("width") or ""
-            item["height"] = original.get("height") or ""
-        else:
-            item["imageUrl"] = deck_image
-            item["width"] = original.get("originalWidth", item["width"])
-            item["height"] = original.get("originalHeight", item["height"])
-            if remote != deck_image:
-                item["sourceUrl"] = original.get("originalSourceUrl", "")
-                item["license"] = original.get("originalLicense", "")
-        packaged.append(item)
-    report = {"included": len(packaged), "omittedCount": len(omitted), "omitted": omitted}
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
-        archive.writestr(
-            "catalog.json",
-            json.dumps({"version": 1, "paintings": packaged}, ensure_ascii=False, indent=2) + "\n",
-        )
-        archive.writestr(
-            "bundle-report.json", json.dumps(report, ensure_ascii=False, indent=2) + "\n"
-        )
-        image_root = root / "images"
-        if image_root.exists():
-            for image in sorted(image_root.iterdir()):
-                if image.is_file():
-                    archive.write(image, f"images/{image.name}")
-        for original in catalog["paintings"]:
-            local = original.get("resolution", {}).get("offlineImage")
-            if not local or not (root / local).is_file():
-                continue
-            target = f"images/highres-{original['id']}{(root / local).suffix or '.jpg'}"
-            archive.write(root / local, target)
-    write_json(output.with_suffix(output.suffix + ".report.json"), report)
-    return output
-
-
 def export_metadata(catalog_path: Path, output: Path) -> None:
     fields = ("id", "title", "artist", "year", "movement", "medium", "tags")
     paintings = [
@@ -617,11 +542,6 @@ def main() -> None:
     p_approve.add_argument("painting_id")
     p_approve.add_argument("--candidate", type=int, default=0)
     p_approve.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
-    p_bundle = sub.add_parser(
-        "bundle", help="Build an app ZIP with catalog.json at the root and all images"
-    )
-    p_bundle.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
-    p_bundle.add_argument("--output", type=Path, default=DATA / "painting-pack.zip")
     p_metadata = sub.add_parser("metadata", help="Export all note metadata without image data")
     p_metadata.add_argument("--catalog", type=Path, default=DATA / "catalog.json")
     p_metadata.add_argument("--output", type=Path, default=ROOT / "catalog" / "paintings.json")
@@ -646,12 +566,6 @@ def main() -> None:
     elif args.command == "approve":
         approve_candidate(args.catalog, args.painting_id, args.candidate)
         print(f"Approved candidate {args.candidate} for {args.painting_id}")
-    elif args.command == "bundle":
-        result = bundle_catalog(args.catalog, args.output)
-        report = read_json(result.with_suffix(result.suffix + ".report.json"))
-        print(
-            f"{result}: included {report['included']}; omitted {report['omittedCount']} without images"
-        )
     elif args.command == "metadata":
         export_metadata(args.catalog, args.output)
         print(args.output)

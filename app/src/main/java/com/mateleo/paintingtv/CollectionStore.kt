@@ -59,7 +59,7 @@ class CollectionStore(private val context: Context) {
         }.getOrDefault(emptyMap())
     }
 
-    /** Switches to [directory], then removes every other collection, including abandoned partial imports. */
+    /** Switches to [directory], then removes every other collection, including abandoned partial downloads. */
     fun activate(directory: File, paintings: List<Painting>) {
         require(directory.parentFile?.canonicalFile == root.canonicalFile)
         require(paintings.isNotEmpty())

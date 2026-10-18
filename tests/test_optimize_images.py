@@ -1,7 +1,6 @@
 import json
 import tempfile
 import unittest
-import zipfile
 from pathlib import Path
 
 from PIL import Image
@@ -53,7 +52,7 @@ class CompressionTests(unittest.TestCase):
             self.assertLessEqual(max(result["width"], result["height"]), 700)
             self.assertLessEqual(result["width"] * result["height"], 250_000)
 
-    def test_pack_can_resume_and_contains_only_referenced_images(self):
+    def test_dataset_can_resume_and_catalog_references_readable_images(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             with Image.new("RGB", (64, 64), "blue") as image:
@@ -80,9 +79,11 @@ class CompressionTests(unittest.TestCase):
             self.assertEqual(result["outputBytes"], result2["outputBytes"])
             self.assertEqual(result["recordsChecked"], 2)
             self.assertEqual(result["included"], 1)
-            with zipfile.ZipFile(result["bundlePath"]) as archive:
-                catalog = json.loads(archive.read("catalog.json"))
-                self.assertIn(catalog["paintings"][0]["imageUrl"], archive.namelist())
+            catalog = json.loads((root / "pack/catalog.json").read_text())
+            self.assertEqual(len(catalog["paintings"]), 1)
+            with Image.open(root / "pack" / catalog["paintings"][0]["imageUrl"]) as image:
+                self.assertEqual(image.size, (64, 64))
+            self.assertFalse((root / "pack.zip").exists())
 
 
 if __name__ == "__main__":

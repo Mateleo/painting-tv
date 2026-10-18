@@ -1,8 +1,6 @@
 package com.mateleo.paintingtv
 
 import android.Manifest
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -17,13 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : ComponentActivity() {
     private lateinit var gallery: GalleryViewModel
-    private val picker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            try { contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-            catch (_: SecurityException) { /* Some pickers grant access only until the app closes. */ }
-            gallery.startImport(uri.toString(), "zip")
-        }
-    }
     private val notifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,13 +41,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         })
-        setContent { Gallery(gallery, onImport = {
-            requestNotifications()
-            try { picker.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) }
-            catch (_: ActivityNotFoundException) {
-                gallery.message = "No file picker is installed. Use the ADB collection inbox described in the README."
-            }
-        }, onDownload = { requestNotifications(); gallery.startImport(it, "download") }) }
+        setContent { Gallery(gallery, onDownload = { requestNotifications(); gallery.startDownload() }) }
     }
 
     private fun requestNotifications() {

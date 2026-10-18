@@ -12,15 +12,8 @@ collection. On a new install, open Settings and choose **Download all · 2.9 GB*
 The collection is unchanged from 0.3.0: 2,160 paintings, available offline after
 all images finish downloading.
 
-For an offline install, download `painting-pack.zip.001`, `painting-pack.zip.002`,
-`painting-pack.parts.json`, and `join-pack.py` into one folder, then run:
-
-```sh
-python join-pack.py painting-pack.parts.json --output painting-pack.zip
-```
-
-Import the joined ZIP through **Settings → Import ZIP**. Do not import the
-individual parts. `SHA256SUMS.txt` lists checksums for the release assets.
+The collection is hosted on [Hugging Face](https://huggingface.co/datasets/Mateleo/painting-tv-collection).
+Use the latest app release to download it. Collection archives are no longer distributed.
 
 This remains a debug-signed personal preview. Built and checked with Android
 lint and JVM unit tests; the new launcher artwork and download behavior still

@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
@@ -32,87 +31,47 @@ import java.net.URL
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
-import java.util.zip.ZipInputStream
 import javax.net.ssl.HttpsURLConnection
 
 private const val PARALLEL_DOWNLOADS = 8
 
-/** Builds a complete collection beside the live one; only a successful import replaces it. */
+/** Builds a complete collection beside the live one; only a successful download replaces it. */
 class CollectionWorker(context: Context, parameters: WorkerParameters) : CoroutineWorker(context, parameters) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        // Without foreground status (e.g. started from the background on Android 12+) the import still runs.
+        // Without foreground status (e.g. started from the background on Android 12+) the download still runs.
         runCatching { setForeground(notification()) }
         val store = CollectionStore(applicationContext)
-        val source = inputData.getString("source") ?: return@withContext Result.failure()
-        val mode = inputData.getString("mode") ?: "zip"
-        val hash = MessageDigest.getInstance("SHA-256").digest("$mode:$source".toByteArray())
+        val hash = MessageDigest.getInstance("SHA-256").digest("download:$COLLECTION_URL".toByteArray())
             .take(12).joinToString("") { "%02x".format(it) }
         // A retried download reuses verified files in its stage. Never mutate the active collection.
         val stage = File(store.root, "collection-$hash".let { if (store.activeName == it) "$it-next" else it })
         try {
             stage.mkdirs()
             setProgress(workDataOf("message" to "Preparing collection…"))
-            when (mode) {
-                "zip" -> importZip(source, stage)
-                "download" -> downloadCollection(source, stage)
-                else -> error("Unknown import type")
-            }
+            downloadCollection(stage)
             val catalog = File(stage, "catalog.json")
             require(catalog.isFile && catalog.length() <= 32L * 1024 * 1024) { "Missing or oversized catalog.json" }
             val paintings = CollectionStore.parse(catalog.readText())
-            if (mode == "zip") paintings.forEachIndexed { index, painting ->
-                currentCoroutineContext().ensureActive()
-                val image = CollectionStore.safeFile(stage, painting.imageUrl)
-                require(isImage(image)) { "Missing or invalid image: ${painting.title}" }
-                if (index % 25 == 0) setProgress(workDataOf("message" to "Checking ${index + 1} / ${paintings.size}"))
-            }
             store.activate(stage, paintings)
             Result.success(workDataOf("message" to "${paintings.size} paintings ready offline"))
         } catch (cancelled: kotlinx.coroutines.CancellationException) {
             throw cancelled
         } catch (e: Exception) {
-            Result.failure(workDataOf("message" to (e.message ?: "Collection could not be imported").take(500)))
+            Result.failure(workDataOf("message" to (e.message ?: "Collection could not be downloaded").take(500)))
         }
     }
 
-    private suspend fun importZip(source: String, stage: File) {
-        // Restart a cancelled ZIP import cleanly; the original collection remains untouched.
-        stage.deleteRecursively()
-        val input = if (source.startsWith("file:")) {
-            val file = File(requireNotNull(Uri.parse(source).path))
-            val inbox = File(applicationContext.getExternalFilesDir(null), "inbox").canonicalFile
-            require(file.canonicalPath.startsWith(inbox.path + File.separator)) { "File must be in the import inbox" }
-            file.inputStream()
-        } else {
-            require(source.startsWith("content:")) { "Choose a collection ZIP" }
-            applicationContext.contentResolver.openInputStream(Uri.parse(source)) ?: error("Cannot open ZIP")
-        }
-        ZipInputStream(input.buffered()).use { zip ->
-            var files = 0
-            var total = 0L
-            while (true) {
-                val entry = zip.nextEntry ?: break
-                val target = CollectionStore.safeFile(stage, entry.name)
-                if (entry.isDirectory) { target.mkdirs(); continue }
-                require(++files <= 40_001) { "Too many ZIP entries" }
-                total += copy(zip, target, 150L * 1024 * 1024, "ZIP entry exceeds 150 MB")
-                require(total <= 100L * 1024 * 1024 * 1024) { "Collection exceeds 100 GB" }
-                if (files % 10 == 0) setProgress(workDataOf("message" to "Importing $files files · ${total / 1024 / 1024} MB"))
-            }
-        }
-    }
-
-    private suspend fun downloadCollection(source: String, stage: File) {
+    private suspend fun downloadCollection(stage: File) {
         val store = CollectionStore(applicationContext)
         val manifestFile = File(stage, "manifest.json")
-        download(source, manifestFile, 32L * 1024 * 1024)
+        download(COLLECTION_URL, manifestFile, 32L * 1024 * 1024)
         val text = manifestFile.readText()
         val json = JSONObject(text)
         val paintings = CollectionStore.parse(text)
         val entries = json.getJSONArray("paintings")
         // Relative image paths are hosted beside the manifest; keep the file type for the decoder.
         val addresses = paintings.mapIndexed { index, painting ->
-            val address = URL(URL(source), painting.imageUrl)
+            val address = URL(URL(COLLECTION_URL), painting.imageUrl)
             val extension = address.path.substringAfterLast('.', "").lowercase().takeIf { it in setOf("jpg", "jpeg", "png", "webp") } ?: "jpg"
             val path = "images/${painting.id}.$extension"
             entries.getJSONObject(index).put("imageUrl", path)

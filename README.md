@@ -52,27 +52,6 @@ about 3 GB free.
 **Updating:** install a newer `painting-tv.apk` the same way. Settings and the
 collection are kept.
 
-### Offline alternative: import a ZIP
-
-The release also carries the collection as `painting-pack.zip.001` and `.002`
-(GitHub limits files to 2 GiB). Download both parts, `painting-pack.parts.json`,
-and `join-pack.py` into one folder, then join and verify them:
-
-```sh
-python join-pack.py painting-pack.parts.json --output painting-pack.zip
-```
-
-Copy `painting-pack.zip` to a USB stick and choose **Settings → Import
-ZIP** (needs about 6 GB free while importing). If the TV has no file picker,
-push it with ADB instead:
-
-```sh
-adb shell am start -n com.mateleo.paintingtv/.MainActivity   # creates the inbox
-adb shell am force-stop com.mateleo.paintingtv
-adb push painting-pack.zip /sdcard/Android/data/com.mateleo.paintingtv/files/inbox/collection.zip
-adb shell am start -n com.mateleo.paintingtv/.MainActivity   # imports it
-```
-
 ## Using it
 
 - **Left / Right:** previous / next painting.

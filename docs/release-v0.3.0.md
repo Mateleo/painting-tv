@@ -13,11 +13,8 @@ Install only the APK; the app now fetches the collection itself.
   The collection remains mixed resolution; the **All / HD+ / 4K+** filters still apply.
 - Includes the gentle-zoom jump and stuck-slideshow fixes made after 0.2.0.
 
-The ZIP route remains as an offline alternative. GitHub limits release files to
-2 GiB, so the 2.86 GB pack ships as `painting-pack.zip.001` and `.002`. Download
-both parts, `painting-pack.parts.json` and `join-pack.py`, then run
-`python join-pack.py painting-pack.parts.json --output painting-pack.zip` and
-import the joined ZIP. Do not import the parts on the TV.
+The collection is hosted on [Hugging Face](https://huggingface.co/datasets/Mateleo/painting-tv-collection).
+Use the latest app release to download it. Collection archives are no longer distributed.
 
 The research decisions, with source page, licence, checksum, and review verdict
 for each, are now committed in `catalog/research-sources.json`. Identity checks

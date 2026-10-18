@@ -12,7 +12,6 @@ import io
 import json
 import math
 import shutil
-import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -329,13 +328,6 @@ def build_pack(
         "guard": "Five native-resolution patches, PSNR >= min_psnr for lossy WebP; otherwise original or lossless.",
     }
     write_json(output / "compression-report.json", report)
-    bundle = output.parent / (output.name + ".zip")
-    with zipfile.ZipFile(bundle, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
-        archive.write(output / "catalog.json", "catalog.json")
-        archive.write(output / "compression-report.json", "compression-report.json")
-        for item in records:
-            archive.write(output / item["imageUrl"], item["imageUrl"])
-    report["bundlePath"] = str(bundle)
     return report
 
 

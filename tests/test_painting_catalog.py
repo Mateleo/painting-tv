@@ -9,7 +9,6 @@ from unittest.mock import patch
 
 from tools.painting_catalog import (
     approve_candidate,
-    bundle_catalog,
     download_pack,
     extract_apkg,
     image_dimensions,
@@ -148,60 +147,6 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(item["resolution"]["status"], "approved")
             self.assertEqual(item["imageUrl"], candidate["imageUrl"])
             self.assertEqual(item["originalImageUrl"], "")
-
-    def test_bundle_has_root_catalog_and_relative_image(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            (root / "images").mkdir()
-            (root / "images" / "work.jpg").write_bytes(b"deck image")
-            catalog = {
-                "version": 1,
-                "paintings": [
-                    {
-                        "id": "x",
-                        "title": "Title",
-                        "artist": "Artist",
-                        "year": "",
-                        "movement": "",
-                        "imageUrl": "https://example.org/high.jpg",
-                        "originalImageUrl": "images/work.jpg",
-                        "originalWidth": 20,
-                        "originalHeight": 10,
-                        "originalSourceUrl": "",
-                        "originalLicense": "",
-                        "width": 400,
-                        "height": 200,
-                        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Work",
-                        "license": "PD",
-                        "resolution": {"status": "approved", "candidates": []},
-                    },
-                    {
-                        "id": "y",
-                        "title": "Missing",
-                        "artist": "Artist",
-                        "year": "",
-                        "movement": "",
-                        "imageUrl": "",
-                        "width": "",
-                        "height": "",
-                        "sourceUrl": "",
-                        "license": "",
-                        "resolution": {"status": "unresolved", "candidates": []},
-                    },
-                ],
-            }
-            path = root / "catalog.json"
-            path.write_text(json.dumps(catalog))
-            bundle = bundle_catalog(path, root / "bundle.zip")
-            with zipfile.ZipFile(bundle) as archive:
-                self.assertIn("catalog.json", archive.namelist())
-                self.assertIn("images/work.jpg", archive.namelist())
-                output = json.loads(archive.read("catalog.json"))
-                self.assertEqual(output["paintings"][0]["imageUrl"], "images/work.jpg")
-                self.assertEqual(output["paintings"][0]["width"], 20)
-                report = json.loads(archive.read("bundle-report.json"))
-                self.assertEqual((report["included"], report["omittedCount"]), (1, 1))
-                self.assertEqual(report["omitted"][0]["id"], "y")
 
     def test_resolve_limit_counts_pending_records_and_resume_skips_reviewed(self):
         with tempfile.TemporaryDirectory() as td:

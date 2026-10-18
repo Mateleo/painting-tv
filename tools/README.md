@@ -2,7 +2,7 @@
 
 These tools fetch the shared Anki deck, extract the note fields and embedded
 images, suggest Wikimedia Commons matches with image dimensions and license
-metadata, and package manually approved images for offline display. The
+metadata, and export reviewed images for the Hugging Face dataset. The
 resolver stores candidates and provenance in data/catalog.json; a similarity
 score is a review aid, never proof of identity.
 
@@ -38,22 +38,13 @@ The manifest command exports the app contract (version and paintings). By
 default it uses relative paths to embedded or downloaded images. Add --online
 to use approved HTTPS source URLs while unresolved records retain their local
 images. Once candidates are approved, pack downloads them, skips existing
-files, and records resumable local paths for the app bundle:
+files, and records resumable local paths for dataset preparation:
 
     uv run --locked painting-catalog pack --min-width 3840
-    uv run --locked painting-catalog bundle
 
 The pack command does not fetch unresolved or merely suggested results.
 Original scans vary in resolution and orientation; min-width filters by source
 width but cannot ensure a vertical work fills a 4K screen.
-
-The bundle command writes data/painting-pack.zip. It contains catalog.json at
-the ZIP root and an images/ directory with embedded deck images.
-Approved high-resolution downloads are included alongside them, and the
-packaged catalog points to those approved files. The bundle stays usable
-offline even for paintings that have not yet been matched. Four deck notes
-have no embedded image and are omitted from the app bundle; bundle-report.json
-inside the ZIP and the adjacent report JSON list those omitted records.
 
 The metadata command exports all 2,160 notes, without images or resolver
 details, to catalog/paintings.json. This compact catalog can be checked into
@@ -113,7 +104,8 @@ compare the recorded `sha256`.
 
 `build_quality_pack` merges the available sources, chooses the strongest
 screen-fill resolution among verified candidates, keeps an original fallback,
-and produces `data/tv-quality-pack.zip`. It fully audits the selected exports
+and produces a dataset folder at `data/tv-quality-pack/` containing `catalog.json`
+and its referenced images. No distribution archive is created. It fully audits the selected exports
 and records every original note in `catalog/quality-upgrade-report.json` and CSV.
 `quality_review` generates the searchable, self-contained HTML review.
 
