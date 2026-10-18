@@ -1,6 +1,7 @@
 package com.mateleo.paintingtv
 
 import android.graphics.Bitmap
+import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -20,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -46,7 +48,9 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 
 private val Ivory = Color(0xFFF0E7D4)
@@ -84,10 +88,8 @@ fun Gallery(vm: GalleryViewModel, onDownload: () -> Unit = {}, screensaver: Bool
         if (collection == null) return@LaunchedEffect
         if (painting == null) { frame = null; return@LaunchedEffect }
         val crop = settings.crop
-        suspend fun decode(shown: Painting) = withContext(Dispatchers.IO) {
-            vm.store.decode(collection, shown,
-                (configuration.screenWidthDp * density).toInt(), (configuration.screenHeightDp * density).toInt(), crop)
-        }
+        suspend fun decode(shown: Painting, background: Boolean = false) = vm.store.decode(collection, shown,
+            (configuration.screenWidthDp * density).toInt(), (configuration.screenHeightDp * density).toInt(), crop, background)
         // A painting prepared for another turn or framing is dropped first, so at most two large bitmaps are alive.
         val ready = prepared?.takeIf { it.painting == painting && it.crop == crop }
         prepared = null
@@ -107,26 +109,41 @@ fun Gallery(vm: GalleryViewModel, onDownload: () -> Unit = {}, screensaver: Bool
         delay(DISSOLVE_MILLIS + 400L)
         val upcoming = vm.upcoming()?.takeIf { it != painting } ?: return@LaunchedEffect
         try {
-            prepared = Prepared(upcoming, crop, decode(upcoming))
+            prepared = Prepared(upcoming, crop, decode(upcoming, background = true))
         } catch (cancelled: kotlinx.coroutines.CancellationException) {
             throw cancelled
         } catch (_: Throwable) {} // Its own turn reports the error.
     }
 
-    LaunchedEffect(revision, frame, settings.seconds, vm.playing, active, vm.panel) {
+    val controls = vm.controls && !vm.panel && !screensaver
+    // Only the slow zoom and the visible progress bar need a new frame each vsync; otherwise just wait.
+    val animate = settings.zoom && settings.crop || controls
+    LaunchedEffect(revision, frame, settings.seconds, vm.playing, active, vm.panel, animate) {
         val progress = frame?.takeIf { it.revision == revision && vm.playing && active && !vm.panel }?.progress ?: return@LaunchedEffect
-        progress.animateTo(1f, tween(((1f - progress.value) * settings.seconds * 1000).toInt(), easing = LinearEasing))
+        val start = progress.value
+        val remaining = ((1f - start) * settings.seconds * 1000).toLong().coerceAtLeast(1)
+        if (animate) progress.animateTo(1f, tween(remaining.toInt(), easing = LinearEasing))
+        else {
+            val started = SystemClock.elapsedRealtime()
+            // Records the time spent, so the zoom or progress bar resumes from the right place.
+            try { delay(remaining) } finally {
+                val elapsed = (SystemClock.elapsedRealtime() - started).toFloat() / remaining
+                withContext(NonCancellable) { progress.snapTo(start + (1f - start) * elapsed.coerceAtMost(1f)) }
+            }
+        }
         vm.next()
     }
-    LaunchedEffect(vm.lastInteraction, vm.controls, vm.panel) {
-        if (vm.controls && !vm.panel) { delay(5000); vm.controls = false }
+    // Watched outside composition, so a key press does not recompose the whole screen.
+    LaunchedEffect(Unit) {
+        snapshotFlow { Triple(vm.lastInteraction, vm.controls, vm.panel) }.collectLatest { (_, shown, panel) ->
+            if (shown && !panel) { delay(5000); vm.controls = false }
+        }
     }
     LaunchedEffect(vm.controls, vm.panel) {
         if (screensaver) return@LaunchedEffect
         if (vm.controls && !vm.panel) { delay(100); focus.requestFocus() }
         else if (!vm.controls) rootFocus.requestFocus()
     }
-    val controls = vm.controls && !vm.panel && !screensaver
 
     MaterialTheme {
         Box(Modifier.fillMaxSize().background(Color.Black).focusRequester(rootFocus)
@@ -174,9 +191,11 @@ fun Gallery(vm: GalleryViewModel, onDownload: () -> Unit = {}, screensaver: Bool
                             "  ·  " + durationLabel(settings.seconds), color = Muted, fontSize = 13.sp)
                         GalleryButton(stringResource(R.string.settings), onClick = { vm.panel = true; vm.interact() })
                     }
-                    Box(Modifier.fillMaxWidth().height(2.dp).background(Color.White.copy(alpha = 0.15f))) {
-                        Box(Modifier.fillMaxWidth(frame?.progress?.value ?: 0f).fillMaxHeight().background(Ivory))
-                    }
+                    // Read while drawing, so the advancing bar does not recompose the controls every frame.
+                    val progress = frame?.progress
+                    Box(Modifier.fillMaxWidth().height(2.dp).background(Color.White.copy(alpha = 0.15f)).drawBehind {
+                        drawRect(Ivory, size = size.copy(width = size.width * (progress?.value ?: 0f)))
+                    })
                 }
             }
             if (vm.panel && !screensaver) SettingsPanel(vm, onDownload)
@@ -203,6 +222,8 @@ private fun SettingsPanel(vm: GalleryViewModel, onDownload: () -> Unit) {
     val focus = remember { FocusRequester() }
     val downloadFocus = remember { FocusRequester() }
     val cancelFocus = remember { FocusRequester() }
+    // Measured off the main thread, once when Settings opens and again when a download starts or stops.
+    val freeSpace by produceState("", vm.working) { value = withContext(Dispatchers.IO) { vm.freeSpace() } }
     // Until the full collection is in, the panel opens on the download button so one OK press fetches it.
     val incomplete = collection != null && (collection.directory == null || collection.partial)
     val offerDownload = incomplete && !vm.working
@@ -245,7 +266,7 @@ private fun SettingsPanel(vm: GalleryViewModel, onDownload: () -> Unit) {
             Spacer(Modifier.height(4.dp))
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.12f)))
             val count = collection?.paintings?.size ?: 0
-            Heading(stringResource(R.string.collection_heading, pluralStringResource(R.plurals.painting_count, count, count), vm.freeSpace()))
+            Heading(stringResource(R.string.collection_heading, pluralStringResource(R.plurals.painting_count, count, count), freeSpace))
             if (vm.working) {
                 if (vm.downloadMessage.isNotBlank()) Text(vm.downloadMessage, color = Ivory, fontSize = 14.sp)
                 GalleryButton(stringResource(R.string.cancel), Modifier.focusRequester(cancelFocus), onClick = vm::cancelDownload)

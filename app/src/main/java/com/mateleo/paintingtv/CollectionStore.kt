@@ -8,6 +8,11 @@ import android.graphics.ImageDecoder
 import android.graphics.Rect
 import android.graphics.ColorSpace
 import android.os.Build
+import android.os.Process
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
@@ -76,8 +81,23 @@ class CollectionStore(private val context: Context) {
         minOf(8_300_000L, context.getSystemService(ActivityManager::class.java).memoryClass.toLong() * 1024 * 1024 / 32)
     }
 
-    @Synchronized
-    fun decode(collection: ArtCollection, painting: Painting, screenWidth: Int, screenHeight: Int, crop: Boolean): Bitmap {
+    private val decoding = Mutex()
+
+    /**
+     * One decode at a time. Waiting is cancellable, so paintings skipped past quickly are never decoded;
+     * a [background] decode (the next painting, prepared ahead) leaves the CPU to the interface.
+     */
+    suspend fun decode(collection: ArtCollection, painting: Painting, screenWidth: Int, screenHeight: Int, crop: Boolean,
+        background: Boolean = false): Bitmap = decoding.withLock {
+        withContext(Dispatchers.IO) {
+            val priority = Process.getThreadPriority(Process.myTid())
+            if (background) Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
+            try { decodeNow(collection, painting, screenWidth, screenHeight, crop) }
+            finally { if (background) Process.setThreadPriority(priority) }
+        }
+    }
+
+    private fun decodeNow(collection: ArtCollection, painting: Painting, screenWidth: Int, screenHeight: Int, crop: Boolean): Bitmap {
         val file = collection.directory?.let { safeFile(it, painting.imageUrl) }
         val targetWidth = screenWidth.coerceIn(1280, 3840)
         val targetHeight = screenHeight.coerceIn(720, 2160)
