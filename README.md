@@ -99,7 +99,8 @@ same key to install updates over an existing install. See
 Launcher assets follow the [Android TV icon guidelines](https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines):
 an adaptive framed-landscape icon, a 16:9 banner with the app name, and a separate
 single-color notification icon. Vector sources are in `app/src/main/res/drawable/`;
-the adaptive layers are wired in `app/src/main/res/mipmap-anydpi/`.
+the adaptive layers are wired in `app/src/main/res/mipmap-anydpi-v26/`. PNG copies in
+`mipmap-*dpi/` let file managers show an icon for the APK.
 
 ## Releases
 
