@@ -231,7 +231,7 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
         val notification = NotificationCompat.Builder(applicationContext, "collection")
             .setContentTitle("Preparing your painting collection")
             .setContentText("You can return to the gallery while this finishes.")
-            .setSmallIcon(com.mateleo.paintingtv.R.drawable.app_icon).setOngoing(true).build()
+            .setSmallIcon(com.mateleo.paintingtv.R.drawable.ic_notification).setOngoing(true).build()
         return if (Build.VERSION.SDK_INT >= 29) ForegroundInfo(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         else ForegroundInfo(1, notification)
     }

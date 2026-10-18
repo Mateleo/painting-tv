@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Keep the entire framed landscape inside a circular launcher mask. -->
+    <group android:scaleX="0.68" android:scaleY="0.68"
+        android:pivotX="54" android:pivotY="54">
+        <path android:fillColor="#D8C9A3" android:pathData="M18,24h72v60h-72z" />
+        <path android:fillColor="#243C32" android:pathData="M23,29h62v50h-62z" />
+        <path android:fillColor="#8DAB8D" android:pathData="M23,69l20,-24l15,17l12,-10l15,17v10h-62z" />
+        <path android:fillColor="#E2C68D" android:pathData="M64,36h9v9h-9z" />
+    </group>
+</vector>

@@ -4,6 +4,8 @@ A quiet, offline painting slideshow for Android TV and Google TV: 2,160 famous
 paintings, no account, ads, analytics, or server. Built with Kotlin and Compose
 for TV; Python tools prepare the collection.
 
+<img src="docs/images/painting-tv.webp" alt="Painting TV showing Cézanne’s Still Life with Apples and a Pot of Primroses on a television" width="800">
+
 ## Install on your TV
 
 You need the TV and a computer. It takes about 10 minutes plus the collection
@@ -114,3 +116,8 @@ uv run --locked --extra images ty check
 The APK lands in `app/build/outputs/apk/debug/`. It is debug-signed; keep the
 same key to install updates over an existing install. See
 [tools/README.md](tools/README.md) for building and publishing the collection.
+
+Launcher assets follow the [Android TV icon guidelines](https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines):
+an adaptive framed-landscape icon, a 16:9 banner with the app name, and a separate
+single-color notification icon. Vector sources are in `app/src/main/res/drawable/`;
+the adaptive layers are wired in `app/src/main/res/mipmap-anydpi/`.
