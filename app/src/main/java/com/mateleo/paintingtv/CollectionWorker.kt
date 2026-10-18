@@ -99,10 +99,13 @@ class CollectionWorker(context: Context, parameters: WorkerParameters) : Corouti
         val entries = json.getJSONArray("paintings")
         paintings.forEachIndexed { index, painting ->
             currentCoroutineContext().ensureActive()
-            val path = "images/${painting.id}.jpg"
+            // Relative image paths are hosted beside the manifest; keep the file type for the decoder.
+            val address = URL(URL(source), painting.imageUrl)
+            val extension = address.path.substringAfterLast('.', "").lowercase().takeIf { it in setOf("jpg", "jpeg", "png", "webp") } ?: "jpg"
+            val path = "images/${painting.id}.$extension"
             val target = CollectionStore.safeFile(stage, path)
             setProgress(workDataOf("message" to "Downloading ${index + 1} / ${paintings.size} · ${painting.title}"))
-            if (!isImage(target)) download(painting.imageUrl, target, 150L * 1024 * 1024)
+            if (!isImage(target)) download(address.toString(), target, 150L * 1024 * 1024)
             require(isImage(target)) { "Invalid image from source: ${painting.title}" }
             entries.getJSONObject(index).put("imageUrl", path)
         }

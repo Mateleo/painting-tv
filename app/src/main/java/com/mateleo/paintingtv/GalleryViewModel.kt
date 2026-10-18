@@ -17,6 +17,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/** The prepared collection, hosted publicly so the TV needs no account or file transfer. */
+const val COLLECTION_URL = "https://huggingface.co/datasets/Mateleo/painting-tv-collection/resolve/main/catalog.json"
+
 data class GallerySettings(val seconds: Int = 10, val zoom: Boolean = true, val captions: Boolean = true,
     val crop: Boolean = true, val minimumHeight: Int = 0)
 
@@ -76,6 +79,13 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
             if (collection?.directory == loaded.directory && collection != null) return@launch
             collection = loaded
             rebuildPlaylist()
+            // Point a fresh install with only the starter paintings at the one-press download, once.
+            if (loaded.directory == null && !preferences.getBoolean("offeredCollection", false)) {
+                preferences.edit().putBoolean("offeredCollection", true).apply()
+                message = "Welcome. Choose Download full collection to install all paintings for offline viewing."
+                panel = true
+                interact()
+            }
         } catch (e: Exception) { message = e.message ?: "Could not open collection" }
     }
 

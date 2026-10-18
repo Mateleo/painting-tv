@@ -168,8 +168,11 @@ private fun GalleryButton(label: String, modifier: Modifier = Modifier, onClick:
 private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload: (String) -> Unit) {
     val settings = vm.settings
     val focus = remember { FocusRequester() }
+    val downloadFocus = remember { FocusRequester() }
+    // A starter-only install opens on the download button so one OK press fetches the collection.
+    val starter = vm.collection?.directory == null && !vm.working
     var url by rememberSaveable { mutableStateOf("") }
-    LaunchedEffect(Unit) { delay(100); focus.requestFocus() }
+    LaunchedEffect(Unit) { delay(100); (if (starter) downloadFocus else focus).requestFocus() }
     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.CenterEnd) {
         Column(Modifier.width(560.dp).fillMaxHeight().background(Panel).verticalScroll(rememberScrollState()).padding(32.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -206,16 +209,18 @@ private fun SettingsPanel(vm: GalleryViewModel, onImport: () -> Unit, onDownload
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.12f)))
             Text("Offline collection", color = Ivory, fontSize = 21.sp, fontFamily = FontFamily.Serif)
             Text("${vm.collection?.paintings?.size ?: 0} paintings installed · ${vm.freeSpace()}", color = Muted, fontSize = 13.sp)
-            Text("Import a collection ZIP from USB, or download a prepared collection once. Playback uses local files.", color = Muted, fontSize = 13.sp)
+            Text("Download the full collection once over the internet, or import a ZIP from USB. Playback uses local files.", color = Muted, fontSize = 13.sp)
             if (!vm.working) {
+                GalleryButton("Download full collection (about 2.9 GB)", Modifier.focusRequester(downloadFocus), onClick = { onDownload(COLLECTION_URL) })
+                Text("Resumable: if it stops, choose it again and finished images are kept.", color = Muted, fontSize = 12.sp)
                 GalleryButton("Import collection ZIP", onClick = onImport)
                 if (vm.inboxFile.isFile) GalleryButton("Import inbox ZIP again", onClick = vm::retryInbox)
-                Text("Collection manifest URL (HTTPS)", color = Ivory, fontSize = 13.sp)
+                Text("Or another collection manifest URL (HTTPS)", color = Ivory, fontSize = 13.sp)
                 BasicTextField(url, onValueChange = { url = it }, singleLine = true,
                     textStyle = TextStyle(color = Ivory, fontSize = 14.sp), cursorBrush = androidx.compose.ui.graphics.SolidColor(Ivory),
                     modifier = Modifier.fillMaxWidth().border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(6.dp)).padding(14.dp),
                     decorationBox = { inner -> if (url.isEmpty()) Text("https://…/catalog.json", color = Muted, fontSize = 14.sp); inner() })
-                GalleryButton("Download whole collection", onClick = {
+                GalleryButton("Download from this URL", onClick = {
                     if (url.trim().startsWith("https://")) onDownload(url.trim())
                     else vm.message = "Enter an HTTPS manifest URL, or import a ZIP."
                 })
