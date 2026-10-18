@@ -121,7 +121,7 @@ with those two files:
 ```sh
 git tag -a v0.5.0 -m "Painting TV 0.5.0"
 git push origin v0.5.0
-gh release create v0.5.0 --verify-tag --prerelease --latest \
+gh release create v0.5.0 --verify-tag --prerelease \
   --title "Painting TV 0.5.0" --notes-file docs/release-v0.5.0.md \
   data/release-v0.5.0/painting-tv-0.5.0.apk data/release-v0.5.0/SHA256SUMS.txt
 ```
