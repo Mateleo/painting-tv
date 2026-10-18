@@ -6,14 +6,26 @@ analytics, subscription, or server is needed for playback.
 
 ## Use it on your TV
 
-Download `painting-tv.apk` and `painting-pack.zip` from the private repository's
-[releases](https://github.com/Mateleo/painting-tv/releases). Install the APK on
-your TV using your preferred Android TV installer, or use ADB below. The APK
+Download `painting-tv.apk` from the private repository's
+[releases](https://github.com/Mateleo/painting-tv/releases) and install it on
+your TV with your preferred Android TV installer, or use ADB below. The APK
 starts with two public-domain paintings from The Metropolitan Museum of Art.
 
-If a large collection is supplied as `painting-pack.zip.001`, `.002`, etc.,
-download every part plus `painting-pack.parts.json` and `join-pack.py` into one
-folder. Join and verify them on your computer before importing on the TV:
+On first launch, Settings opens on **Download full collection (about 2.9 GB)**.
+Press OK. The app downloads the 2,160 paintings from the public
+[Hugging Face dataset](https://huggingface.co/datasets/Mateleo/painting-tv-collection)
+in a background task and reports progress. Allow notifications if prompted so
+you can see that task. If the download stops, choose it again: finished images
+are kept. The gallery switches to the new collection only after every image has
+been checked, and then plays fully offline. Replacing a collection temporarily
+needs room for both the old and new collections; the old files are removed after
+successful installation.
+
+### Offline alternative: import the ZIP
+
+The release also carries the same collection as `painting-pack.zip.001`,
+`.002`, etc. Download every part plus `painting-pack.parts.json` and
+`join-pack.py` into one folder, then join and verify them on your computer:
 
 ```sh
 python join-pack.py painting-pack.parts.json --output painting-pack.zip
@@ -24,12 +36,7 @@ individual parts on the TV. GitHub's per-file release limit is why large packs
 are split; splitting does not recompress or reduce image quality.
 
 Open **Settings → Import collection ZIP** and choose `painting-pack.zip` from
-USB or local storage. Keep the app open until the import starts. It continues
-in a background task and reports progress. Allow notifications if prompted so
-you can see that task. The gallery switches to the imported collection only
-after every referenced image has been checked. You can then disconnect from
-the network. Importing a replacement temporarily needs room for both the old
-and new collections; the old files are removed after successful installation.
+USB or local storage. Keep the app open until the import starts.
 
 Some TVs have no Android document picker. The ADB inbox works without one:
 

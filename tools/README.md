@@ -117,6 +117,17 @@ and produces `data/tv-quality-pack.zip`. It fully audits the selected exports
 and records every original note in `catalog/quality-upgrade-report.json` and CSV.
 `quality_review` generates the searchable, self-contained HTML review.
 
+The app's built-in **Download full collection** reads
+`https://huggingface.co/datasets/Mateleo/painting-tv-collection`. To publish a
+rebuilt pack there, upload `catalog.json`, the dataset card `README.md`, and only
+the images that catalog references (the pack folder can hold stale exports):
+
+    hf upload Mateleo/painting-tv-collection data/hf-upload . --repo-type dataset
+
+Downloading again on a TV that already has this collection fetches every image
+again into a separate stage; resuming reuses images only within an unfinished
+download.
+
 The encoder preserves source dimensions by default. It copies already compact
 JPEGs unchanged, tries high-quality WebP where useful, and keeps the original
 unless the candidate saves at least 5% and passes a 43 dB PSNR guard measured
