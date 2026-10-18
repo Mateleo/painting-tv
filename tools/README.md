@@ -99,7 +99,8 @@ quality pack as that dataset, then upload it:
 The export rebuilds `data/hf-upload/` with:
 
 - `catalog.json`: the app contract, version 2. Only the fields the app reads,
-  French titles applied, compact.
+  French titles applied, compact. Each painting's `sha256` lets the app verify
+  its download and keep images that did not change.
 - `images/`: hard links to the pack images the catalog references; stale files
   are removed.
 - `metadata.jsonl`: one row per image (`file_name`, display fields, source,
@@ -107,9 +108,12 @@ The export rebuilds `data/hf-upload/` with:
 - `README.md`: the dataset card from `tools/dataset-card.md`, whose `configs`
   block points the viewer at `metadata.jsonl` and `images/`.
 
-`--delete "*"` removes remote files the new export no longer has. Downloading
-again on a TV that already has this collection fetches every image again into a
-separate stage; resuming reuses images only within an unfinished download.
+`--delete "*"` removes remote files the new export no longer has. The app checks
+the published catalog about once a day and offers the update in Settings. An
+update builds a separate stage: images whose `sha256` matches the installed
+collection are copied from it, and only new or changed images are downloaded.
+Catalogs published without `sha256` cannot be verified, so their images are
+always downloaded again.
 
 The encoder preserves source dimensions by default. It copies already compact
 JPEGs unchanged, tries high-quality WebP where useful, and keeps the original
