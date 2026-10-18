@@ -1,6 +1,6 @@
 # Painting TV 0.4.1 — simpler collection downloads
 
-Hugging Face is now the only collection source. Install `painting-tv.apk`, open
+Hugging Face is now the only collection source. Install `painting-tv-0.4.1.apk`, open
 Settings, and choose **Download all · 2.9 GB**. Completed paintings join the
 gallery while the rest download, and stay available offline. Paused downloads
 can still resume.

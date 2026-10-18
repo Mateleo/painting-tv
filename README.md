@@ -13,7 +13,7 @@ download.
 
 **1. Download the APK.** On your computer, open the
 [latest release](https://github.com/Mateleo/painting-tv/releases) and download
-`painting-tv.apk`. The repository is private, so the TV can't fetch it directly.
+`painting-tv-<version>.apk` (for example, `painting-tv-0.4.1.apk`). The repository is private, so the TV can't fetch it directly.
 
 **2. Allow installing apps on the TV.**
 
@@ -26,7 +26,7 @@ Menu names vary slightly between TV brands.
 
 **3. Copy the APK to the TV and install it.** Pick one:
 
-- **USB stick:** copy `painting-tv.apk` onto it, plug it into the TV, open it in
+- **USB stick:** copy the downloaded APK onto it, plug it into the TV, open it in
   a file manager app (e.g. *File Commander* or *X-plore* from the Play Store),
   and choose **Install**.
 - **Over Wi-Fi:** install *Send Files to TV* on both your phone and the TV, send
@@ -36,7 +36,7 @@ Menu names vary slightly between TV brands.
 
   ```sh
   adb connect TV_IP:5555        # accept the prompt on the TV
-  adb install -r painting-tv.apk
+  adb install -r painting-tv-0.4.1.apk  # use the version you downloaded
   ```
 
 **4. Download the collection.** Open **Painting TV**. On first launch, Settings
@@ -49,7 +49,7 @@ pauses the download and keeps what is already downloaded; **Resume download**
 continues it. Once every image is in, the gallery works fully offline. Keep
 about 3 GB free.
 
-**Updating:** install a newer `painting-tv.apk` the same way. Settings and the
+**Updating:** install the APK from a newer release the same way. Settings and the
 collection are kept.
 
 ## Using it
@@ -100,3 +100,28 @@ Launcher assets follow the [Android TV icon guidelines](https://developer.androi
 an adaptive framed-landscape icon, a 16:9 banner with the app name, and a separate
 single-color notification icon. Vector sources are in `app/src/main/res/drawable/`;
 the adaptive layers are wired in `app/src/main/res/mipmap-anydpi/`.
+
+## Releases
+
+Every release APK includes its version: `painting-tv-<version>.apk`.
+After setting the app version and writing `docs/release-v<version>.md`, build and
+check the app with the command above, then stage the release (example: 0.4.1):
+
+```sh
+python -m tools.prepare_release --tag v0.4.1
+```
+
+This reads Android's build metadata, checks that the APK version matches the
+tag, and writes `data/release-v0.4.1/painting-tv-0.4.1.apk` and `SHA256SUMS.txt`.
+Commit and push the version and notes, tag that commit, then create the release
+with those two files:
+
+```sh
+git tag -a v0.4.1 -m "Painting TV 0.4.1"
+git push origin v0.4.1
+gh release create v0.4.1 --verify-tag --prerelease --latest \
+  --title "Painting TV 0.4.1" --notes-file docs/release-v0.4.1.md \
+  data/release-v0.4.1/painting-tv-0.4.1.apk data/release-v0.4.1/SHA256SUMS.txt
+```
+
+Use the same local signing key as earlier releases so installed apps can update.
