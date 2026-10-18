@@ -34,6 +34,15 @@ class CollectionStoreTest {
         assertTrue(File(keep, "catalog.json").isFile)
         root.deleteRecursively()
     }
+    @Test fun readsImageChecksums() {
+        val sha = "a".repeat(64)
+        val painting = CollectionStore.parse(catalog().replace("\"movement\":\"\"", "\"sha256\":\"$sha\"")).single()
+        assertEquals(sha, painting.sha256)
+        assertEquals("", CollectionStore.parse(catalog()).single().sha256)
+    }
+    @Test(expected = IllegalArgumentException::class) fun rejectsMalformedChecksums() {
+        CollectionStore.parse(catalog().replace("\"movement\":\"\"", "\"sha256\":\"ABC\""))
+    }
     @Test fun acceptsNestedRelativePaths() {
         assertEquals(File("/tmp/gallery/images/image.jpg"), CollectionStore.safeFile(File("/tmp/gallery"), "images/image.jpg"))
     }

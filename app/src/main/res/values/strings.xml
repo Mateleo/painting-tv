@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name" translatable="false">Painting TV</string>
+
+    <!-- Gallery -->
+    <string name="opening">Opening the gallery…</string>
+    <string name="filter_matches_nothing">No paintings match the selected quality filter.</string>
+    <string name="painting_description">%1$s, %2$s</string>
+    <string name="cannot_open_painting">Cannot open %1$s. %2$s</string>
+    <string name="previous">Previous</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="next">Next</string>
+    <string name="settings">Settings</string>
+    <plurals name="painting_count">
+        <item quantity="one">%d painting</item>
+        <item quantity="other">%d paintings</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="done">Done</string>
+    <string name="time_per_painting">Time per painting</string>
+    <string name="framing">Framing</string>
+    <string name="fill_screen">Fill screen</string>
+    <string name="whole_painting">Whole painting</string>
+    <string name="display">Display</string>
+    <string name="slow_zoom">Slow zoom</string>
+    <string name="captions">Captions</string>
+    <string name="image_quality">Image quality</string>
+    <string name="quality_all">All</string>
+    <string name="collection_heading">Collection · %1$s · %2$s</string>
+    <string name="free_space">%.1f GB available</string>
+    <string name="download_all">Download all · 2.9 GB</string>
+    <string name="resume_download">Resume download</string>
+    <string name="download_update">Download update</string>
+    <string name="update_available">A new version of the collection is available. Only new or changed paintings are downloaded.</string>
+    <string name="cancel">Cancel</string>
+    <string name="screensaver_hint">Painting TV can also be your TV\'s screen saver: Settings → System → Ambient mode or Screen saver. Google TV needs an ADB command instead (see the README).</string>
+
+    <!-- Messages -->
+    <string name="welcome">Welcome. Choose Download all to install every painting for offline viewing.</string>
+    <string name="collection_outdated">This version of the app needs the collection in its new format. Choose Download all to download it again.</string>
+    <string name="collection_unreadable">Could not open the collection</string>
+    <string name="filter_empty">No paintings meet this quality filter. Choose a lower threshold or whole-painting framing.</string>
+
+    <!-- Collection download -->
+    <string name="download_preparing">Preparing collection…</string>
+    <string name="download_progress">Downloading %1$d / %2$d</string>
+    <string name="download_paused">Download paused. Downloaded paintings stay in the gallery.</string>
+    <plurals name="download_finished">
+        <item quantity="one">%d painting ready offline</item>
+        <item quantity="other">%d paintings ready offline</item>
+    </plurals>
+    <string name="notification_channel">Collection downloads</string>
+    <string name="notification_title">Preparing your painting collection</string>
+    <string name="notification_text">You can return to the gallery while this finishes.</string>
+</resources>

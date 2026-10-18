@@ -1,0 +1,56 @@
+<resources>
+    <!-- Gallery -->
+    <string name="opening">Ouverture de la galerie…</string>
+    <string name="filter_matches_nothing">Aucun tableau ne correspond au filtre de qualité choisi.</string>
+    <string name="painting_description">%1$s, %2$s</string>
+    <string name="cannot_open_painting">Impossible d\'ouvrir %1$s. %2$s</string>
+    <string name="previous">Précédent</string>
+    <string name="play">Lecture</string>
+    <string name="pause">Pause</string>
+    <string name="next">Suivant</string>
+    <string name="settings">Réglages</string>
+    <plurals name="painting_count">
+        <item quantity="one">%d tableau</item>
+        <item quantity="many">%d tableaux</item>
+        <item quantity="other">%d tableaux</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="done">OK</string>
+    <string name="time_per_painting">Durée par tableau</string>
+    <string name="framing">Cadrage</string>
+    <string name="fill_screen">Plein écran</string>
+    <string name="whole_painting">Tableau entier</string>
+    <string name="display">Affichage</string>
+    <string name="slow_zoom">Zoom lent</string>
+    <string name="captions">Légendes</string>
+    <string name="image_quality">Qualité d\'image</string>
+    <string name="quality_all">Tous</string>
+    <string name="collection_heading">Collection · %1$s · %2$s</string>
+    <string name="free_space">%.1f Go disponibles</string>
+    <string name="download_all">Tout télécharger · 2,9 Go</string>
+    <string name="resume_download">Reprendre le téléchargement</string>
+    <string name="download_update">Télécharger la mise à jour</string>
+    <string name="update_available">Une nouvelle version de la collection est disponible. Seuls les tableaux nouveaux ou modifiés sont téléchargés.</string>
+    <string name="cancel">Annuler</string>
+    <string name="screensaver_hint">Painting TV peut aussi servir d\'économiseur d\'écran : Paramètres → Système → Mode Ambiance ou Économiseur d\'écran. Sur Google TV, il faut une commande ADB (voir le README).</string>
+
+    <!-- Messages -->
+    <string name="welcome">Bienvenue. Choisissez Tout télécharger pour installer tous les tableaux et les regarder hors ligne.</string>
+    <string name="collection_outdated">Cette version de l\'application lit la collection dans un nouveau format. Choisissez Tout télécharger pour la télécharger à nouveau.</string>
+    <string name="collection_unreadable">Impossible d\'ouvrir la collection</string>
+    <string name="filter_empty">Aucun tableau n\'atteint ce niveau de qualité. Choisissez un seuil plus bas ou le cadrage Tableau entier.</string>
+
+    <!-- Collection download -->
+    <string name="download_preparing">Préparation de la collection…</string>
+    <string name="download_progress">Téléchargement %1$d / %2$d</string>
+    <string name="download_paused">Téléchargement en pause. Les tableaux déjà téléchargés restent dans la galerie.</string>
+    <plurals name="download_finished">
+        <item quantity="one">%d tableau prêt hors ligne</item>
+        <item quantity="many">%d tableaux prêts hors ligne</item>
+        <item quantity="other">%d tableaux prêts hors ligne</item>
+    </plurals>
+    <string name="notification_channel">Téléchargements de la collection</string>
+    <string name="notification_title">Préparation de votre collection de tableaux</string>
+    <string name="notification_text">Vous pouvez revenir à la galerie pendant ce temps.</string>
+</resources>
