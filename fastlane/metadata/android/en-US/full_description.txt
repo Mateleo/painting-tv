@@ -1,0 +1,20 @@
+Turn your TV into a gallery. Painting TV shows 2,160 famous paintings, one at a time, with no account, no ads and no tracking.
+
+<b>Download once, then watch offline</b>
+On first launch, download the collection (about 2.9 GB) from Settings. Paintings join the slideshow as they arrive, and once everything is in, the app works without internet. When the collection is updated, only new or changed paintings are downloaded.
+
+<b>Made for the big screen</b>
+• Fill the screen, or show the whole painting with margins
+• Optional slow zoom and captions with title, artist, date and collection
+• An All / HD+ / 4K+ filter by source resolution
+• Time per painting from 10 seconds to 1 hour
+• A shuffle that goes through every painting before repeating, even after a restart
+• Can be your TV's screen saver
+• English or French, following your TV's language
+
+<b>The collection</b>
+The paintings come from the shared Anki deck "Tableaux de maîtres : les 2000 plus vus", with larger reproductions from WikiArt, Wikimedia Commons and museum open-access collections wherever one matched. Nothing is upscaled or AI-generated, so resolution varies from painting to painting.
+
+Rights remain with their holders. Many works are in the public domain; some are still under copyright. Rights holders who want a work removed can contact the developer.
+
+Painting TV is open source under the MIT License.

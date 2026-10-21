@@ -176,6 +176,10 @@ release with the same key, or installed apps can't update. Its certificate
 SHA-256 is
 `9a8df44e50987cc6b62e56f92727c4ef914a369262d6675c87e48f91f878cff8`.
 
+Google Play takes an app bundle from `./gradlew bundleRelease` and its listing
+from `fastlane/metadata/android/`; [docs/google-play.md](docs/google-play.md)
+walks through publishing there.
+
 ## License
 
 The code is under the [MIT License](LICENSE). The paintings, their
