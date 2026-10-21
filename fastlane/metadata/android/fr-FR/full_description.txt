@@ -1,0 +1,20 @@
+Transformez votre TV en galerie. Painting TV présente 2 160 tableaux célèbres, un à la fois, sans compte, sans publicité et sans suivi.
+
+<b>Un seul téléchargement, puis hors ligne</b>
+Au premier lancement, téléchargez la collection (environ 2,9 Go) depuis les Paramètres. Les tableaux rejoignent le diaporama au fil du téléchargement ; une fois terminé, l'application fonctionne sans internet. Quand la collection évolue, seuls les tableaux nouveaux ou modifiés sont téléchargés.
+
+<b>Pensé pour le grand écran</b>
+• Plein écran, ou tableau entier avec des marges
+• Zoom lent et légendes (titre, artiste, date, collection) en option
+• Un filtre Tous / HD+ / 4K+ selon la résolution de la source
+• Durée par tableau de 10 secondes à 1 heure
+• Un ordre aléatoire qui montre chaque tableau avant de recommencer, même après un redémarrage
+• Peut servir d'économiseur d'écran
+• En français ou en anglais, selon la langue de la TV
+
+<b>La collection</b>
+Les tableaux viennent du deck Anki partagé « Tableaux de maîtres : les 2000 plus vus », avec des reproductions plus grandes issues de WikiArt, Wikimedia Commons et des collections ouvertes des musées lorsqu'elles correspondaient. Rien n'est agrandi artificiellement ni généré par IA ; la résolution varie donc d'un tableau à l'autre.
+
+Les droits restent à leurs titulaires. Beaucoup d'œuvres sont dans le domaine public ; certaines sont encore protégées. Les ayants droit qui souhaitent le retrait d'une œuvre peuvent contacter le développeur.
+
+Painting TV est open source, sous licence MIT.

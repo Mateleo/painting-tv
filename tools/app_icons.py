@@ -13,6 +13,8 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "app/src/main/res"
+# Store listing graphics, in the fastlane layout that Google Play and F-Droid read.
+STORE = ROOT / "fastlane/metadata/android/en-US/images"
 SOURCE = ROOT / "app/src/main/assets/images/met-436535.jpg"
 # Inter Display ExtraBold, SIL Open Font License (tools/fonts/OFL.txt).
 FONT = ROOT / "tools/fonts/InterDisplay-ExtraBold.ttf"
@@ -110,8 +112,11 @@ def background(scale: float) -> Image.Image:
     return image.convert("RGB")
 
 
-def legacy(scale: float) -> Image.Image:
-    """48dp icon for file managers and launchers without adaptive icons."""
+def legacy(scale: float, rounded: bool = True) -> Image.Image:
+    """48dp icon for file managers and launchers without adaptive icons.
+
+    The store icon is left square: Google Play applies its own mask.
+    """
     size = round(48 * scale)
     big = size * SUPERSAMPLE
     # The adaptive icon shows the middle 72dp of 108dp; show the same part of the painting.
@@ -121,6 +126,8 @@ def legacy(scale: float) -> Image.Image:
         .crop((big // 4, big // 4, big // 4 + big, big // 4 + big))
     )
     draw_logo(image, big / 2, big / 2, big * 0.55)
+    if not rounded:
+        return image.resize((size, size), Image.Resampling.LANCZOS).convert("RGB")
     mask = Image.new("L", (big, big), 0)
     margin = round(big / 48)
     ImageDraw.Draw(mask).rounded_rectangle(
@@ -132,8 +139,16 @@ def legacy(scale: float) -> Image.Image:
 
 def banner(scale: float) -> Image.Image:
     """The 160dp x 90dp TV banner: the painting edge to edge, the logo and the name."""
-    width, height = round(160 * scale) * SUPERSAMPLE, round(90 * scale) * SUPERSAMPLE
-    image = painting(BANNER_CROP, width, height)
+    return poster(round(160 * scale), round(90 * scale))
+
+
+def poster(width: int, height: int) -> Image.Image:
+    """The banner's design at any size; wider shapes keep the middle of the banner's crop."""
+    left, top, right, bottom = BANNER_CROP
+    crop_height = min(bottom - top, round((right - left) * height / width))
+    top += (bottom - top - crop_height) // 2
+    width, height = width * SUPERSAMPLE, height * SUPERSAMPLE
+    image = painting((left, top, right, top + crop_height), width, height)
     # Darkens towards the left, behind the name.
     fade = Image.linear_gradient("L").rotate(90).resize((width, height)).point(lambda v: v * 4 // 5)
     shade = Image.new("RGBA", (width, height), (6, 6, 8, 255))
@@ -182,6 +197,10 @@ def main() -> None:
         background(scale).save(folder / "ic_launcher_background.png", optimize=True)
         banner(scale).save(folder / "tv_banner.png", optimize=True)
         legacy(scale).save(RES / f"mipmap-{name}/ic_launcher.png", optimize=True)
+    STORE.mkdir(parents=True, exist_ok=True)
+    legacy(512 / 48, rounded=False).save(STORE / "icon.png", optimize=True)
+    poster(1024, 500).save(STORE / "featureGraphic.png", optimize=True)
+    banner(8).save(STORE / "tvBanner.png", optimize=True)
 
 
 if __name__ == "__main__":
