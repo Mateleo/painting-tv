@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+  Store screenshots of Painting TV, rebuilt from Gallery.kt at the TV's 960 x 540 dp, so one CSS pixel
+  is one dp. tools/store_screenshots.py renders each ?shot=&lang= at 2x for 1920 x 1080 PNGs.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;1,400&family=Roboto:wght@400;600&display=block">
+<style>
+  :root { --ivory: #f0e7d4; --muted: #bdb9b0; }
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 960px; height: 540px; overflow: hidden; background: #000; font-family: Roboto, sans-serif; }
+  .screen { position: relative; width: 960px; height: 540px; overflow: hidden; }
+  .painting { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .painting.fit { object-fit: contain; }
+  .bottom { position: absolute; left: 0; right: 0; bottom: 0; }
+  .caption { background: linear-gradient(transparent, rgba(0, 0, 0, .65)); padding: 60px 42px 34px; }
+  .caption.raised { padding-bottom: 116px; }
+  .title { color: #fff; font: italic 25px/1.3 "Noto Serif", serif; }
+  .meta { color: rgba(255, 255, 255, .86); font-size: 14px; margin-top: 5px; white-space: pre; }
+  .controls { background: linear-gradient(transparent, rgba(0, 0, 0, .88)); padding: 24px 42px; }
+  .row { display: flex; gap: 12px; align-items: center; }
+  .count { color: var(--muted); font-size: 13px; white-space: pre; margin-left: auto; }
+  .progress { height: 2px; margin-top: 12px; background: rgba(255, 255, 255, .15); }
+  .progress div { height: 100%; background: var(--ivory); }
+  button { border: 0; border-radius: 999px; min-height: 40px; padding: 10px 16px; font: 14px Roboto, sans-serif;
+    color: var(--ivory); background: rgba(255, 255, 255, .09); }
+  button.selected { background: rgba(240, 231, 212, .3); font-weight: 600; }
+  button.focused { background: var(--ivory); color: #171c18; transform: scale(1.1); }
+  .scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, .65); }
+  .panel { position: absolute; top: 0; right: 0; width: 560px; height: 540px; padding: 32px; background: rgba(20, 25, 22, .96);
+    display: flex; flex-direction: column; gap: 12px; }
+  .panel h1 { flex: 1; color: var(--ivory); font: 27px "Noto Serif", serif; }
+  .panel .options { display: flex; gap: 8px; align-items: center; }
+  .heading { color: var(--muted); font-size: 13px; }
+  .rule { height: 1px; margin-top: 4px; background: rgba(255, 255, 255, .12); }
+  .hint { color: var(--muted); font-size: 12px; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="screen" id="screen"></div>
+<script>
+const STRINGS = {
+  en: { previous: "Previous", pause: "Pause", next: "Next", settings: "Settings", done: "Done", paintings: "paintings",
+    time: "Time per painting", framing: "Framing", fill: "Fill screen", whole: "Whole painting", display: "Display",
+    zoom: "Slow zoom", captions: "Captions", quality: "Image quality", all: "All", free: "41.3 GB available",
+    hint: "Painting TV can also be your TV's screen saver: Settings → System → Ambient mode or Screen saver. Google TV needs an ADB command instead (see the README)." },
+  fr: { previous: "Précédent", pause: "Pause", next: "Suivant", settings: "Réglages", done: "OK", paintings: "tableaux",
+    time: "Durée par tableau", framing: "Cadrage", fill: "Plein écran", whole: "Tableau entier", display: "Affichage",
+    zoom: "Zoom lent", captions: "Légendes", quality: "Qualité d'image", all: "Tous", free: "41,3 Go disponibles",
+    hint: "Painting TV peut aussi servir d'économiseur d'écran : Paramètres → Système → Mode Ambiance ou Économiseur d'écran. Sur Google TV, il faut une commande ADB (voir le README)." },
+};
+// Real catalog entries; images come from the dataset export in data/hf-upload.
+const PAINTINGS = {
+  wave: { id: "751680020640c538", title: "La Grande Vague de Kanagawa", meta: ["Hokusai", "1831", "Ukiyo-e", "Tokyo National Museum"] },
+  rain: { id: "031df8bdbd986c64", title: "Rue de Paris, temps de pluie", meta: ["Gustave Caillebotte", "1877", "Impressionnisme", "Art Institute of Chicago"] },
+  jatte: { id: "b871ac3988b5529e", title: "Un dimanche après-midi à l'Île de la Grande Jatte", meta: ["Georges Seurat", "1886", "Pointillisme, Neo-Impressionnisme", "Art Institute of Chicago"] },
+  pearl: { id: "50204477d5968a90", title: "La Jeune Fille à la perle", meta: ["Johannes Vermeer", "1665", "Baroque"] },
+};
+const SHOTS = {
+  1: { painting: "wave", caption: true },
+  2: { painting: "rain", caption: true, controls: true },
+  3: { painting: "jatte", settings: true },
+  4: { painting: "pearl", caption: true, fit: true },
+};
+
+const params = new URLSearchParams(location.search);
+const t = STRINGS[params.get("lang") || "en"];
+const shot = SHOTS[params.get("shot") || "1"];
+const p = PAINTINGS[shot.painting];
+const html = (strings, ...values) => strings.reduce((out, s, i) => out + s + (values[i] ?? ""), "");
+const button = (label, cls = "") => html`<button class="${cls}">${label}</button>`;
+
+let out = html`<img class="painting ${shot.fit ? "fit" : ""}" src="../data/hf-upload/images/${p.id}.jpg">`;
+if (shot.caption) out += html`<div class="bottom caption ${shot.controls ? "raised" : ""}">
+  <div class="title">${p.title}</div><div class="meta">${p.meta.join("  ·  ")}</div></div>`;
+if (shot.controls) out += html`<div class="bottom controls">
+  <div class="row">${button(t.previous)}${button(t.pause, "focused")}${button(t.next)}
+    <span class="count">2160 ${t.paintings}  ·  30s</span>${button(t.settings)}</div>
+  <div class="progress"><div style="width: 38%"></div></div></div>`;
+if (shot.settings) {
+  const options = (items, selected) => items.map(label => button(label, selected.includes(label) ? "selected" : "")).join("");
+  out += html`<div class="scrim"></div><div class="panel">
+    <div class="row"><h1>${t.settings}</h1>${button(t.done, "focused")}</div>
+    <div class="heading">${t.time}</div><div class="options">${options(["10s", "30s", "1m", "5m", "15m", "1h"], ["30s"])}</div>
+    <div class="heading">${t.framing}</div><div class="options">${options([t.fill, t.whole], [t.fill])}</div>
+    <div class="heading">${t.display}</div><div class="options">${options([t.zoom, t.captions], [t.zoom, t.captions])}</div>
+    <div class="heading">${t.quality}</div><div class="options">${options([t.all, "HD+", "4K+"], [t.all])}
+      <span class="heading" style="margin-left: 8px">2160 ${t.paintings}</span></div>
+    <div class="rule"></div>
+    <div class="heading">Collection · 2160 ${t.paintings} · ${t.free}</div>
+    <div class="hint">${t.hint}</div></div>`;
+}
+document.getElementById("screen").innerHTML = out;
+</script>
+</body>
+</html>

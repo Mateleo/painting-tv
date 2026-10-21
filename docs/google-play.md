@@ -12,7 +12,7 @@ Everything the listing needs is in the repository:
 | Title, short and full description, release notes (EN, FR) | `fastlane/metadata/android/<language>/` |
 | 512 px icon, 1024×500 feature graphic, 1280×720 TV banner | `fastlane/metadata/android/en-US/images/` (regenerate with `python -m tools.app_icons`) |
 | Privacy policy | `PRIVACY.md`, at <https://github.com/Mateleo/painting-tv/blob/main/PRIVACY.md> once the repository is public |
-| TV screenshots | Take them on the TV (step 4) |
+| TV screenshots, 1920×1080 (EN, FR) | `fastlane/metadata/android/<language>/images/tvScreenshots/` (regenerate with `python -m tools.store_screenshots`) |
 
 ## 1. Create the developer account
 
@@ -53,15 +53,15 @@ copy `title.txt`, `short_description.txt` and `full_description.txt`, and upload
 yours. Website: the GitHub repository.
 
 Then add **Android TV** under **Advanced settings → Form factors** and, in the
-TV section of the listing, upload `tvBanner.png` and TV screenshots. Take
-screenshots on the TV with the app open, from a computer connected over ADB:
+TV section of the listing, upload `tvBanner.png` and the four TV screenshots
+from `images/tvScreenshots/` of the same language: a painting filling the
+screen, the remote controls, Settings, and a portrait in whole-painting framing.
 
-```sh
-adb exec-out screencap -p > screenshot-1.png
-```
-
-Take three or four: a painting filling the screen, one with captions and
-controls, Settings, and a portrait painting in whole-painting framing.
+They are rendered from `tools/screenshots.html`, a copy of the app's screens
+with its sizes, colours and text, using real paintings from the dataset export.
+If the interface changes, update that page to match and rerun
+`python -m tools.store_screenshots`. Real captures work too: with the TV
+connected over ADB, run `adb exec-out screencap -p > screenshot.png`.
 
 ## 5. App content forms
 
