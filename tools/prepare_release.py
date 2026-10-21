@@ -29,7 +29,7 @@ def prepare_release(apk_dir: Path, output: Path, tag: str) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True, help="Release tag, e.g. v0.4.1")
-    parser.add_argument("--apk-dir", type=Path, default=ROOT / "app/build/outputs/apk/debug")
+    parser.add_argument("--apk-dir", type=Path, default=ROOT / "app/build/outputs/apk/release")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     output = args.output or ROOT / "data" / f"release-{args.tag}"

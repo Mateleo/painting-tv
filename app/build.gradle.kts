@@ -1,7 +1,14 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// Release signing comes from local.properties, which stays out of the repository.
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use(::load)
 }
 
 android {
@@ -11,8 +18,8 @@ android {
         applicationId = "com.mateleo.paintingtv"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "0.7.2"
+        versionCode = 12
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
@@ -21,7 +28,22 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildTypes { release { isMinifyEnabled = false } }
+    signingConfigs {
+        localProperties.getProperty("release.storeFile")?.let { store ->
+            create("release") {
+                storeFile = file(store)
+                storePassword = localProperties.getProperty("release.storePassword")
+                keyAlias = localProperties.getProperty("release.keyAlias")
+                keyPassword = localProperties.getProperty("release.keyPassword")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
+        }
+    }
 }
 
 dependencies {

@@ -1,10 +1,20 @@
 # Painting TV
 
 A quiet, offline painting slideshow for Android TV and Google TV: 2,160 famous
-paintings, no account, ads, analytics, or server. Built with Kotlin and Compose
-for TV; Python tools prepare the collection.
+paintings, with no account, ads, analytics, or server of its own. Built with
+Kotlin and Compose for TV; Python tools prepare the collection.
 
-<img src="docs/images/painting-tv.webp" alt="Painting TV showing Cézanne’s Still Life with Apples and a Pot of Primroses on a television" width="800">
+<p align="center">
+  <img src="docs/images/painting-tv.webp" alt="Painting TV showing Cézanne’s Still Life with Apples and a Pot of Primroses on a television" width="800">
+</p>
+
+- **2,160 paintings** from the Anki deck *Tableaux de maîtres : les 2000 plus
+  vus*, upgraded to the largest matching reproductions found.
+- **Fill screen or whole painting** framing, slow zoom, captions with artist,
+  date and collection, and an **All / HD+ / 4K+** resolution filter.
+- **Works offline** once the collection is downloaded, and doubles as the TV's
+  **screen saver**.
+- English or French interface, following the TV's language.
 
 ## Install on your TV
 
@@ -13,7 +23,9 @@ download.
 
 **1. Download the APK.** On your computer, open the
 [latest release](https://github.com/Mateleo/painting-tv/releases) and download
-`painting-tv-<version>.apk` (for example, `painting-tv-0.5.0.apk`). The repository is private, so the TV can't fetch it directly.
+`painting-tv-<version>.apk` (for example, `painting-tv-1.0.0.apk`).
+`SHA256SUMS.txt` next to it lets you check the download
+(`sha256sum -c SHA256SUMS.txt`).
 
 **2. Allow installing apps on the TV.**
 
@@ -36,7 +48,7 @@ Menu names vary slightly between TV brands.
 
   ```sh
   adb connect TV_IP:5555        # accept the prompt on the TV
-  adb install -r painting-tv-0.5.0.apk  # use the version you downloaded
+  adb install -r painting-tv-1.0.0.apk  # use the version you downloaded
   ```
 
 **4. Download the collection.** Open **Painting TV**. On first launch, Settings
@@ -50,7 +62,8 @@ continues it. Once every image is in, the gallery works fully offline. Keep
 about 3 GB free.
 
 **Updating:** install the APK from a newer release the same way. Settings and the
-collection are kept. When the published collection changes, Settings offers
+collection are kept. Coming from a 0.x preview? Those were signed with a
+different key, so uninstall the old app first and download the collection again. When the published collection changes, Settings offers
 **Download update**; only new or changed paintings are downloaded.
 
 ## Using it
@@ -62,9 +75,10 @@ collection are kept. When the published collection changes, Settings offers
 
 Settings: time per painting (10 s to 1 h, default 30 s), slow zoom, captions,
 **fill screen** or **whole painting** framing, and an **All / HD+ / 4K+** filter
-by source resolution. Playback shuffles through every painting before repeating,
-even across restarts, and keeps the TV awake. The interface follows the TV's
-language (English or French).
+by source resolution. With whole painting framing, a painting qualifies when one
+edge reaches the screen (2160 px tall or 3840 px wide for 4K+); filling the
+screen needs both. Playback shuffles through every painting before repeating,
+even across restarts, and keeps the TV awake.
 
 ### As a screen saver
 
@@ -96,7 +110,8 @@ collection where one is known ([catalog/collections.json](catalog/collections.js
 
 Rights remain with their holders. Many works are public domain; some are under
 Creative Commons or still in copyright. This is a personal, non-commercial
-viewer.
+viewer. Rights holders who want a work removed can open an issue or a discussion
+on the dataset.
 
 ## Development
 
@@ -109,8 +124,7 @@ uv run --locked --extra images ruff check tools tests
 uv run --locked --extra images ty check
 ```
 
-The APK lands in `app/build/outputs/apk/debug/`. It is debug-signed; keep the
-same key to install updates over an existing install. See
+The debug APK lands in `app/build/outputs/apk/debug/`. See
 [tools/README.md](tools/README.md) for building and publishing the collection.
 
 Launcher assets follow the [Android TV icon guidelines](https://developer.android.com/design/ui/tv/guides/system/tv-app-icon-guidelines):
@@ -125,24 +139,45 @@ managers show an icon for the APK.
 ## Releases
 
 Every release APK includes its version: `painting-tv-<version>.apk`.
-After setting the app version and writing `docs/release-v<version>.md`, build and
-check the app with the command above, then stage the release (example: 0.5.0):
+After setting `versionCode` and `versionName` in `app/build.gradle.kts` and
+writing `docs/release-v<version>.md`, build and check the app with the commands
+above, build the signed APK, then stage the release (example: 1.0.0):
 
 ```sh
-python -m tools.prepare_release --tag v0.5.0
+./gradlew assembleRelease --no-daemon
+python -m tools.prepare_release --tag v1.0.0
 ```
 
 This reads Android's build metadata, checks that the APK version matches the
-tag, and writes `data/release-v0.5.0/painting-tv-0.5.0.apk` and `SHA256SUMS.txt`.
+tag, and writes `data/release-v1.0.0/painting-tv-1.0.0.apk` and `SHA256SUMS.txt`.
 Commit and push the version and notes, tag that commit, then create the release
 with those two files:
 
 ```sh
-git tag -a v0.5.0 -m "Painting TV 0.5.0"
-git push origin v0.5.0
-gh release create v0.5.0 --verify-tag --prerelease \
-  --title "Painting TV 0.5.0" --notes-file docs/release-v0.5.0.md \
-  data/release-v0.5.0/painting-tv-0.5.0.apk data/release-v0.5.0/SHA256SUMS.txt
+git tag -a v1.0.0 -m "Painting TV 1.0.0"
+git push origin v1.0.0
+gh release create v1.0.0 --verify-tag \
+  --title "Painting TV 1.0.0" --notes-file docs/release-v1.0.0.md \
+  data/release-v1.0.0/painting-tv-1.0.0.apk data/release-v1.0.0/SHA256SUMS.txt
 ```
 
-Use the same local signing key as earlier releases so installed apps can update.
+Release builds are signed with a key kept outside the repository. Point
+`local.properties` at it:
+
+```properties
+release.storeFile=/path/to/release.jks
+release.storePassword=…
+release.keyAlias=painting-tv
+release.keyPassword=…
+```
+
+Without these lines `assembleRelease` produces an unsigned APK. Sign every
+release with the same key, or installed apps can't update. Its certificate
+SHA-256 is
+`9a8df44e50987cc6b62e56f92727c4ef914a369262d6675c87e48f91f878cff8`.
+
+## License
+
+The code is under the [MIT License](LICENSE). The paintings, their
+reproductions and the published dataset are not covered by it; see
+[The collection](#the-collection).
